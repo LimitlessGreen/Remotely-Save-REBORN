@@ -1,4 +1,4 @@
-import { deepStrictEqual, throws } from "assert";
+import { deepStrictEqual, throws, rejects } from "assert";
 import type { Entity, RemotelySavePluginSettings } from "../src/baseTypes";
 
 /**
@@ -186,9 +186,11 @@ describe("Advanced Sync: Edge Cases", () => {
     };
 
     // The sync orchestrator should catch this and ensure no state is corrupted
-    await throws(async () => {
+    await rejects(async () => {
         await mockFs.readFile("any.md");
-    }, { message: "Network timeout" });
+    }, (err: any) => {
+        return err.message === "Network timeout";
+    });
   });
 });
 

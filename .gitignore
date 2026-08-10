@@ -13,6 +13,7 @@ main.js
 
 # pro (local reference only, not for version control)
 pro/
+local_pro_reference/
 
 # obsidian
 data.json
