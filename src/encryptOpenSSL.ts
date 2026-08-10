@@ -24,7 +24,9 @@ const getKeyIVFromPassword = async (
   const k2 = await window.crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
-      salt: salt as unknown as BufferSource,
+      name: "PBKDF2",
+      salt: salt as Uint8Array<ArrayBuffer>,
+      iterations: rounds,
       iterations: rounds,
       hash: "SHA-256",
     },
