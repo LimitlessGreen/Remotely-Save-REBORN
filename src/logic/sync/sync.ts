@@ -4,11 +4,11 @@
  */
 
 import PQueue from "p-queue";
-import type { InternalDBs, RemotelySavePluginSettings, SyncTriggerSourceType, MixedEntity, Entity } from "./baseTypes";
-import { getClient } from "./fsGetter";
-import { FakeFsLocal } from "./fsLocal";
-import { FakeFsEncrypt } from "./fsEncrypt";
-import * as SmartSyncLogic from "./smartSyncLogic";
+import type { InternalDBs, RemotelySavePluginSettings, SyncTriggerSourceType, MixedEntity, Entity } from "../../core/baseTypes";
+import { getClient } from "../../core/fs/fsGetter";
+import { FakeFsLocal } from "../../core/fs/fsLocal";
+import { FakeFsEncrypt } from "../../core/fs/fsEncrypt";
+import * as SmartSyncLogic from "./smartSync";
 
 export async function syncer(
   db: InternalDBs,

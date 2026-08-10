@@ -1,14 +1,14 @@
-import { DEFAULT_DEBUG_FOLDER, type Entity } from "./baseTypes";
+import { DEFAULT_DEBUG_FOLDER, type Entity } from "../baseTypes";
 import { FakeFs } from "./fsAll";
 
 import { TFile, TFolder, type Vault } from "obsidian";
-import { mkdirpInVault, statFix, unixTimeToStr } from "./misc";
+import { mkdirpInVault, statFix, unixTimeToStr } from "../../utils/misc";
 import {
   getHiddenAllowListRoots,
   listFilesByAdapterPaths,
   listFilesInObsFolder,
 } from "./obsFolderLister";
-import type { Profiler } from "./profiler";
+import type { Profiler } from "../../utils/profiler";
 
 export class FakeFsLocal extends FakeFs {
   vault: Vault;

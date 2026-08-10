@@ -1,10 +1,10 @@
 import type { ListedFiles, Vault } from "obsidian";
-import type { Entity } from "./baseTypes";
+import type { Entity } from "../baseTypes";
 
 import { Queue } from "@fyears/tsqueue";
 import chunk from "lodash/chunk";
 import flatten from "lodash/flatten";
-import { isSpecialFolderNameToSkip, statFix } from "./misc";
+import { isSpecialFolderNameToSkip, statFix } from "../../utils/misc";
 
 const isPluginDirItself = (x: string, pluginId: string) => {
   return (

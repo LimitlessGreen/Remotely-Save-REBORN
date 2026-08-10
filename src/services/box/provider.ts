@@ -3,8 +3,8 @@
  * FakeFs Provider for Box
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type BoxConfig, BOX_CLIENT_ID, BOX_CLIENT_SECRET } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type BoxConfig, BOX_CLIENT_ID, BOX_CLIENT_SECRET } from "../../core/baseTypes";
 import { BoxApiClient } from "./client";
 import { OAuth2Handler } from "../../auth/oauth2";
 

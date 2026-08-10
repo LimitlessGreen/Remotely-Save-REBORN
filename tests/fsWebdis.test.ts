@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { getOrigPath } from "../src/fsWebdis";
+import { getOrigPath } from "../src/services/webdis/provider";
 
 describe("Webdis operations tests", () => {
   it("should get orig keys correctly", () => {

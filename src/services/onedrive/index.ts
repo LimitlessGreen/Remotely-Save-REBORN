@@ -3,7 +3,7 @@ import type RemotelySavePlugin from "../../main";
 import { OneDriveProvider } from "./provider";
 import { OneDriveSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_ONEDRIVE, COMMAND_CALLBACK_ONEDRIVEFULL, ONEDRIVE_AUTHORITY, ONEDRIVE_CLIENT_ID } from "../../baseTypes";
+import { COMMAND_CALLBACK_ONEDRIVE, COMMAND_CALLBACK_ONEDRIVEFULL, ONEDRIVE_AUTHORITY, ONEDRIVE_CLIENT_ID } from "../../core/baseTypes";
 import { OAuth2Handler } from "../../auth/oauth2";
 
 export const OneDriveService: CloudService = {

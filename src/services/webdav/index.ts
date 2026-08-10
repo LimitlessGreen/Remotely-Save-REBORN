@@ -1,7 +1,7 @@
 import { type App } from "obsidian";
 import type RemotelySavePlugin from "../../main";
-import { FakeFsWebdav } from "../../fsWebdav";
-import { FakeFsNutStore } from "../../fsNutStore";
+import { FakeFsWebdav } from "./provider";
+import { FakeFsNutStore } from "./nutstore";
 import { WebdavSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
 

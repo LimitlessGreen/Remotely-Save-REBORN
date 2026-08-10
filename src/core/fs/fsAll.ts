@@ -1,6 +1,6 @@
 import isEqual from "lodash/isEqual";
 import { nanoid } from "nanoid";
-import type { Entity } from "./baseTypes";
+import type { Entity } from "../baseTypes";
 
 export abstract class FakeFs {
   abstract kind: string;

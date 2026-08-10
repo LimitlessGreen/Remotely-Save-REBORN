@@ -1,4 +1,4 @@
-import type { FakeFs } from "./fsAll";
+import type { FakeFs } from "../../core/fs/fsAll";
 
 export async function copyFolder(key: string, left: FakeFs, right: FakeFs) {
   if (!key.endsWith("/")) {

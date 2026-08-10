@@ -1,9 +1,9 @@
 import cloneDeep from "lodash/cloneDeep";
 import { Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
-import type { QRExportType } from "../../baseTypes";
-import type { TransItemType } from "../../i18n";
-import { exportQrCodeUri, importQrCodeUri, parseUriByHand } from "../../importExport";
+import type { QRExportType } from "../../core/baseTypes";
+import type { TransItemType } from "../../core/i18n/i18n";
+import { exportQrCodeUri, importQrCodeUri, parseUriByHand } from "../../utils/importExport";
 import type RemotelySavePlugin from "../../main";
 
 class ExportSettingsQrCodeModal extends Modal {

@@ -3,7 +3,7 @@ import {
   OAUTH2_FORCE_EXPIRE_MILLISECONDS,
   type RemotelySavePluginSettings,
   type SUPPORTED_SERVICES_TYPE,
-} from "../../src/baseTypes";
+} from "../../src/core/baseTypes";
 import {
   COMMAND_CALLBACK_PRO,
   type FeatureInfo,

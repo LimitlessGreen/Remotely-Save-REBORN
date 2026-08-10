@@ -3,8 +3,8 @@
  * FakeFs Provider for Koofr
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type KoofrConfig, KOOFR_CLIENT_ID, KOOFR_CLIENT_SECRET } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type KoofrConfig, KOOFR_CLIENT_ID, KOOFR_CLIENT_SECRET } from "../../core/baseTypes";
 import { KoofrApiClient } from "./client";
 import { OAuth2Handler } from "../../auth/oauth2";
 

@@ -3,8 +3,8 @@
  * Unified OneDrive Provider (Supports both App Folder and Full Drive)
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type OnedriveConfig, type OnedriveFullConfig, ONEDRIVE_AUTHORITY, ONEDRIVE_CLIENT_ID } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type OnedriveConfig, type OnedriveFullConfig, ONEDRIVE_AUTHORITY, ONEDRIVE_CLIENT_ID } from "../../core/baseTypes";
 import { OneDriveApiClient } from "./client";
 import { OAuth2Handler } from "../../auth/oauth2";
 

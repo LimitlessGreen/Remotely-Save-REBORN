@@ -7,11 +7,11 @@ import {
   type TextComponent,
 } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
-import type { ConflictActionType, SyncDirectionType } from "../../baseTypes";
-import type { TransItemType } from "../../i18n";
+import type { ConflictActionType, SyncDirectionType } from "../../core/baseTypes";
+import type { TransItemType } from "../../core/i18n/i18n";
 import type RemotelySavePlugin from "../../main";
-import { changeMobileStatusBar, stringToFragment } from "../../misc";
-import { generateClearDupFilesSettingsPart } from "../../settingsClearDupFiles";
+import { changeMobileStatusBar, stringToFragment } from "../../utils/misc";
+import { generateClearDupFilesSettingsPart } from "../../logic/sync/settingsClearDupFiles";
 
 class SyncConfigDirModal extends Modal {
   plugin: RemotelySavePlugin;

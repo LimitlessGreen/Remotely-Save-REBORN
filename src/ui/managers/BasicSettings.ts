@@ -8,11 +8,11 @@ import {
   type TextComponent,
 } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
-import type { CipherMethodType } from "../../baseTypes";
-import type { TransItemType } from "../../i18n";
-import { upsertLastFailedSyncTimeByVault, upsertLastSuccessSyncTimeByVault } from "../../localdb";
+import type { CipherMethodType } from "../../core/baseTypes";
+import type { TransItemType } from "../../core/i18n/i18n";
+import { upsertLastFailedSyncTimeByVault, upsertLastSuccessSyncTimeByVault } from "../../core/storage/localdb";
 import type RemotelySavePlugin from "../../main";
-import { stringToFragment } from "../../misc";
+import { stringToFragment } from "../../utils/misc";
 
 class PasswordModal extends Modal {
   plugin: RemotelySavePlugin;

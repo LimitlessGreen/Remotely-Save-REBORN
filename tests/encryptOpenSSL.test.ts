@@ -9,8 +9,8 @@ import {
   encryptStringToBase64url,
   getSizeFromEncToOrig,
   getSizeFromOrigToEnc,
-} from "../src/encryptOpenSSL";
-import { base64ToBase64url, bufferToArrayBuffer } from "../src/misc";
+} from "../src/logic/encryption/providers/openssl";
+import { base64ToBase64url, bufferToArrayBuffer } from "../src/utils/misc";
 
 describe("Encryption OpenSSL tests", () => {
   beforeEach(() => {

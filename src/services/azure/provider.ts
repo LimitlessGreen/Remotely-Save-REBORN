@@ -3,10 +3,10 @@
  * FakeFs Provider for Azure Blob Storage
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type AzureBlobStorageConfig } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type AzureBlobStorageConfig } from "../../core/baseTypes";
 import { AzureBlobApiClient } from "./client";
-import { arrayBufferToHex } from "../../misc";
+import { arrayBufferToHex } from "../../utils/misc";
 
 export class AzureBlobProvider extends FakeFs {
   kind: "azureblobstorage" = "azureblobstorage";

@@ -1,5 +1,5 @@
 import { LCS, mergeDigIn } from "node-diff3";
-import type { Entity } from "./baseTypes";
+import type { Entity } from "../../core/baseTypes";
 
 /**
  * APACHE 2.0 CLEAN ROOM IMPLEMENTATION

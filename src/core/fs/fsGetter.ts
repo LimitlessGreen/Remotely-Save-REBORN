@@ -1,11 +1,11 @@
-import type { RemotelySavePluginSettings } from "./baseTypes";
+import type { RemotelySavePluginSettings } from "../baseTypes";
 import type { FakeFs } from "./fsAll";
-import { FakeFsS3 } from "./fsS3";
-import { FakeFsWebdav } from "./fsWebdav";
-import { FakeFsNutStore } from "./fsNutStore";
-import { FakeFsDropbox } from "./fsDropbox";
-import { FakeFsWebdis } from "./fsWebdis";
-import { getServiceById } from "./services/serviceRegistry";
+import { FakeFsS3 } from "../../services/s3/provider";
+import { FakeFsWebdav } from "../../services/webdav/provider";
+import { FakeFsNutStore } from "../../services/webdav/nutstore";
+import { FakeFsDropbox } from "../../services/dropbox/provider";
+import { FakeFsWebdis } from "../../services/webdis/provider";
+import { getServiceById } from "../../services/serviceRegistry";
 
 /**
  * APACHE 2.0 CLEAN ROOM IMPLEMENTATION

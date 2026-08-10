@@ -1,6 +1,6 @@
 import { type App, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../../ui/settingsManager";
-import { getClient } from "../../fsGetter";
+import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
 

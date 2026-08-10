@@ -2,9 +2,9 @@ import { type App, Modal, Notice, Setting, requireApiVersion } from "obsidian";
 import type { TextComponent } from "obsidian";
 import type RemotelySavePlugin from "../../main";
 import { BaseSettingsManager } from "../../ui/settingsManager";
-import { API_VER_ENSURE_REQURL_OK, VALID_REQURL } from "../../baseTypesObs";
-import { simpleTransRemotePrefix } from "../../fsS3";
-import { getClient } from "../../fsGetter";
+import { API_VER_ENSURE_REQURL_OK, VALID_REQURL } from "../../core/baseTypesObs";
+import { simpleTransRemotePrefix } from "./provider";
+import { getClient } from "../../core/fs/fsGetter";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
 
 /**

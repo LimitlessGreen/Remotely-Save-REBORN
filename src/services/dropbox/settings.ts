@@ -6,11 +6,11 @@ import {
   getAuthUrlAndVerifier as getAuthUrlAndVerifierDropbox,
   sendAuthReq as sendAuthReqDropbox,
   setConfigBySuccessfullAuthInplace,
-} from "../../fsDropbox";
-import { getClient } from "../../fsGetter";
+} from "./provider";
+import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
-import type { TransItemType } from "../../i18n";
+import type { TransItemType } from "../../core/i18n/i18n";
 
 class DropboxAuthModal extends Modal {
   readonly plugin: RemotelySavePlugin;

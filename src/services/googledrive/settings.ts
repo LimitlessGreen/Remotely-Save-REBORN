@@ -1,6 +1,6 @@
 import { type App, Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../../ui/settingsManager";
-import { DEFAULT_GOOGLEDRIVE_CONFIG } from "../../baseTypes";
+import { DEFAULT_GOOGLEDRIVE_CONFIG } from "../../core/baseTypes";
 
 export class GoogleDriveSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {

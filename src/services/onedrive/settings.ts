@@ -7,11 +7,11 @@ import {
   ONEDRIVE_AUTHORITY,
   type OnedriveConfig,
   type OnedriveFullConfig,
-} from "../../baseTypes";
-import { getClient } from "../../fsGetter";
+} from "../../core/baseTypes";
+import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
-import type { TransItemType } from "../../i18n";
-import { stringToFragment } from "../../misc";
+import type { TransItemType } from "../../core/i18n/i18n";
+import { stringToFragment } from "../../utils/misc";
 import {
   DEFAULT_ONEDRIVEFULL_CONFIG,
   getAuthUrlAndVerifier as getAuthUrlAndVerifierOnedrive,

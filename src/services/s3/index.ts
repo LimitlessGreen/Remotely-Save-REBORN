@@ -1,6 +1,6 @@
 import { type App } from "obsidian";
 import type RemotelySavePlugin from "../../main";
-import { FakeFsS3 } from "../../fsS3";
+import { FakeFsS3 } from "./provider";
 import type { CloudService } from "../serviceInterface";
 import { S3Settings } from "./settings";
 

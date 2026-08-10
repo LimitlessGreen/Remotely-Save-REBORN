@@ -1,6 +1,6 @@
 import { type App } from "obsidian";
 import type RemotelySavePlugin from "../../main";
-import { FakeFsWebdis } from "../../fsWebdis";
+import { FakeFsWebdis } from "./provider";
 import { WebdisSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
 

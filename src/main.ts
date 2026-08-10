@@ -17,37 +17,37 @@ import {
   setIcon,
 } from "obsidian";
 import { SERVICES } from "./services/serviceRegistry";
-import { syncer } from "./sync";
+import { syncer } from "./logic/sync/sync";
 import type {
   RemotelySavePluginSettings,
   SyncTriggerSourceType,
-} from "./baseTypes";
+} from "./core/baseTypes";
 import {
   COMMAND_CALLBACK,
   COMMAND_CALLBACK_DROPBOX,
   COMMAND_CALLBACK_ONEDRIVE,
   COMMAND_URI,
-} from "./baseTypes";
-import { API_VER_ENSURE_REQURL_OK } from "./baseTypesObs";
-import { messyConfigToNormal, normalConfigToMessy } from "./configPersist";
-import { exportVaultSyncPlansToFiles } from "./debugMode";
+} from "./core/baseTypes";
+import { API_VER_ENSURE_REQURL_OK } from "./core/baseTypesObs";
+import { messyConfigToNormal, normalConfigToMessy } from "./core/storage/configPersist";
+import { exportVaultSyncPlansToFiles } from "./utils/debugMode";
 import {
   DEFAULT_DROPBOX_CONFIG,
   sendAuthReq as sendAuthReqDropbox,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceDropbox,
-} from "./fsDropbox";
-import { FakeFsEncrypt } from "./fsEncrypt";
-import { getClient } from "./fsGetter";
-import { FakeFsLocal } from "./fsLocal";
+} from "./services/dropbox/provider";
+import { FakeFsEncrypt } from "./core/fs/fsEncrypt";
+import { getClient } from "./core/fs/fsGetter";
+import { FakeFsLocal } from "./core/fs/fsLocal";
 import {
   DEFAULT_ONEDRIVE_CONFIG,
-} from "./baseTypes";
-import { DEFAULT_S3_CONFIG } from "./fsS3";
-import { DEFAULT_WEBDAV_CONFIG } from "./fsWebdav";
-import { DEFAULT_WEBDIS_CONFIG } from "./fsWebdis";
-import { I18n } from "./i18n";
-import type { LangTypeAndAuto, TransItemType } from "./i18n";
-import { importQrCodeUri } from "./importExport";
+} from "./core/baseTypes";
+import { DEFAULT_S3_CONFIG } from "./services/s3/provider";
+import { DEFAULT_WEBDAV_CONFIG } from "./services/webdav/provider";
+import { DEFAULT_WEBDIS_CONFIG } from "./services/webdis/provider";
+import { I18n } from "./core/i18n/i18n";
+import type { LangTypeAndAuto, TransItemType } from "./core/i18n/i18n";
+import { importQrCodeUri } from "./utils/importExport";
 import {
   type InternalDBs,
   clearAllLoggerOutputRecords,
@@ -58,11 +58,11 @@ import {
   upsertLastFailedSyncTimeByVault,
   upsertLastSuccessSyncTimeByVault,
   upsertPluginVersionByVault,
-} from "./localdb";
-import { changeMobileStatusBar } from "./misc";
-import { DEFAULT_PROFILER_CONFIG, Profiler } from "./profiler";
+} from "./core/storage/localdb";
+import { changeMobileStatusBar } from "./utils/misc";
+import { DEFAULT_PROFILER_CONFIG, Profiler } from "./utils/profiler";
 import { RemotelySaveSettingTab } from "./settings";
-import { SyncAlgoV3Modal } from "./syncAlgoV3Notice";
+import { SyncAlgoV3Modal } from "./ui/modals/syncAlgoV3Notice";
 
 const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   s3: DEFAULT_S3_CONFIG,

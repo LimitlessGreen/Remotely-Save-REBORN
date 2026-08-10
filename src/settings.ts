@@ -9,15 +9,15 @@ import {
 import type {
   SUPPORTED_SERVICES_TYPE,
   SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR,
-} from "./baseTypes";
+} from "./core/baseTypes";
 
 import { SERVICES } from "./services/serviceRegistry";
-import type { TransItemType } from "./i18n";
+import type { TransItemType } from "./core/i18n/i18n";
 import type RemotelySavePlugin from "./main"; // unavoidable
 import {
   checkHasSpecialCharForDir,
   stringToFragment,
-} from "./misc";
+} from "./utils/misc";
 import { BasicSettingsManager } from "./ui/managers/BasicSettings";
 import { AdvancedSettingsManager } from "./ui/managers/AdvancedSettings";
 import { ImportExportSettingsManager } from "./ui/managers/ImportExportSettings";

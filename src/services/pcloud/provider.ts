@@ -3,8 +3,8 @@
  * FakeFs Provider for pCloud
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type PCloudConfig } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type PCloudConfig } from "../../core/baseTypes";
 import { PCloudApiClient } from "./client";
 
 export class PCloudProvider extends FakeFs {

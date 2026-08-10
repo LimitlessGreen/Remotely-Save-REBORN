@@ -1,7 +1,7 @@
 import { base64url } from "rfc4648";
-import { reverseString } from "./misc";
+import { reverseString } from "../../utils/misc";
 
-import type { RemotelySavePluginSettings } from "./baseTypes";
+import type { RemotelySavePluginSettings } from "../baseTypes";
 
 const DEFAULT_README: string =
   "The file contains sensitive info, so DO NOT take screenshot of, copy, or share it to anyone! It's also generated automatically, so do not edit it manually.";

@@ -1,5 +1,5 @@
 import { deepStrictEqual, throws, rejects } from "assert";
-import type { Entity, RemotelySavePluginSettings } from "../src/baseTypes";
+import type { Entity, RemotelySavePluginSettings } from "../src/core/baseTypes";
 
 /**
  * CLEAN ROOM SPECIFICATION: Advanced Sync Features
@@ -18,7 +18,7 @@ interface MockFs {
   rename(oldKey: string, newKey: string): Promise<void>;
 }
 
-import * as SmartSyncLogic from "../src/logic/smartSync";
+import * as SmartSyncLogic from "../src/logic/sync/smartSync";
 
 describe("Advanced Sync: Smart Conflict Handling (Markdown)", () => {
   describe("Two-Way Merge", () => {

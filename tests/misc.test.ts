@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { JSDOM } from "jsdom";
-import * as misc from "../src/misc";
+import * as misc from "../src/utils/misc";
 
 describe("Misc: hidden file", () => {
   it("should find hidden file correctly", () => {

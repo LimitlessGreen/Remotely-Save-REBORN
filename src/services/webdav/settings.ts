@@ -1,11 +1,11 @@
 import { type App, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../../ui/settingsManager";
-import { getClient } from "../../fsGetter";
+import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
-import { VALID_REQURL } from "../../baseTypesObs";
-import type { WebdavAuthType } from "../../baseTypes";
-import { stringToFragment } from "../../misc";
+import { VALID_REQURL } from "../../core/baseTypesObs";
+import type { WebdavAuthType } from "../../core/baseTypes";
+import { stringToFragment } from "../../utils/misc";
 
 export class WebdavSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {

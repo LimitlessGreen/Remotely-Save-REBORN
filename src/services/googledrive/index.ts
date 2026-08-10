@@ -3,9 +3,9 @@ import type RemotelySavePlugin from "../../main";
 import { GoogleDriveProvider } from "./provider";
 import { GoogleDriveSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_GOOGLEDRIVE } from "../../baseTypes";
+import { COMMAND_CALLBACK_GOOGLEDRIVE } from "../../core/baseTypes";
 import { OAuth2Handler } from "../../auth/oauth2";
-import { GOOGLEDRIVE_CLIENT_ID, GOOGLEDRIVE_CLIENT_SECRET } from "../../baseTypes";
+import { GOOGLEDRIVE_CLIENT_ID, GOOGLEDRIVE_CLIENT_SECRET } from "../../core/baseTypes";
 
 export const GoogleDriveService: CloudService = {
   id: "googledrive",

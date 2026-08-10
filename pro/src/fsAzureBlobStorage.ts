@@ -9,9 +9,9 @@ import {
   ContainerClient,
   newPipeline,
 } from "@azure/storage-blob";
-import type { Entity } from "../../src/baseTypes";
-import { FakeFs } from "../../src/fsAll";
-import { arrayBufferToHex, getFolderLevels } from "../../src/misc";
+import type { Entity } from "../../src/core/baseTypes";
+import { FakeFs } from "../../src/core/fs/fsAll";
+import { arrayBufferToHex, getFolderLevels } from "../../src/utils/misc";
 import type { AzureBlobStorageConfig } from "./baseTypesPro";
 
 export const simpleTransRemotePrefix = (x: string) => {

@@ -5,13 +5,13 @@
 import * as mime from "mime-types";
 import { requestUrl } from "obsidian";
 import PQueue from "p-queue";
-import { DEFAULT_CONTENT_TYPE, type Entity } from "../../src/baseTypes";
-import { FakeFs } from "../../src/fsAll";
+import { DEFAULT_CONTENT_TYPE, type Entity } from "../../src/core/baseTypes";
+import { FakeFs } from "../../src/core/fs/fsAll";
 import {
   getFolderLevels,
   splitFileSizeToChunkRanges,
   unixTimeToStr,
-} from "../../src/misc";
+} from "../../src/utils/misc";
 import {
   GOOGLEDRIVE_CLIENT_ID,
   GOOGLEDRIVE_CLIENT_SECRET,

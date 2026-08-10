@@ -1,6 +1,6 @@
 import { type App } from "obsidian";
 import type RemotelySavePlugin from "../../main";
-import { FakeFsDropbox } from "../../fsDropbox";
+import { FakeFsDropbox } from "./provider";
 import type { CloudService } from "../serviceInterface";
 import { DropboxSettings } from "./settings";
 

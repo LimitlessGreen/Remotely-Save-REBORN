@@ -3,8 +3,8 @@
  * FakeFs Provider for Yandex Disk
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, type YandexDiskConfig, YANDEXDISK_CLIENT_ID, YANDEXDISK_CLIENT_SECRET } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, type YandexDiskConfig, YANDEXDISK_CLIENT_ID, YANDEXDISK_CLIENT_SECRET } from "../../core/baseTypes";
 import { YandexDiskApiClient } from "./client";
 import { OAuth2Handler } from "../../auth/oauth2";
 

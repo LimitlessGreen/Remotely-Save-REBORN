@@ -14,10 +14,10 @@ import {
   OAUTH2_FORCE_EXPIRE_MILLISECONDS,
   ONEDRIVE_AUTHORITY,
   ONEDRIVE_CLIENT_ID,
-} from "../../src/baseTypes";
-import { VALID_REQURL } from "../../src/baseTypesObs";
-import { FakeFs } from "../../src/fsAll";
-import { bufferToArrayBuffer } from "../../src/misc";
+} from "../../src/core/baseTypes";
+import { VALID_REQURL } from "../../src/core/baseTypesObs";
+import { FakeFs } from "../../src/core/fs/fsAll";
+import { bufferToArrayBuffer } from "../../src/utils/misc";
 import {
   COMMAND_CALLBACK_ONEDRIVEFULL,
   type OnedriveFullConfig,

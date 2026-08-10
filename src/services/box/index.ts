@@ -3,7 +3,7 @@ import type RemotelySavePlugin from "../../main";
 import { BoxProvider } from "./provider";
 import { BoxSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_BOX, BOX_CLIENT_ID, BOX_CLIENT_SECRET } from "../../baseTypes";
+import { COMMAND_CALLBACK_BOX, BOX_CLIENT_ID, BOX_CLIENT_SECRET } from "../../core/baseTypes";
 import { OAuth2Handler } from "../../auth/oauth2";
 
 export const BoxService: CloudService = {

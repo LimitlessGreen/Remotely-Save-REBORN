@@ -1,10 +1,10 @@
 import { Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
-import { messyConfigToNormal } from "../../configPersist";
-import { exportVaultProfilerResultsToFiles, exportVaultSyncPlansToFiles } from "../../debugMode";
-import { clearAllPrevSyncRecordByVault, clearAllSyncPlanRecords, destroyDBs } from "../../localdb";
-import { stringToFragment } from "../../misc";
-import { DEFAULT_PROFILER_CONFIG } from "../../profiler";
+import { messyConfigToNormal } from "../../core/storage/configPersist";
+import { exportVaultProfilerResultsToFiles, exportVaultSyncPlansToFiles } from "../../utils/debugMode";
+import { clearAllPrevSyncRecordByVault, clearAllSyncPlanRecords, destroyDBs } from "../../core/storage/localdb";
+import { stringToFragment } from "../../utils/misc";
+import { DEFAULT_PROFILER_CONFIG } from "../../utils/profiler";
 
 export class DebugSettingsManager extends BaseSettingsManager {
   render(containerEl: HTMLElement): void {

@@ -3,8 +3,8 @@
  * FakeFs Provider for Google Drive
  */
 
-import { FakeFs } from "../../fsAll";
-import { type Entity, GOOGLEDRIVE_CLIENT_ID, GOOGLEDRIVE_CLIENT_SECRET, type GoogleDriveConfig, DEFAULT_CONTENT_TYPE } from "../../baseTypes";
+import { FakeFs } from "../../core/fs/fsAll";
+import { type Entity, GOOGLEDRIVE_CLIENT_ID, GOOGLEDRIVE_CLIENT_SECRET, type GoogleDriveConfig, DEFAULT_CONTENT_TYPE } from "../../core/baseTypes";
 import { GoogleDriveApiClient } from "./client";
 import { OAuth2Handler } from "../../auth/oauth2";
 import * as mime from "mime-types";

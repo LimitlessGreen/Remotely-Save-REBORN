@@ -1,4 +1,4 @@
-import type { FakeFsLocal } from "./fsLocal";
+import type { FakeFsLocal } from "../../core/fs/fsLocal";
 
 /**
  * APACHE 2.0 CLEAN ROOM IMPLEMENTATION

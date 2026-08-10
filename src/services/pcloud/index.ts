@@ -3,7 +3,7 @@ import type RemotelySavePlugin from "../../main";
 import { PCloudProvider } from "./provider";
 import { PCloudSettings } from "./settings";
 import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_PCLOUD } from "../../baseTypes";
+import { COMMAND_CALLBACK_PCLOUD } from "../../core/baseTypes";
 
 export const PCloudService: CloudService = {
   id: "pcloud",
