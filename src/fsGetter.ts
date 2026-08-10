@@ -22,19 +22,5 @@ export function getClient(
     return service.getProvider({ settings, saveSettings: saveUpdatedConfigFunc } as any, { vault: { getName: () => vaultName } } as any);
   }
 
-  switch (settings.serviceType) {
-    case "s3":
-      return new FakeFsS3(settings.s3);
-    case "webdav":
-      if (settings.webdav.address.includes("jianguoyun.com")) {
-        return new FakeFsNutStore(settings.webdav, vaultName, saveUpdatedConfigFunc);
-      }
-      return new FakeFsWebdav(settings.webdav, vaultName, saveUpdatedConfigFunc);
-    case "dropbox":
-      return new FakeFsDropbox(settings.dropbox, vaultName, saveUpdatedConfigFunc);
-    case "webdis":
-      return new FakeFsWebdis(settings.webdis, vaultName, saveUpdatedConfigFunc);
-    default:
-      throw Error(`ServiceType=${settings.serviceType} not supported.`);
-  }
+  throw Error(`ServiceType=${settings.serviceType} not supported.`);
 }

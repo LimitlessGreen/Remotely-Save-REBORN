@@ -2,6 +2,10 @@ import { GoogleDriveService } from "./googledrive";
 import { OneDriveService } from "./onedrive";
 import { BoxService } from "./box";
 import { PCloudService } from "./pcloud";
+import { S3Service } from "./s3";
+import { DropboxService } from "./dropbox";
+import { WebdavService } from "./webdav";
+import { WebdisService } from "./webdis";
 import type { CloudService } from "./serviceInterface";
 
 /**
@@ -13,6 +17,10 @@ export const SERVICES: CloudService[] = [
   OneDriveService,
   BoxService,
   PCloudService,
+  S3Service,
+  DropboxService,
+  WebdavService,
+  WebdisService,
 ];
 
 export function getServiceById(id: string): CloudService | undefined {

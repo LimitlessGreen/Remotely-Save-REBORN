@@ -1,7 +1,7 @@
 import { type App, Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../../ui/settingsManager";
 import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "./fsAzureBlobStorage";
-import { wrapTextWithPasswordHide } from "../../settings";
+import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
 
 export class AzureSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {
