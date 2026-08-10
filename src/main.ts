@@ -22,47 +22,48 @@ import {
   getAndSaveProFeatures,
   sendAuthReq as sendAuthReqPro,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplacePro,
-} from "../pro/src/account";
+} from "./advancedAccount";
 import {
   COMMAND_CALLBACK_BOX,
   COMMAND_CALLBACK_KOOFR,
   COMMAND_CALLBACK_ONEDRIVEFULL,
   COMMAND_CALLBACK_PCLOUD,
-  COMMAND_CALLBACK_PRO,
   COMMAND_CALLBACK_YANDEXDISK,
-} from "../pro/src/baseTypesPro";
-import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "../pro/src/fsAzureBlobStorage";
+} from "./baseTypesAdvanced";
+import { DEFAULT_AZUREBLOBSTORAGE_CONFIG, FakeFsAzureBlobStorage } from "./fsAzureBlobStorage";
 import {
   DEFAULT_BOX_CONFIG,
   FakeFsBox,
   sendAuthReq as sendAuthReqBox,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceBox,
-} from "../pro/src/fsBox";
-import { DEFAULT_GOOGLEDRIVE_CONFIG } from "../pro/src/fsGoogleDrive";
+} from "./fsBox";
+import { DEFAULT_GOOGLEDRIVE_CONFIG, FakeFsGoogleDrive } from "./fsGoogleDrive";
 import {
   DEFAULT_KOOFR_CONFIG,
+  FakeFsKoofr,
   sendAuthReq as sendAuthReqKoofr,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceKoofr,
-} from "../pro/src/fsKoofr";
+} from "./fsKoofr";
 import {
-  type AccessCodeResponseSuccessfulType as AccessCodeResponseSuccessfulTypeOnedriveFull,
   DEFAULT_ONEDRIVEFULL_CONFIG,
+  FakeFsOnedriveFull,
   sendAuthReq as sendAuthReqOnedriveFull,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceOnedriveFull,
-} from "../pro/src/fsOnedriveFull";
+} from "./fsOnedriveFull";
 import {
-  type AuthAllowFirstRes as AuthAllowFirstResPCloud,
   DEFAULT_PCLOUD_CONFIG,
+  FakeFsPCloud,
   generateAuthUrl as generateAuthUrlPCloud,
   sendAuthReq as sendAuthReqPCloud,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplacePCloud,
-} from "../pro/src/fsPCloud";
+} from "./fsPCloud";
 import {
   DEFAULT_YANDEXDISK_CONFIG,
+  FakeFsYandexDisk,
   sendAuthReq as sendAuthReqYandexDisk,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceYandexDisk,
-} from "../pro/src/fsYandexDisk";
-import { syncer } from "../pro/src/sync";
+} from "./fsYandexDisk";
+import { syncer } from "./sync";
 import type {
   RemotelySavePluginSettings,
   SyncTriggerSourceType,
@@ -153,7 +154,6 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   enableMobileStatusBar: false,
   encryptionMethod: "unknown",
   profiler: DEFAULT_PROFILER_CONFIG,
-  pro: DEFAULT_PRO_CONFIG,
 };
 
 interface OAuth2Info {
@@ -870,76 +870,6 @@ export default class RemotelySavePlugin extends Plugin {
       }
     );
 
-    this.registerObsidianProtocolHandler(
-      COMMAND_CALLBACK_PRO,
-      async (inputParams) => {
-        if (this.oauth2Info.helperModal !== undefined) {
-          const k = this.oauth2Info.helperModal.contentEl;
-          k.empty();
-
-          t("protocol_pro_connecting")
-            .split("\n")
-            .forEach((val) => {
-              k.createEl("p", {
-                text: val,
-              });
-            });
-        }
-
-        console.debug(inputParams);
-        const authRes = await sendAuthReqPro(
-          this.oauth2Info.verifier || "verifier",
-          inputParams.code,
-          async (e: any) => {
-            new Notice(t("protocol_pro_connect_fail"));
-            new Notice(`${e}`);
-            throw e;
-          }
-        );
-        console.debug(authRes);
-
-        const self = this;
-        await setConfigBySuccessfullAuthInplacePro(
-          this.settings.pro!,
-          authRes,
-          () => self.saveSettings()
-        );
-
-        await getAndSaveProFeatures(
-          this.settings.pro!,
-          this.manifest.version,
-          () => self.saveSettings()
-        );
-
-        await getAndSaveProEmail(
-          this.settings.pro!,
-          this.manifest.version,
-          () => self.saveSettings()
-        );
-
-        this.oauth2Info.verifier = ""; // reset it
-        this.oauth2Info.helperModal?.close(); // close it
-        this.oauth2Info.helperModal = undefined;
-
-        this.oauth2Info.authDiv?.toggleClass(
-          "pro-auth-button-hide",
-          this.settings.pro?.refreshToken !== ""
-        );
-        this.oauth2Info.authDiv = undefined;
-
-        this.oauth2Info.revokeAuthSetting?.setDesc(
-          t("protocol_pro_connect_succ_revoke", {
-            email: this.settings.pro?.email,
-          })
-        );
-        this.oauth2Info.revokeAuthSetting = undefined;
-        this.oauth2Info.revokeDiv?.toggleClass(
-          "pro-revoke-auth-button-hide",
-          this.settings.pro?.email === ""
-        );
-        this.oauth2Info.revokeDiv = undefined;
-      }
-    );
 
     this.registerObsidianProtocolHandler(
       COMMAND_CALLBACK_BOX,
@@ -1702,10 +1632,6 @@ export default class RemotelySavePlugin extends Plugin {
       koofrExpired = true;
       this.settings.koofr = cloneDeep(DEFAULT_KOOFR_CONFIG);
       needSave = true;
-    }
-
-    if (this.settings.pro === undefined) {
-      this.settings.pro = cloneDeep(DEFAULT_PRO_CONFIG);
     }
 
     // save back

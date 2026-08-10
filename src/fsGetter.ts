@@ -1,10 +1,10 @@
-import { FakeFsAzureBlobStorage } from "../pro/src/fsAzureBlobStorage";
-import { FakeFsBox } from "../pro/src/fsBox";
-import { FakeFsGoogleDrive } from "../pro/src/fsGoogleDrive";
-import { FakeFsKoofr } from "../pro/src/fsKoofr";
-import { FakeFsOnedriveFull } from "../pro/src/fsOnedriveFull";
-import { FakeFsPCloud } from "../pro/src/fsPCloud";
-import { FakeFsYandexDisk } from "../pro/src/fsYandexDisk";
+import { FakeFsAzureBlobStorage } from "./fsAzureBlobStorage";
+import { FakeFsBox } from "./fsBox";
+import { FakeFsGoogleDrive } from "./fsGoogleDrive";
+import { FakeFsKoofr } from "./fsKoofr";
+import { FakeFsOnedriveFull } from "./fsOnedriveFull";
+import { FakeFsPCloud } from "./fsPCloud";
+import { FakeFsYandexDisk } from "./fsYandexDisk";
 import type { RemotelySavePluginSettings } from "./baseTypes";
 import type { FakeFs } from "./fsAll";
 import { FakeFsDropbox } from "./fsDropbox";
