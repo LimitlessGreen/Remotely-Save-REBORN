@@ -33,7 +33,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
-    "@fyears/eme": "^0.0.3",
+    "@fyears/eme": "file:../eme",
     "@noble/ciphers": "^0.5.1",
     "@noble/hashes": "^1.4.0",
     "base32768": "^3.0.1",

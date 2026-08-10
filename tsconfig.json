@@ -14,7 +14,12 @@
     "esModuleInterop": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["dom", "es5", "scripthost", "es2015", "webworker"]
+    "lib": ["dom", "es5", "scripthost", "es2015", "webworker"],
+    "paths": {
+      "@fyears/rclone-crypt": ["libs/rclone-crypt/src/index"],
+      "@fyears/tsqueue": ["libs/tsqueue/src/index"],
+      "@fyears/eme": ["libs/eme/src/index"]
+    }
   },
   "include": ["src/global.d.ts", "**/*.ts"]
 }

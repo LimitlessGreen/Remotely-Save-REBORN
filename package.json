@@ -24,6 +24,9 @@
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
+  "workspaces": [
+    "libs/*"
+  ],
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@microsoft/microsoft-graph-types": "^2.40.0",
@@ -62,8 +65,9 @@
     "@aws-sdk/types": "^3.609.0",
     "@azure/msal-node": "^2.12.0",
     "@azure/storage-blob": "^12.24.0",
-    "@fyears/rclone-crypt": "^0.0.7",
-    "@fyears/tsqueue": "^1.0.1",
+    "@fyears/rclone-crypt": "file:libs/rclone-crypt",
+    "@fyears/tsqueue": "file:libs/tsqueue",
+    "@fyears/eme": "file:libs/eme",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@sanity/diff-match-patch": "^3.1.1",
     "@smithy/fetch-http-handler": "^3.2.4",
