@@ -244,6 +244,11 @@ export const checkIsSkipItemOrNotByName = (
     }
   }
 
+  if (finalIsIgnored === undefined && enableAllowMode && isExplictlyAllowed) {
+    // Explicit allow should bypass hidden-file checks.
+    finalIsIgnored = false;
+  }
+
   const checkIsHidden =
     isHiddenPath(key, true, false) ||
     (!syncUnderscoreItems && isHiddenPath(key, false, true)) ||

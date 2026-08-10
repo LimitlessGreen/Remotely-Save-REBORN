@@ -3,7 +3,11 @@ import { FakeFs } from "./fsAll";
 
 import { TFile, TFolder, type Vault } from "obsidian";
 import { mkdirpInVault, statFix, unixTimeToStr } from "./misc";
-import { listFilesInObsFolder } from "./obsFolderLister";
+import {
+  getHiddenAllowListRoots,
+  listFilesByAdapterPaths,
+  listFilesInObsFolder,
+} from "./obsFolderLister";
 import type { Profiler } from "./profiler";
 
 export class FakeFsLocal extends FakeFs {
@@ -14,6 +18,7 @@ export class FakeFsLocal extends FakeFs {
   pluginID: string;
   profiler: Profiler | undefined;
   deleteToWhere: "obsidian" | "system";
+  onlyAllowPaths: string[];
   kind: "local";
   constructor(
     vault: Vault,
@@ -22,7 +27,8 @@ export class FakeFsLocal extends FakeFs {
     configDir: string,
     pluginID: string,
     profiler: Profiler | undefined,
-    deleteToWhere: "obsidian" | "system"
+    deleteToWhere: "obsidian" | "system",
+    onlyAllowPaths: string[]
   ) {
     super();
 
@@ -33,6 +39,7 @@ export class FakeFsLocal extends FakeFs {
     this.pluginID = pluginID;
     this.profiler = profiler;
     this.deleteToWhere = deleteToWhere;
+    this.onlyAllowPaths = onlyAllowPaths;
     this.kind = "local";
   }
 
@@ -113,6 +120,22 @@ export class FakeFsLocal extends FakeFs {
         local.push(f);
       }
       this.profiler?.insert("finish syncConfigDir");
+    }
+
+    const hiddenAllowRoots = getHiddenAllowListRoots(this.onlyAllowPaths);
+    if (hiddenAllowRoots.length > 0) {
+      this.profiler?.insert("into extra allowlist hidden scan");
+      const extraFiles = await listFilesByAdapterPaths(
+        hiddenAllowRoots,
+        this.vault
+      );
+      const existingKeys = new Set(local.map((e) => e.key));
+      for (const f of extraFiles) {
+        if (!existingKeys.has(f.key)) {
+          local.push(f);
+        }
+      }
+      this.profiler?.insert("finish extra allowlist hidden scan");
     }
 
     this.profiler?.insert("finish walk for local");
