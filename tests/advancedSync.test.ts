@@ -18,7 +18,7 @@ interface MockFs {
   rename(oldKey: string, newKey: string): Promise<void>;
 }
 
-import * as SmartSyncLogic from "../src/smartSyncLogic";
+import * as SmartSyncLogic from "../src/logic/smartSync";
 
 describe("Advanced Sync: Smart Conflict Handling (Markdown)", () => {
   describe("Two-Way Merge", () => {

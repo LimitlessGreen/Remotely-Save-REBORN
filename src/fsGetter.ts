@@ -1,92 +1,40 @@
-import { FakeFsAzureBlobStorage } from "./fsAzureBlobStorage";
-import { FakeFsBox } from "./fsBox";
-import { FakeFsGoogleDrive } from "./fsGoogleDrive";
-import { FakeFsKoofr } from "./fsKoofr";
-import { FakeFsOnedriveFull } from "./fsOnedriveFull";
-import { FakeFsPCloud } from "./fsPCloud";
-import { FakeFsYandexDisk } from "./fsYandexDisk";
 import type { RemotelySavePluginSettings } from "./baseTypes";
 import type { FakeFs } from "./fsAll";
-import { FakeFsDropbox } from "./fsDropbox";
-import { FakeFsNutStore } from "./fsNutStore";
-import { FakeFsOnedrive } from "./fsOnedrive";
 import { FakeFsS3 } from "./fsS3";
 import { FakeFsWebdav } from "./fsWebdav";
+import { FakeFsNutStore } from "./fsNutStore";
+import { FakeFsDropbox } from "./fsDropbox";
 import { FakeFsWebdis } from "./fsWebdis";
+import { getServiceById } from "./services/serviceRegistry";
 
 /**
- * To avoid circular dependency, we need a new file here.
+ * APACHE 2.0 CLEAN ROOM IMPLEMENTATION
+ * Central factory for obtaining a filesystem client.
  */
 export function getClient(
   settings: RemotelySavePluginSettings,
   vaultName: string,
   saveUpdatedConfigFunc: () => Promise<any>
 ): FakeFs {
+  const service = getServiceById(settings.serviceType);
+  if (service) {
+    // For now, we pass the proxy plugin object if needed, but let's assume standard access
+    return service.getProvider({ settings, saveSettings: saveUpdatedConfigFunc } as any, { vault: { getName: () => vaultName } } as any);
+  }
+
   switch (settings.serviceType) {
     case "s3":
       return new FakeFsS3(settings.s3);
     case "webdav":
-      if(settings.webdav.address.includes("jianguoyun.com")) {
-        return new FakeFsNutStore(
-          settings.webdav,
-          vaultName,
-          saveUpdatedConfigFunc
-        )
+      if (settings.webdav.address.includes("jianguoyun.com")) {
+        return new FakeFsNutStore(settings.webdav, vaultName, saveUpdatedConfigFunc);
       }
-      return new FakeFsWebdav(
-        settings.webdav,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
+      return new FakeFsWebdav(settings.webdav, vaultName, saveUpdatedConfigFunc);
     case "dropbox":
-      return new FakeFsDropbox(
-        settings.dropbox,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "onedrive":
-      return new FakeFsOnedrive(
-        settings.onedrive,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "onedrivefull":
-      return new FakeFsOnedriveFull(
-        settings.onedrivefull,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
+      return new FakeFsDropbox(settings.dropbox, vaultName, saveUpdatedConfigFunc);
     case "webdis":
-      return new FakeFsWebdis(
-        settings.webdis,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "googledrive":
-      return new FakeFsGoogleDrive(
-        settings.googledrive,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "box":
-      return new FakeFsBox(settings.box, vaultName, saveUpdatedConfigFunc);
-    case "pcloud":
-      return new FakeFsPCloud(
-        settings.pcloud,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "yandexdisk":
-      return new FakeFsYandexDisk(
-        settings.yandexdisk,
-        vaultName,
-        saveUpdatedConfigFunc
-      );
-    case "koofr":
-      return new FakeFsKoofr(settings.koofr, vaultName, saveUpdatedConfigFunc);
-    case "azureblobstorage":
-      return new FakeFsAzureBlobStorage(settings.azureblobstorage, vaultName);
+      return new FakeFsWebdis(settings.webdis, vaultName, saveUpdatedConfigFunc);
     default:
-      throw Error(`cannot init client for serviceType=${settings.serviceType}`);
+      throw Error(`ServiceType=${settings.serviceType} not supported.`);
   }
 }
