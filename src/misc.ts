@@ -92,7 +92,6 @@ export const bufferToArrayBuffer = (
 ): ArrayBuffer => {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
 };
-};
 
 /**
  * Simple func.
