@@ -1,0 +1,37 @@
+{
+  "name": "@fyears/tsqueue",
+  "version": "1.0.1",
+  "description": "implement queue and stack",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "cross-env TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} mocha -r ts-node/register 'tests/**/*.ts'",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fyears/tsqueue.git"
+  },
+  "keywords": [
+    "queue",
+    "stack",
+    "data structure"
+  ],
+  "author": "fyears",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fyears/tsqueue/issues"
+  },
+  "homepage": "https://github.com/fyears/tsqueue#readme",
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.1.0",
+    "chai": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "mocha": "^9.1.4",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
+  }
+}
