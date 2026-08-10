@@ -11,6 +11,9 @@ pnpm-lock.yaml
 main.js
 *.js.map
 
+# pro (local reference only, not for version control)
+pro/
+
 # obsidian
 data.json
 

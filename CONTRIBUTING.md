@@ -1,22 +1,14 @@
 # Contributing
 
-## What
+This project is a community-maintained fork. We welcome contributions!
 
-Starting from April 29, 2024, all individual contributors' contributions are only possibly accepted after they sign the CLA.
+## How to contribute
 
-We do not accept corporate contributions at this moment.
+1. Fork the repository.
+2. Create a new branch for your changes.
+3. Make your changes and ensure they are well-tested.
+4. Submit a pull request.
 
-You can check out [CLA](./CLA.md).
+## Licensing
 
-## Steps
-
-1. Make some changes to the code. Open a pull request.
-2. A rebot will check the status.
-   ![robot check](./assets/cla-process/cla-robot-alert.png)
-3. Read the [CLA](./CLA.md) carefully and make a decision.
-4. If you decide to sign the CLA, please make a comment "I have read the CLA Document and I hereby sign the CLA".
-5. If you decide to not sign the CLA, please close the PR.
-6. The robot should recheck and pass the check automatically.
-   ![robot recheck](./assets/cla-process/cla-sign-and-pass.png)
-7. Your pr will be reviewed.
-8. If you sign the CLA and submit some more PRs, the robot should pass the test automatically.
+By contributing to this project, you agree that your contributions will be licensed under the Apache License, version 2.0. We no longer require a separate Contributor License Agreement (CLA).
