@@ -21,15 +21,14 @@ import type {
 } from "./baseTypes";
 
 import cloneDeep from "lodash/cloneDeep";
-import { generateAzureBlobStorageSettingsPart } from "../pro/src/settingsAzureBlobStorage";
-import { generateBoxSettingsPart } from "../pro/src/settingsBox";
-import { generateClearDupFilesSettingsPart } from "../pro/src/settingsClearDupFiles";
-import { generateGoogleDriveSettingsPart } from "../pro/src/settingsGoogleDrive";
-import { generateKoofrSettingsPart } from "../pro/src/settingsKoofr";
-import { generateOnedriveFullSettingsPart } from "../pro/src/settingsOnedriveFull";
-import { generatePCloudSettingsPart } from "../pro/src/settingsPCloud";
-import { generateProSettingsPart } from "../pro/src/settingsPro";
-import { generateYandexDiskSettingsPart } from "../pro/src/settingsYandexDisk";
+import { generateAzureBlobStorageSettingsPart } from "./settingsAzureBlobStorage";
+import { generateBoxSettingsPart } from "./settingsBox";
+import { generateClearDupFilesSettingsPart } from "./settingsClearDupFiles";
+import { generateGoogleDriveSettingsPart } from "./settingsGoogleDrive";
+import { generateKoofrSettingsPart } from "./settingsKoofr";
+import { generateOnedriveFullSettingsPart } from "./settingsOnedriveFull";
+import { generatePCloudSettingsPart } from "./settingsPCloud";
+import { generateYandexDiskSettingsPart } from "./settingsYandexDisk";
 import { API_VER_ENSURE_REQURL_OK, VALID_REQURL } from "./baseTypesObs";
 import { messyConfigToNormal } from "./configPersist";
 import {
@@ -1844,8 +1843,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     const {
       onedriveFullDiv,
-      onedriveFullAllowedToUsedDiv,
-      onedriveFullNotShowUpHintSetting,
     } = generateOnedriveFullSettingsPart(
       containerEl,
       t,
@@ -1860,8 +1857,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     const {
       googleDriveDiv,
-      googleDriveAllowedToUsedDiv,
-      googleDriveNotShowUpHintSetting,
     } = generateGoogleDriveSettingsPart(
       containerEl,
       t,
@@ -1874,7 +1869,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     // below for box
     //////////////////////////////////////////////////
 
-    const { boxDiv, boxAllowedToUsedDiv, boxNotShowUpHintSetting } =
+    const { boxDiv } =
       generateBoxSettingsPart(containerEl, t, this.app, this.plugin, () =>
         this.plugin.saveSettings()
       );
@@ -1883,7 +1878,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     // below for pcloud
     //////////////////////////////////////////////////
 
-    const { pCloudDiv, pCloudAllowedToUsedDiv, pCloudNotShowUpHintSetting } =
+    const { pCloudDiv } =
       generatePCloudSettingsPart(containerEl, t, this.app, this.plugin, () =>
         this.plugin.saveSettings()
       );
@@ -1894,8 +1889,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     const {
       yandexDiskDiv,
-      yandexDiskAllowedToUsedDiv,
-      yandexDiskNotShowUpHintSetting,
     } = generateYandexDiskSettingsPart(
       containerEl,
       t,
@@ -1908,7 +1901,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     // below for koofr
     //////////////////////////////////////////////////
 
-    const { koofrDiv, koofrAllowedToUsedDiv, koofrNotShowUpHintSetting } =
+    const { koofrDiv } =
       generateKoofrSettingsPart(containerEl, t, this.app, this.plugin, () =>
         this.plugin.saveSettings()
       );
@@ -1919,8 +1912,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     const {
       azureBlobStorageDiv,
-      azureBlobStorageAllowedToUsedDiv,
-      azureBlobStorageNotShowUpHintSetting,
     } = generateAzureBlobStorageSettingsPart(
       containerEl,
       t,
@@ -1944,12 +1935,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         dropdown.addOption("webdav", t("settings_chooseservice_webdav"));
         dropdown.addOption("onedrive", t("settings_chooseservice_onedrive"));
         dropdown.addOption("webdis", t("settings_chooseservice_webdis"));
-
-        dropdown.addOption("separator line", "-----");
-        (dropdown.selectEl.lastChild as HTMLElement).setAttribute(
-          "disabled",
-          "disabled"
-        );
 
         dropdown.addOption(
           "googledrive",
@@ -2739,33 +2724,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           }
         });
       });
-
-    //////////////////////////////////////////////////
-    // below for pro
-    //////////////////////////////////////////////////
-
-    const proDiv = containerEl.createEl("div");
-    generateProSettingsPart(
-      proDiv,
-      t,
-      this.app,
-      this.plugin,
-      () => this.plugin.saveSettings(),
-      onedriveFullAllowedToUsedDiv,
-      onedriveFullNotShowUpHintSetting,
-      googleDriveAllowedToUsedDiv,
-      googleDriveNotShowUpHintSetting,
-      boxAllowedToUsedDiv,
-      boxNotShowUpHintSetting,
-      pCloudAllowedToUsedDiv,
-      pCloudNotShowUpHintSetting,
-      yandexDiskAllowedToUsedDiv,
-      yandexDiskNotShowUpHintSetting,
-      koofrAllowedToUsedDiv,
-      koofrNotShowUpHintSetting,
-      azureBlobStorageAllowedToUsedDiv,
-      azureBlobStorageNotShowUpHintSetting
-    );
 
     //////////////////////////////////////////////////
     // below for debug

@@ -17,19 +17,12 @@ import {
   setIcon,
 } from "obsidian";
 import {
-  DEFAULT_PRO_CONFIG,
-  getAndSaveProEmail,
-  getAndSaveProFeatures,
-  sendAuthReq as sendAuthReqPro,
-  setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplacePro,
-} from "./advancedAccount";
-import {
   COMMAND_CALLBACK_BOX,
   COMMAND_CALLBACK_KOOFR,
   COMMAND_CALLBACK_ONEDRIVEFULL,
   COMMAND_CALLBACK_PCLOUD,
   COMMAND_CALLBACK_YANDEXDISK,
-} from "./baseTypesAdvanced";
+} from "./baseTypes";
 import { DEFAULT_AZUREBLOBSTORAGE_CONFIG, FakeFsAzureBlobStorage } from "./fsAzureBlobStorage";
 import {
   DEFAULT_BOX_CONFIG,
