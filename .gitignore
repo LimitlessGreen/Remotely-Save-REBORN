@@ -21,5 +21,8 @@ data.json
 # debug
 logs.txt
 
+# local deploy
+dev-deploy.mjs
+
 # hidden files
 .*

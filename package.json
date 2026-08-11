@@ -3,10 +3,9 @@
   "version": "0.5.25",
   "description": "This is yet another sync plugin for Obsidian app.",
   "scripts": {
-    "dev2": "node esbuild.config.mjs --watch",
-    "build2": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "build": "webpack --mode production",
-    "dev": "webpack --mode development --watch",
+    "dev": "node esbuild.config.mjs --watch",
+    "deploy:dev": "node dev-deploy.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "format": "npx @biomejs/biome check --write .",
     "clean": "npx rimraf main.js",
     "test": "mocha --import=tsx 'tests/**/*.ts'"
@@ -49,14 +48,10 @@
     "npm-check-updates": "^16.14.20",
     "obsidian": "^1.5.7",
     "openapi-typescript": "^7.1.0",
-    "ts-loader": "^9.5.1",
     "tslib": "^2.6.3",
     "tsx": "^4.23.12",
     "typescript": "^5.5.4",
     "webdav-server": "^2.6.2",
-    "webpack": "^5.93.0",
-    "webpack-cli": "^5.1.4",
-    "worker-loader": "^3.0.8",
     "yargs": "^18.1.0"
   },
   "dependencies": {
