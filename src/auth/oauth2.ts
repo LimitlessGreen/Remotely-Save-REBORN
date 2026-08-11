@@ -1,7 +1,5 @@
-/**
- * APACHE 2.0 CLEAN ROOM IMPLEMENTATION
- * Shared OAuth2 infrastructure
- */
+import { nanoid } from "nanoid";
+import { base64url } from "rfc4648";
 
 export interface TokenResponse {
   access_token: string;
@@ -22,6 +20,13 @@ export interface AuthConfig {
 
 export class OAuth2Handler {
   constructor(private config: AuthConfig) {}
+
+  public static async generatePkce(): Promise<{ verifier: string; challenge: string }> {
+    const verifier = nanoid(64);
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+    const challenge = base64url.stringify(new Uint8Array(hash), { pad: false });
+    return { verifier, challenge };
+  }
 
   public getAuthUrl(state: string, extraParams: Record<string, string> = {}): string {
     const url = new URL(this.config.authEndpoint);

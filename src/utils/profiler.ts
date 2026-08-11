@@ -1,5 +1,5 @@
-import type { ProfilerConfig, SUPPORTED_SERVICES_TYPE } from "./baseTypes";
-import { type InternalDBs, insertProfilerResultByVault } from "./localdb";
+import type { ProfilerConfig, SUPPORTED_SERVICES_TYPE } from "../core/baseTypes";
+import { type InternalDBs, insertProfilerResultByVault } from "../core/storage/localdb";
 import { roughSizeOfObject, unixTimeToStr } from "./misc";
 
 interface BreakPoint {

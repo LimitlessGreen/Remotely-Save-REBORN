@@ -1,16 +1,16 @@
 import type { Vault } from "obsidian";
 
-import type { SyncPlanType } from "../pro/src/sync";
+import type { SyncPlanType } from "../core/baseTypes";
 import {
   DEFAULT_DEBUG_FOLDER,
   DEFAULT_PROFILER_RESULT_FILE_PREFIX,
   DEFAULT_SYNC_PLANS_HISTORY_FILE_PREFIX,
-} from "./baseTypes";
+} from "../core/baseTypes";
 import {
   readAllProfilerResultsByVault,
   readAllSyncPlanRecordTextsByVault,
-} from "./localdb";
-import type { InternalDBs } from "./localdb";
+} from "../core/storage/localdb";
+import type { InternalDBs } from "../core/storage/localdb";
 import { mkdirpInVault } from "./misc";
 
 const getSubsetOfSyncPlan = (x: string, onlyChange: boolean) => {

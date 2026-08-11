@@ -2,7 +2,7 @@ import { scryptAsync } from "@noble/hashes/scrypt";
 import { xsalsa20poly1305 } from "@noble/ciphers/salsa";
 import { randomBytes } from "@noble/ciphers/webcrypto";
 import { pad, unpad } from "pkcs7-padding";
-import { EMECipher, AESCipherBlock } from "@fyears/eme";
+import { EMECipher, AESCipherBlock } from "../../eme/src/index";
 import { base32hex, base64url } from "rfc4648";
 import * as base32768 from "base32768";
 

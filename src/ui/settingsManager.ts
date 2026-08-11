@@ -1,6 +1,6 @@
 import { type App, Setting } from "obsidian";
 import type RemotelySavePlugin from "../main";
-import type { TransItemType } from "../i18n";
+import type { TransItemType } from "../core/i18n/i18n";
 
 /**
  * APACHE 2.0 CLEAN ROOM IMPLEMENTATION

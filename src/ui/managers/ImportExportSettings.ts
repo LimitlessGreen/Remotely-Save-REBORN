@@ -1,5 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
-import { Modal, Notice, Setting } from "obsidian";
+import { type App, Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
 import type { QRExportType } from "../../core/baseTypes";
 import type { TransItemType } from "../../core/i18n/i18n";

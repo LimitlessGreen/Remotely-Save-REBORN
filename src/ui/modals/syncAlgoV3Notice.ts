@@ -1,8 +1,8 @@
 import { type App, Modal } from "obsidian";
-import type { TransItemType } from "./i18n";
-import type RemotelySavePlugin from "./main"; // unavoidable
+import type { TransItemType } from "../../core/i18n/i18n";
+import type RemotelySavePlugin from "../../main"; // unavoidable
 
-import { stringToFragment } from "./misc";
+import { stringToFragment } from "../../utils/misc";
 
 export class SyncAlgoV3Modal extends Modal {
   agree: boolean;

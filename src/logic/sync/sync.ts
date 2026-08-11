@@ -3,14 +3,17 @@
  * Main synchronization engine
  */
 
+import { type App } from "obsidian";
 import PQueue from "p-queue";
-import type { InternalDBs, RemotelySavePluginSettings, SyncTriggerSourceType, MixedEntity, Entity } from "../../core/baseTypes";
+import type { RemotelySavePluginSettings, SyncTriggerSourceType, MixedEntity, Entity } from "../../core/baseTypes";
+import type { InternalDBs } from "../../core/storage/localdb";
 import { getClient } from "../../core/fs/fsGetter";
 import { FakeFsLocal } from "../../core/fs/fsLocal";
 import { FakeFsEncrypt } from "../../core/fs/fsEncrypt";
 import * as SmartSyncLogic from "./smartSync";
 
 export async function syncer(
+  app: App,
   db: InternalDBs,
   settings: RemotelySavePluginSettings,
   vaultName: string,
@@ -20,9 +23,18 @@ export async function syncer(
 ) {
   console.info(`Syncer started (Apache 2.0 implementation)`);
 
-  const fsLocal = new FakeFsLocal(app.vault, settings);
+  const fsLocal = new FakeFsLocal(
+    app.vault,
+    settings.syncConfigDir ?? false,
+    settings.syncBookmarks ?? false,
+    app.vault.configDir,
+    "remotely-save", // plugin ID
+    undefined, // profiler
+    settings.deleteToWhere ?? "system",
+    settings.onlyAllowPaths ?? []
+  );
   const fsRemote = getClient(settings, vaultName, saveUpdatedConfigFunc);
-  const fsEncrypt = new FakeFsEncrypt(fsRemote, settings);
+  const fsEncrypt = new FakeFsEncrypt(fsRemote, settings.password, settings.encryptionMethod ?? "unknown");
 
   try {
     // 1. Fetch metadata from both sides
@@ -52,6 +64,8 @@ export async function syncer(
   } catch (error) {
     console.error(`Sync failed:`, error);
     throw error;
+  } finally {
+    fsEncrypt.closeResources();
   }
 }
 

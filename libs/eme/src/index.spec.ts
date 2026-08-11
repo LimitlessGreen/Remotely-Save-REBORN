@@ -21,11 +21,11 @@ async function verifyTestVec(v: TestVec) {
     let inputBack = new Uint8Array()
 
     if (v.isEncrypt) {
-        output = await eme.encrypt(v.tweak, v.input)
-        inputBack = await eme.decrypt(v.tweak, output)
+        output = await eme.encrypt(v.tweak, v.input) as any
+        inputBack = await eme.decrypt(v.tweak, output) as any
     } else {
-        output = await eme.decrypt(v.tweak, v.input)
-        inputBack = await eme.encrypt(v.tweak, output)
+        output = await eme.decrypt(v.tweak, v.input) as any
+        inputBack = await eme.encrypt(v.tweak, output) as any
     }
 
     deepStrictEqual(v.output, output)

@@ -6,7 +6,7 @@ ep2(localforage);
 export type LocalForage = typeof localforage;
 import { nanoid } from "nanoid";
 
-import type { SyncPlanType } from "../../../pro/src/sync";
+import type { SyncPlanType } from "../baseTypes";
 import type { Entity, SUPPORTED_SERVICES_TYPE } from "../baseTypes";
 import { unixTimeToStr } from "../../utils/misc";
 

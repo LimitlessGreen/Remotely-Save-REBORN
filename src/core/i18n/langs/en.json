@@ -600,5 +600,21 @@
   "settings_export_azureblobstorage_button": "Export Azure Blob Storage Part",
   "settings_cleardupfiles": "Clear Duplicated Conflict Files",
   "settings_cleardupfiles_desc": "If you have ever used Smart Conflict feature, the plugin may generate duplicated files. <strong>IF YOU ARE SURE THE DUPLICATED FILES ARE NO LONGER NEEDED</strong>, you can clear <strong>ALL</strong> of them locally here.",
-  "settings_cleardupfiles_button": "Start Scanning"
+  "settings_cleardupfiles_button": "Start Scanning",
+  "modal_proauth_copybutton": "Copy Auth URL",
+  "modal_proauth_copynotice": "Auth URL copied!",
+  "modal_proauth_maualinput": "Manual Auth Input",
+  "modal_proauth_maualinput_notice": "Verifying...",
+  "protocol_pro_connect_manualinput_succ": "Connected successfully!",
+  "modal_proauth_maualinput_conn_fail": "Connection failed!",
+  "settings_pro": "Pro Features",
+  "settings_pro_tutorial": "Tutorial for Pro features",
+  "settings_pro_features": "Active Features",
+  "settings_pro_features_refresh_button": "Refresh Features",
+  "settings_pro_revoke": "Revoke Pro Account",
+  "settings_pro_revoke_button": "Revoke",
+  "settings_pro_intro": "Pro Introduction",
+  "settings_pro_intro_button": "View Intro",
+  "settings_pro_auth": "Pro Auth",
+  "settings_pro_auth_button": "Connect Pro Account"
 }

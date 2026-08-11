@@ -22,6 +22,7 @@ import { BasicSettingsManager } from "./ui/managers/BasicSettings";
 import { AdvancedSettingsManager } from "./ui/managers/AdvancedSettings";
 import { ImportExportSettingsManager } from "./ui/managers/ImportExportSettings";
 import { DebugSettingsManager } from "./ui/managers/DebugSettings";
+import { AccountSettingsManager } from "./ui/managers/AccountSettings";
 
 export class ChangeRemoteBaseDirModal extends Modal {
   readonly plugin: RemotelySavePlugin;
@@ -66,7 +67,8 @@ export class ChangeRemoteBaseDirModal extends Modal {
           );
           button.onClick(async () => {
             // in the settings, the value is reset to the special case ""
-            this.plugin.settings[this.service].remoteBaseDir = "";
+            const s = (this.service as any) === "nutstore" ? "webdav" : this.service;
+            (this.plugin.settings as any)[s].remoteBaseDir = "";
             await this.plugin.saveSettings();
             new Notice(t("modal_remotebasedir_notice"));
             this.close();
@@ -94,7 +96,8 @@ export class ChangeRemoteBaseDirModal extends Modal {
         .addButton((button) => {
           button.setButtonText(t("modal_remotebasedir_secondconfirm_change"));
           button.onClick(async () => {
-            this.plugin.settings[this.service].remoteBaseDir =
+            const s = (this.service as any) === "nutstore" ? "webdav" : this.service;
+            (this.plugin.settings as any)[s].remoteBaseDir =
               this.newRemoteBaseDir;
             await this.plugin.saveSettings();
             new Notice(t("modal_remotebasedir_notice"));
@@ -187,6 +190,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       service.getSettings(this.plugin, this.app, t).render(containerEl);
     }
 
+    new AccountSettingsManager(this.plugin, this.app, t).render(containerEl);
     new BasicSettingsManager(this.plugin, this.app, t).render(containerEl);
     new AdvancedSettingsManager(this.plugin, this.app, t).render(containerEl);
     new ImportExportSettingsManager(this.plugin, this.app, t).render(containerEl);

@@ -2,10 +2,7 @@ import merge from "lodash/merge";
 import Mustache from "mustache";
 import { moment } from "obsidian";
 
-import { LANGS as LANGS_PRO } from "../../../pro/src/langs";
-import { LANGS as LANGS_BASIC } from "./langs";
-
-const LANGS = merge(LANGS_BASIC, LANGS_PRO);
+import { LANGS } from "./langs";
 
 export type LangType = keyof typeof LANGS;
 export type LangTypeAndAuto = LangType | "auto";

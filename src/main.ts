@@ -35,16 +35,23 @@ import {
   DEFAULT_DROPBOX_CONFIG,
   sendAuthReq as sendAuthReqDropbox,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceDropbox,
-} from "./services/dropbox/provider";
+} from "./services/dropbox/DropboxFileSystem";
 import { FakeFsEncrypt } from "./core/fs/fsEncrypt";
 import { getClient } from "./core/fs/fsGetter";
 import { FakeFsLocal } from "./core/fs/fsLocal";
 import {
   DEFAULT_ONEDRIVE_CONFIG,
-} from "./core/baseTypes";
-import { DEFAULT_S3_CONFIG } from "./services/s3/provider";
-import { DEFAULT_WEBDAV_CONFIG } from "./services/webdav/provider";
-import { DEFAULT_WEBDIS_CONFIG } from "./services/webdis/provider";
+  DEFAULT_ONEDRIVEFULL_CONFIG,
+} from "./services/onedrive/OneDriveFileSystem";
+import { DEFAULT_GOOGLEDRIVE_CONFIG } from "./services/googledrive/GoogleDriveFileSystem";
+import { DEFAULT_BOX_CONFIG } from "./services/box/BoxFileSystem";
+import { DEFAULT_PCLOUD_CONFIG } from "./services/pcloud/PCloudFileSystem";
+import { DEFAULT_YANDEXDISK_CONFIG } from "./services/yandex/YandexFileSystem";
+import { DEFAULT_KOOFR_CONFIG } from "./services/koofr/KoofrFileSystem";
+import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "./services/azure/AzureFileSystem";
+import { DEFAULT_S3_CONFIG } from "./services/s3/S3FileSystem";
+import { DEFAULT_WEBDAV_CONFIG } from "./services/webdav/WebdavFileSystem";
+import { DEFAULT_WEBDIS_CONFIG } from "./services/webdis/WebdisFileSystem";
 import { I18n } from "./core/i18n/i18n";
 import type { LangTypeAndAuto, TransItemType } from "./core/i18n/i18n";
 import { importQrCodeUri } from "./utils/importExport";
@@ -77,6 +84,7 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   yandexdisk: DEFAULT_YANDEXDISK_CONFIG,
   koofr: DEFAULT_KOOFR_CONFIG,
   azureblobstorage: DEFAULT_AZUREBLOBSTORAGE_CONFIG,
+  officialAccount: undefined,
   password: "",
   serviceType: "s3",
   currLogLevel: "info",
@@ -183,56 +191,8 @@ export default class RemotelySavePlugin extends Plugin {
   appContainerObserver?: MutationObserver;
 
   async syncRun(triggerSource: SyncTriggerSourceType = "manual") {
-    let profiler: Profiler | undefined = undefined;
-    if (this.settings.profiler?.enable ?? false) {
-      profiler = new Profiler(
-        undefined,
-        this.settings.profiler?.enablePrinting ?? false,
-        this.settings.profiler?.recordSize ?? false
-      );
-    }
-    const fsLocal = new FakeFsLocal(
-      this.app.vault,
-      this.settings.syncConfigDir ?? false,
-      this.settings.syncBookmarks ?? false,
-      this.app.vault.configDir,
-      this.manifest.id,
-      profiler,
-      this.settings.deleteToWhere ?? "system",
-      this.settings.onlyAllowPaths ?? []
-    );
-    const fsRemote = getClient(
-      this.settings,
-      this.app.vault.getName(),
-      async () => await this.saveSettings()
-    );
-    const fsEncrypt = new FakeFsEncrypt(
-      fsRemote,
-      this.settings.password ?? "",
-      this.settings.encryptionMethod ?? "rclone-base64"
-    );
-
     const t = (x: TransItemType, vars?: any) => {
       return this.i18n.t(x, vars);
-    };
-
-    const profileID = this.getCurrProfileID();
-
-    const getProtectError = (
-      protectModifyPercentage: number,
-      realModifyDeleteCount: number,
-      allFilesCount: number
-    ) => {
-      const percent = ((100 * realModifyDeleteCount) / allFilesCount).toFixed(
-        1
-      );
-      const res = t("syncrun_abort_protectmodifypercentage", {
-        protectModifyPercentage,
-        realModifyDeleteCount,
-        allFilesCount,
-        percent,
-      });
-      return res;
     };
 
     const getNotice = (
@@ -243,180 +203,6 @@ export default class RemotelySavePlugin extends Plugin {
       if (s === "manual" || s === "dry") {
         new Notice(msg, timeout);
       }
-    };
-
-    const notifyFunc = async (s: SyncTriggerSourceType, step: number) => {
-      switch (step) {
-        case 0:
-          if (s === "dry") {
-            if (this.settings.currLogLevel === "info") {
-              getNotice(s, t("syncrun_shortstep0"));
-            } else {
-              getNotice(s, t("syncrun_step0"));
-            }
-          }
-
-          break;
-
-        case 1:
-          if (this.settings.currLogLevel === "info") {
-            getNotice(
-              s,
-              t("syncrun_shortstep1", {
-                serviceType: this.settings.serviceType,
-              })
-            );
-          } else {
-            getNotice(
-              s,
-              t("syncrun_step1", {
-                serviceType: this.settings.serviceType,
-              })
-            );
-          }
-          break;
-
-        case 2:
-          if (this.settings.currLogLevel === "info") {
-            // pass
-          } else {
-            getNotice(s, t("syncrun_step2"));
-          }
-          break;
-
-        case 3:
-          if (this.settings.currLogLevel === "info") {
-            // pass
-          } else {
-            getNotice(s, t("syncrun_step3"));
-          }
-          break;
-
-        case 4:
-          if (this.settings.currLogLevel === "info") {
-            // pass
-          } else {
-            getNotice(s, t("syncrun_step4"));
-          }
-          break;
-
-        case 5:
-          if (this.settings.currLogLevel === "info") {
-            // pass
-          } else {
-            getNotice(s, t("syncrun_step5"));
-          }
-          break;
-
-        case 6:
-          if (this.settings.currLogLevel === "info") {
-            // pass
-          } else {
-            getNotice(s, t("syncrun_step6"));
-          }
-          break;
-
-        case 7:
-          if (s === "dry") {
-            if (this.settings.currLogLevel === "info") {
-              getNotice(s, t("syncrun_shortstep2skip"));
-            } else {
-              getNotice(s, t("syncrun_step7skip"));
-            }
-          } else {
-            if (this.settings.currLogLevel === "info") {
-              // pass
-            } else {
-              getNotice(s, t("syncrun_step7"));
-            }
-          }
-          break;
-
-        case 8:
-          if (this.settings.currLogLevel === "info") {
-            getNotice(s, t("syncrun_shortstep2"));
-          } else {
-            getNotice(s, t("syncrun_step8"));
-          }
-          break;
-
-        default:
-          throw Error(`unknown step=${step} for showing notice`);
-      }
-    };
-
-    const errNotifyFunc = async (s: SyncTriggerSourceType, error: Error) => {
-      console.error(error);
-      if (error instanceof AggregateError) {
-        for (const e of error.errors) {
-          getNotice(s, e.message, 10 * 1000);
-        }
-      } else {
-        getNotice(s, error?.message ?? "error while sync", 10 * 1000);
-      }
-    };
-
-    const ribboonFunc = async (s: SyncTriggerSourceType, step: number) => {
-      if (step === 1) {
-        if (this.syncRibbon !== undefined) {
-          setIcon(this.syncRibbon, iconNameSyncRunning);
-          this.syncRibbon.setAttribute(
-            "aria-label",
-            t("syncrun_syncingribbon", {
-              pluginName: this.manifest.name,
-              triggerSource: s,
-            })
-          );
-        }
-      } else if (step === 8) {
-        // last step
-        if (this.syncRibbon !== undefined) {
-          setIcon(this.syncRibbon, iconNameSyncWait);
-          const originLabel = `${this.manifest.name}`;
-          this.syncRibbon.setAttribute("aria-label", originLabel);
-        }
-      }
-    };
-
-    const statusBarFunc = async (
-      s: SyncTriggerSourceType,
-      step: number,
-      everythingOk: boolean
-    ) => {
-      if (step === 1) {
-        // change status to "syncing..." on statusbar
-        this.updateLastSyncMsg(s, "syncing", -1, -1);
-      } else if (step === 8 && everythingOk) {
-        const ts = Date.now();
-        await upsertLastSuccessSyncTimeByVault(this.db, this.vaultRandomID, ts);
-        this.updateLastSyncMsg(s, "not_syncing", ts, null); // hack: 'not_syncing'
-      } else if (!everythingOk) {
-        const ts = Date.now();
-        await upsertLastFailedSyncTimeByVault(this.db, this.vaultRandomID, ts);
-        this.updateLastSyncMsg(s, "not_syncing", null, ts);
-      }
-    };
-
-    const markIsSyncingFunc = async (isSyncing: boolean) => {
-      this.isSyncing = isSyncing;
-    };
-
-    const callbackSyncProcess = async (
-      s: SyncTriggerSourceType,
-      realCounter: number,
-      realTotalCount: number,
-      pathName: string,
-      decision: string
-    ) => {
-      this.setCurrSyncMsg(
-        t,
-        s,
-        realCounter,
-        realTotalCount,
-        pathName,
-        decision,
-        triggerSource
-      );
     };
 
     if (this.isSyncing) {
@@ -438,29 +224,14 @@ export default class RemotelySavePlugin extends Plugin {
     const configSaver = async () => await this.saveSettings();
 
     await syncer(
-      fsLocal,
-      fsRemote,
-      fsEncrypt,
-      profiler,
+      this.app,
       this.db,
-      triggerSource,
-      profileID,
-      this.vaultRandomID,
-      this.app.vault.configDir,
       this.settings,
-      this.manifest.version,
+      this.app.vault.getName(),
       configSaver,
-      getProtectError,
-      markIsSyncingFunc,
-      notifyFunc,
-      errNotifyFunc,
-      ribboonFunc,
-      statusBarFunc,
-      callbackSyncProcess
+      triggerSource,
+      getNotice
     );
-
-    fsEncrypt.closeResources();
-    (profiler as Profiler | undefined)?.clear();
 
     this.syncEvent?.trigger("SYNC_DONE");
   }
@@ -489,6 +260,26 @@ export default class RemotelySavePlugin extends Plugin {
     this.syncEvent = new Events();
 
     await this.loadSettings();
+
+    // Migration from "pro" to "officialAccount"
+    if ((this.settings as any).pro !== undefined) {
+      const oldPro = (this.settings as any).pro;
+      this.settings.officialAccount = {
+        email: oldPro.email,
+        refreshToken: oldPro.refreshToken,
+        accessToken: oldPro.accessToken,
+        accessTokenExpiresInMs: oldPro.accessTokenExpiresInMs,
+        accessTokenExpiresAtTimeMs: oldPro.accessTokenExpiresAtTimeMs,
+        enabledFeatures: oldPro.enabledProFeatures?.map((f: any) => ({
+          featureName: f.featureName,
+          enableAtTimeMs: f.enableAtTimeMs,
+          expireAtTimeMs: f.expireAtTimeMs,
+        })) || [],
+        credentialsShouldBeDeletedAtTimeMs: oldPro.credentialsShouldBeDeletedAtTimeMs,
+      };
+      delete (this.settings as any).pro;
+      await this.saveSettings();
+    }
 
     // MUST after loadSettings and before prepareDB
     const profileID: string = this.getCurrProfileID();
@@ -1027,14 +818,16 @@ export default class RemotelySavePlugin extends Plugin {
     if (this.settings.profiler === undefined) {
       this.settings.profiler = DEFAULT_PROFILER_CONFIG;
     }
-    if (this.settings.profiler.enable === undefined) {
-      this.settings.profiler.enable = false;
-    }
-    if (this.settings.profiler.enablePrinting === undefined) {
-      this.settings.profiler.enablePrinting = false;
-    }
-    if (this.settings.profiler.recordSize === undefined) {
-      this.settings.profiler.recordSize = false;
+    if (this.settings.profiler) {
+      if (this.settings.profiler.enable === undefined) {
+        this.settings.profiler.enable = false;
+      }
+      if (this.settings.profiler.enablePrinting === undefined) {
+        this.settings.profiler.enablePrinting = false;
+      }
+      if (this.settings.profiler.recordSize === undefined) {
+        this.settings.profiler.recordSize = false;
+      }
     }
 
     if (this.settings.googledrive === undefined) {
