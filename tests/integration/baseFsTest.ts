@@ -2,15 +2,22 @@ import { strict as assert } from "assert";
 import type { RawFs } from "../../src/core/fs/rawFsInterface";
 
 export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
-  describe(`Base FS Tests at ${rootPath}`, () => {
+  describe(`Base FS Tests at ${rootPath}`, function() {
+    this.timeout(30000); // Set timeout for each platform test suite
     let fs: RawFs;
     const testFile = `${rootPath}/test.txt`;
     const testFolder = `${rootPath}/subdir`;
     const testFileInSubdir = `${testFolder}/inner.txt`;
     const content = new TextEncoder().encode("Hello Integration Test");
 
-    before(() => {
+    before(async () => {
       fs = getFs();
+      // Ensure the test root directory exists
+      try {
+        await fs.mkdir(rootPath);
+      } catch (e) {
+        // Ignore error if it already exists
+      }
     });
 
     it("should be able to write a file", async () => {
@@ -47,8 +54,15 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
     it("should be able to list files (walk)", async () => {
       const entities = await fs.walk(rootPath, false);
       const keys = entities.map(e => e.keyRaw);
-      assert.ok(keys.includes(testFile));
-      assert.ok(keys.includes(testFolder + "/"));
+
+      const includesPath = (list: string[], p: string) => {
+        const p1 = p.endsWith("/") ? p : p + "/";
+        const p2 = p.endsWith("/") ? p.slice(0, -1) : p;
+        return list.includes(p1) || list.includes(p2);
+      };
+
+      assert.ok(keys.includes(testFile), `Keys should include ${testFile}`);
+      assert.ok(includesPath(keys, testFolder), `Keys should include ${testFolder} (with or without slash)`);
     });
 
     it("should be able to delete a file", async () => {

@@ -1,5 +1,11 @@
 import moment from "moment";
 import Module from "module";
+import dns from "node:dns";
+
+// Prefer IPv4 to avoid timeouts on broken IPv6 networks
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 // Mocking Obsidian APIs for Node.js environment
 const obsidianMock = {
@@ -18,12 +24,17 @@ const obsidianMock = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    const buffer = await response.arrayBuffer();
+    const text = new TextDecoder().decode(buffer);
+    let json = {};
+    try { json = JSON.parse(text); } catch (e) {}
+
     return {
       status: response.status,
       headers: Object.fromEntries(response.headers.entries()),
-      arrayBuffer: await response.arrayBuffer(),
-      json: async () => await response.json(),
-      text: async () => await response.text(),
+      arrayBuffer: buffer,
+      json: json,
+      text: text,
     };
   },
   Platform: {
@@ -53,7 +64,12 @@ const obsidianMock = {
     addDropdown(cb: any) { return this; }
     addToggle(cb: any) { return this; }
   },
-  requireApiVersion: (version: string) => true,
+  requireApiVersion: (version: string) => {
+    // Disable the Obsidian requestUrl patch for WebDAV integration tests
+    // so it uses the standard node-webdav request mechanism.
+    if (version === "0.13.26") return false;
+    return true;
+  },
   addIcon: () => {},
   setIcon: () => {},
 };
