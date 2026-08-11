@@ -186,7 +186,7 @@ export class FakeFsLocal extends FakeFs {
     return await this.stat(key);
   }
 
-  async readFile(key: string): Promise<ArrayBuffer> {
+  async readFile(key: string, _versionId?: string): Promise<ArrayBuffer> {
     return await this.vault.adapter.readBinary(key);
   }
 
@@ -194,7 +194,7 @@ export class FakeFsLocal extends FakeFs {
     return await this.vault.adapter.rename(key1, key2);
   }
 
-  async rm(key: string): Promise<void> {
+  async rm(key: string, _versionId?: string): Promise<void> {
     if (this.deleteToWhere === "obsidian") {
       await this.vault.adapter.trashLocal(key);
     } else {

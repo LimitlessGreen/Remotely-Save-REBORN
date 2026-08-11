@@ -343,7 +343,7 @@ export class FakeFsEncrypt extends FakeFs {
     }
   }
 
-  async readFile(key: string): Promise<ArrayBuffer> {
+  async readFile(key: string, versionId?: string): Promise<ArrayBuffer> {
     if (!this.hasCacheMap) {
       throw new Error("You have to build the cacheMap firstly for readFile");
     }
@@ -352,7 +352,7 @@ export class FakeFsEncrypt extends FakeFs {
       throw new Error(`no encrypted key ${key} before! cannot readFile`);
     }
 
-    const contentEnc = await this.innerFs.readFile(keyEnc);
+    const contentEnc = await this.innerFs.readFile(keyEnc, versionId);
     if (this.isPasswordEmpty()) {
       return contentEnc;
     } else {
@@ -363,7 +363,7 @@ export class FakeFsEncrypt extends FakeFs {
 
   async rename(key1: string, key2: string): Promise<void> {
     if (!this.hasCacheMap) {
-      throw new Error("You have to build the cacheMap firstly for readFile");
+      throw new Error("You have to build the cacheMap firstly for rename");
     }
     let key1Enc = this.cacheMapOrigToEnc[key1];
     if (key1Enc === undefined) {
@@ -386,7 +386,7 @@ export class FakeFsEncrypt extends FakeFs {
     return await this.innerFs.rename(key1Enc, key2Enc);
   }
 
-  async rm(key: string): Promise<void> {
+  async rm(key: string, versionId?: string): Promise<void> {
     if (!this.hasCacheMap) {
       throw new Error("You have to build the cacheMap firstly for rm");
     }
@@ -394,7 +394,27 @@ export class FakeFsEncrypt extends FakeFs {
     if (keyEnc === undefined) {
       throw new Error(`no encrypted key ${key} before! cannot rm`);
     }
-    return await this.innerFs.rm(keyEnc);
+    return await this.innerFs.rm(keyEnc, versionId);
+  }
+
+  async listVersions(key: string): Promise<Entity[]> {
+    if (!this.hasCacheMap) {
+      throw new Error("You have to build the cacheMap firstly for listVersions");
+    }
+    const keyEnc = this.cacheMapOrigToEnc[key];
+    if (keyEnc === undefined) {
+      throw new Error(`no encrypted key ${key} before!`);
+    }
+    if (!this.innerFs.listVersions) {
+      throw new Error("Versioning not supported");
+    }
+    const innerVersions = await this.innerFs.listVersions(keyEnc);
+    // Note: We don't decrypt content here, just return metadata
+    return innerVersions.map(v => ({
+      ...v,
+      key,
+      keyRaw: keyEnc,
+    }));
   }
 
   async checkConnect(callbackFunc?: any): Promise<boolean> {

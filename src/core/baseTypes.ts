@@ -3,7 +3,7 @@
  * To avoid circular dependency.
  */
 
-import type { LangTypeAndAuto } from "./i18n";
+import type { LangTypeAndAuto } from "./i18n/i18n";
 
 declare global {
   var DEFAULT_DROPBOX_APP_KEY: string;
@@ -42,7 +42,8 @@ export type SUPPORTED_SERVICES_TYPE =
   | "pcloud"
   | "yandexdisk"
   | "koofr"
-  | "azureblobstorage";
+  | "azureblobstorage"
+  | "nutstore";
 
 export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR = Exclude<
   SUPPORTED_SERVICES_TYPE,
@@ -244,6 +245,35 @@ export interface ProfilerConfig {
   recordSize?: boolean;
 }
 
+export const OFFICIAL_ACCOUNT_CLIENT_ID = global.DEFAULT_REMOTELYSAVE_CLIENT_ID;
+export const OFFICIAL_ACCOUNT_WEBSITE = global.DEFAULT_REMOTELYSAVE_WEBSITE;
+
+export type OFFICIAL_ACCOUNT_FEATURE_TYPE =
+  | "feature-smart_conflict"
+  | "feature-onedrive_full"
+  | "feature-google_drive"
+  | "feature-box"
+  | "feature-pcloud"
+  | "feature-yandex_disk"
+  | "feature-koofr"
+  | "feature-azure_blob_storage";
+
+export interface FeatureInfo {
+  featureName: OFFICIAL_ACCOUNT_FEATURE_TYPE;
+  enableAtTimeMs: number;
+  expireAtTimeMs: number;
+}
+
+export interface OfficialAccountConfig {
+  email?: string;
+  refreshToken?: string;
+  accessToken: string;
+  accessTokenExpiresInMs: number;
+  accessTokenExpiresAtTimeMs: number;
+  enabledFeatures: FeatureInfo[];
+  credentialsShouldBeDeletedAtTimeMs?: number;
+}
+
 export interface RemotelySavePluginSettings {
   s3: S3Config;
   webdav: WebdavConfig;
@@ -257,6 +287,9 @@ export interface RemotelySavePluginSettings {
   yandexdisk: YandexDiskConfig;
   koofr: KoofrConfig;
   azureblobstorage: AzureBlobStorageConfig;
+  nutstore?: WebdavConfig;
+
+  officialAccount?: OfficialAccountConfig;
 
   password: string;
   serviceType: SUPPORTED_SERVICES_TYPE;
@@ -314,6 +347,7 @@ export const COMMAND_URI = "remotely-save";
 export const COMMAND_CALLBACK = "remotely-save-cb";
 export const COMMAND_CALLBACK_ONEDRIVE = "remotely-save-cb-onedrive";
 export const COMMAND_CALLBACK_DROPBOX = "remotely-save-cb-dropbox";
+export const COMMAND_CALLBACK_GOOGLEDRIVE = "remotely-save-cb-googledrive";
 export const COMMAND_CALLBACK_ONEDRIVEFULL = "remotely-save-cb-onedrivefull";
 export const COMMAND_CALLBACK_BOX = "remotely-save-cb-box";
 export const COMMAND_CALLBACK_PCLOUD = "remotely-save-cb-pcloud";
@@ -386,6 +420,8 @@ export interface Entity {
   sizeRaw: number;
   hash?: string;
   etag?: string;
+  versionId?: string;
+  isLatest?: boolean;
   synthesizedFolder?: boolean;
   synthesizedFile?: boolean;
 }
@@ -412,6 +448,8 @@ export interface MixedEntity {
 
   sideNotes?: any;
 }
+
+export type SyncPlanType = Record<string, MixedEntity>;
 
 /**
  * @deprecated
