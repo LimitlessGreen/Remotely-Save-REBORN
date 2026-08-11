@@ -1,11 +1,14 @@
-import { GoogleDriveService } from "./googledrive";
-import { OneDriveService } from "./onedrive";
-import { BoxService } from "./box";
-import { PCloudService } from "./pcloud";
-import { S3Service } from "./s3";
-import { DropboxService } from "./dropbox";
-import { WebdavService } from "./webdav";
-import { WebdisService } from "./webdis";
+import { S3Service } from "./s3/S3Service";
+import { AzureService } from "./azure/AzureService";
+import { GoogleDriveService } from "./googledrive/GoogleDriveService";
+import { OneDriveService } from "./onedrive/OneDriveService";
+import { BoxService } from "./box/BoxService";
+import { PCloudService } from "./pcloud/PCloudService";
+import { YandexDiskService } from "./yandex/YandexService";
+import { KoofrService } from "./koofr/KoofrService";
+import { DropboxService } from "./dropbox/DropboxService";
+import { WebdavService } from "./webdav/WebdavService";
+import { WebdisService } from "./webdis/WebdisService";
 import type { CloudService } from "./serviceInterface";
 
 /**
@@ -17,10 +20,13 @@ export const SERVICES: CloudService[] = [
   OneDriveService,
   BoxService,
   PCloudService,
+  YandexDiskService,
+  KoofrService,
   S3Service,
   DropboxService,
   WebdavService,
   WebdisService,
+  AzureService,
 ];
 
 export function getServiceById(id: string): CloudService | undefined {

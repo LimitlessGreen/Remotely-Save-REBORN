@@ -1,6 +1,6 @@
 import { type App } from "obsidian";
 import type RemotelySavePlugin from "../main";
-import type { FakeFs } from "../fsAll";
+import type { FakeFs } from "../core/fs/fsAll";
 import type { SettingsSection } from "../ui/settingsManager";
 
 /**
