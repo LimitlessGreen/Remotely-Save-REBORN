@@ -34,12 +34,12 @@ if (isDropboxConfigured) {
         const now = Date.now();
 
         // Write first revision
-        const e1 = await fs.writeFile(key, content1.buffer, now);
+        const e1 = await fs.writeFile(key, content1.buffer, now, now);
         const v1Id = e1.versionId;
         assert.ok(v1Id, "Should have a rev ID for first write");
 
         // Write second revision (overwrite)
-        const e2 = await fs.writeFile(key, content2.buffer, now + 1000);
+        const e2 = await fs.writeFile(key, content2.buffer, now + 1000, now + 1000);
         const v2Id = e2.versionId;
         assert.ok(v2Id, "Should have a rev ID for second write");
         assert.notEqual(v1Id, v2Id, "Rev IDs should be different");

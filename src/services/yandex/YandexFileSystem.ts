@@ -86,7 +86,7 @@ class RawYandexDiskFs implements RawFs {
     return await res.arrayBuffer();
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, _mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     const link = await this.api!.getUploadLink(this.rootPath + fullPath, true);
     await fetch(link.href, { method: "PUT", body: content });

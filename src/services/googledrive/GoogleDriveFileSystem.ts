@@ -91,7 +91,7 @@ class RawGoogleDriveFs implements RawFs {
     return await this.api!.downloadFile(id);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     const existingId = await this.resolvePathToId(fullPath).catch(() => null);
 

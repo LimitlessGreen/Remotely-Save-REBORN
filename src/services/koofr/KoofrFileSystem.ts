@@ -93,7 +93,7 @@ class RawKoofrFs implements RawFs {
     return await this.api!.downloadFile(this.config.mountID, `/${this.rootPath}${fullPath}`);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, _mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     await this.api!.uploadFile(this.config.mountID, `/${this.rootPath}${fullPath}`, content);
     return {

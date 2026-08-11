@@ -85,7 +85,7 @@ class RawPCloudFs implements RawFs {
     return await this.api!.downloadFile(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, _mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     const name = fullPath.split("/").filter(Boolean).pop()!;
     const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/") + 1) || "/";

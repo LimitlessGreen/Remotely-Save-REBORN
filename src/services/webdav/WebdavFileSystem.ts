@@ -175,7 +175,7 @@ export class RawWebdavFs implements RawFs {
     return await this.stat(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     // Simplified: always full upload for now, or add logic for chunks if needed
     await this.client.putFileContents(fullPath, content, { overwrite: true });

@@ -253,7 +253,7 @@ export class RawDropboxFs implements RawFs {
     return await this.stat(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
     await this.ensureInited();
     const apiPath = this.fixPathForApi(fullPath);
     const mtimeStr = new Date(Math.floor(mtime / 1000.0) * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");

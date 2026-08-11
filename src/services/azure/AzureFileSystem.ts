@@ -55,7 +55,7 @@ class RawAzureFs implements RawFs {
     return await this.api.downloadBlob(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number): Promise<Entity> {
+  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
     const props = await this.api.uploadBlob(fullPath, content, mtime);
     return {
       key: fullPath,
