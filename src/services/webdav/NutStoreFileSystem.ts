@@ -7,7 +7,6 @@ import { requestUrl } from "obsidian";
 import type { FileStat } from "webdav";
 import Bottleneck from "bottleneck";
 import { DEFAULT_DB_NAME, DEFAULT_TBL_NUTSTORE_DELTA_CACHE } from "../../core/storage/localdb";
-import { isNil } from "lodash";
 import { dirname } from "path";
 
 interface DeltaCache {
@@ -71,7 +70,7 @@ export class NutStoreFileSystem extends WebdavFileSystem {
       });
       const parser = new XMLParser({ attributeNamePrefix: "", removeNSPrefix: true });
       const result = parser.parse(xml.text) as { response: DeltaResponse };
-      if (!isNil(result?.response?.cursor)) {
+      if (result?.response?.cursor != null) {
         result.response.cursor = result.response.cursor.toString();
       }
       if (result.response.delta) {

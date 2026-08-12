@@ -99,7 +99,15 @@ export class RawInternxtFs implements RawFs {
   }
 
   async walk(fullPath: string, partial: boolean): Promise<Entity[]> {
-    const folderId = await this.getFolderId(fullPath);
+    let folderId: string;
+    try {
+      folderId = await this.getFolderId(fullPath);
+    } catch (e: any) {
+      if (e.message.includes("Folder not found")) {
+        return [];
+      }
+      throw e;
+    }
     const contents = await this.client.getFolderContents(folderId);
 
     const entities: Entity[] = [];

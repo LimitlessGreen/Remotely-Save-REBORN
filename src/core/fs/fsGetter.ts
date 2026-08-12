@@ -14,7 +14,8 @@ import { getServiceById } from "../../services/serviceRegistry";
 export function getClient(
   settings: RemotelySavePluginSettings,
   vaultName: string,
-  saveUpdatedConfigFunc: () => Promise<any>
+  saveUpdatedConfigFunc: () => Promise<any>,
+  manifest?: { id: string; version: string }
 ): FakeFs {
   if (settings.serviceType === "s3") {
     return new S3FileSystem(settings.s3);
@@ -35,7 +36,7 @@ export function getClient(
   const service = getServiceById(settings.serviceType);
   if (service) {
     // For now, we pass the proxy plugin object if needed, but let's assume standard access
-    return service.getProvider({ settings, saveSettings: saveUpdatedConfigFunc } as any, { vault: { getName: () => vaultName } } as any);
+    return service.getProvider({ settings, saveSettings: saveUpdatedConfigFunc, manifest } as any, { vault: { getName: () => vaultName } } as any);
   }
 
   throw Error(`ServiceType=${settings.serviceType} not supported.`);

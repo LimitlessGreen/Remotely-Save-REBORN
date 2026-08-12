@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "es6",
+    "target": "ESNext",
     "strict": true,
     "allowJs": true,
     "noImplicitAny": true,
@@ -14,11 +13,12 @@
     "esModuleInterop": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["dom", "es5", "scripthost", "es2015", "webworker"],
+    "lib": ["DOM", "ESNext", "WebWorker"],
+    "types": ["mocha", "node"],
     "paths": {
-      "@fyears/rclone-crypt": ["libs/rclone-crypt/src/index"],
-      "@fyears/tsqueue": ["libs/tsqueue/src/index"],
-      "@fyears/eme": ["libs/eme/src/index"]
+      "@fyears/rclone-crypt": ["./libs/rclone-crypt/src/index"],
+      "@fyears/tsqueue": ["./libs/tsqueue/src/index"],
+      "@fyears/eme": ["./libs/eme/src/index"]
     }
   },
   "include": ["src/global.d.ts", "src/**/*.ts", "libs/**/*.ts", "tests/**/*.ts"]

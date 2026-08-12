@@ -29,12 +29,26 @@ export const SERVICES: CloudService[] = [
   WebdavService,
   WebdisService,
   AzureService,
-];
+].filter(s => {
+  if (s === undefined) {
+    console.warn("A service in registry is undefined! This is likely a circular dependency issue.");
+    return false;
+  }
+  if (s.id === undefined) {
+    console.error("A service in registry has an undefined id!", s);
+    return false;
+  }
+  return true;
+});
 
 export function getServiceById(id: string): CloudService | undefined {
-  return SERVICES.find(s => s.id === id || (id === "onedrivefull" && s.id === "onedrive"));
+  if (SERVICES.some(s => s === undefined)) {
+    console.warn("Some services in registry are undefined! This usually indicates a circular dependency.");
+    console.debug("SERVICES array:", SERVICES);
+  }
+  return SERVICES.find(s => s && (s.id === id || (id === "onedrivefull" && s.id === "onedrive")));
 }
 
 export function getServiceByCallbackId(callbackId: string): CloudService | undefined {
-  return SERVICES.find(s => s.callbackId === callbackId);
+  return SERVICES.find(s => s && s.callbackId === callbackId);
 }

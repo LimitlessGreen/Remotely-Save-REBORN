@@ -5,7 +5,7 @@ import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
 export class AzureSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {
     const root = containerEl.createDiv({ cls: "azure-settings-section" });
-    root.toggleClass("azure-hide", this.plugin.settings.serviceType !== "azureblobstorage");
+    root.toggleClass("azureblobstorage-hide", this.plugin.settings.serviceType !== "azureblobstorage");
 
     this.addHeader(root, this.t("settings_azureblobstorage"));
     this.addDescription(root, this.t("settings_azureblobstorage_disclaimer1"));

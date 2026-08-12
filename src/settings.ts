@@ -176,6 +176,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           "azureblobstorage",
           t("settings_chooseservice_azureblobstorage")
         );
+        dropdown.addOption("internxt", t("settings_chooseservice_internxt"));
 
         dropdown
           .setValue(this.plugin.settings.serviceType)

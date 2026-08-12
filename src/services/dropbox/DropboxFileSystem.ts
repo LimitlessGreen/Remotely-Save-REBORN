@@ -1,6 +1,5 @@
 import { Dropbox, DropboxAuth } from "dropbox";
 import type { DropboxResponse, DropboxResponseError, files } from "dropbox";
-import random from "lodash/random";
 import {
   COMMAND_CALLBACK_DROPBOX,
   DROPBOX_APP_KEY,
@@ -124,7 +123,7 @@ async function retryReq<T>(reqFunc: () => Promise<DropboxResponse<T>>, extraHint
       const headers = isNetworkErr ? {} : headersToRecord(e.headers);
       const svrSec = e.error?.error?.retry_after || Number.parseInt(headers["retry-after"] || "1") || 1;
       const secMin = Math.max(svrSec, waitSeconds[idx]);
-      await delay(random(secMin * 1000, secMin * 1.8 * 1000));
+      await delay(Math.floor(Math.random() * (secMin * 0.8 * 1000 + 1)) + secMin * 1000);
     }
   }
   throw Error("Retry failed");

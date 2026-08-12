@@ -1,4 +1,3 @@
-import cloneDeep from "lodash/cloneDeep";
 import { type App, Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
 import type { FeatureInfo, OfficialAccountConfig as AccountConfig } from "../../core/baseTypes";
@@ -100,7 +99,7 @@ export class AccountSettingsManager extends BaseSettingsManager {
       .addButton(btn => btn
         .setButtonText(t("settings_pro_revoke_button"))
         .onClick(async () => {
-          plugin.settings.officialAccount = cloneDeep(DEFAULT_ACCOUNT_CONFIG);
+          plugin.settings.officialAccount = structuredClone(DEFAULT_ACCOUNT_CONFIG);
           await plugin.saveSettings();
           this.refreshVisibility(authDiv, revokeDiv);
         })

@@ -13,52 +13,55 @@ export const DEFAULT_INTERNXT_CONFIG = {
 
 export class InternxtSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {
+    const { t } = this;
     const root = containerEl.createDiv({ cls: "internxt-settings-section" });
     root.toggleClass("internxt-hide", this.plugin.settings.serviceType !== "internxt");
 
-    this.addHeader(root, "Internxt Settings");
+    this.addHeader(root, t("settings_internxt"));
 
     this.addDirectorySetting(root);
     this.addAuthSection(root);
   }
 
   private addDirectorySetting(el: HTMLElement) {
+    const { t } = this;
     let dir = this.plugin.settings.internxt?.remoteBaseDir || "";
     new Setting(el)
-      .setName("Remote Base Directory")
+      .setName(t("settings_internxt_folder"))
       .addText(text => text
         .setValue(dir)
         .onChange(v => dir = v.trim())
       )
       .addButton(btn => btn
-        .setButtonText("Confirm")
+        .setButtonText(t("confirm"))
         .onClick(async () => {
           if (!this.plugin.settings.internxt) {
             this.plugin.settings.internxt = { ...DEFAULT_INTERNXT_CONFIG };
           }
           this.plugin.settings.internxt.remoteBaseDir = dir;
           await this.plugin.saveSettings();
-          new Notice("Remote base directory updated");
+          new Notice(t("settings_internxt_folder_notice"));
         })
       );
   }
 
   private addAuthSection(el: HTMLElement) {
+    const { t } = this;
     const area = el.createDiv();
     const refresh = () => {
       area.empty();
       const linked = !!this.plugin.settings.internxt?.token;
       new Setting(area)
-        .setName(linked ? "Revoke Internxt" : "Connect to Internxt")
+        .setName(linked ? t("settings_internxt_revoke") : t("settings_internxt_connect"))
         .addButton(btn => btn
-          .setButtonText(linked ? "Revoke" : "Connect")
+          .setButtonText(linked ? t("settings_internxt_revoke_button") : t("settings_internxt_connect_button"))
           .onClick(async () => {
             if (linked) {
               this.plugin.settings.internxt = { ...DEFAULT_INTERNXT_CONFIG };
               await this.plugin.saveSettings();
               refresh();
             } else {
-              new InternxtLoginModal(this.app, this.plugin, () => refresh()).open();
+              new InternxtLoginModal(this.app, this.plugin, t, () => refresh()).open();
             }
           })
         );
@@ -71,20 +74,20 @@ class InternxtLoginModal extends Modal {
   private email = "";
   private password = "";
 
-  constructor(app: App, private plugin: RemotelySavePlugin, private callback: () => void) {
+  constructor(app: App, private plugin: RemotelySavePlugin, private t: any, private callback: () => void) {
     super(app);
   }
 
   onOpen() {
-    const { contentEl } = this;
-    contentEl.createEl("h2", { text: "Login to Internxt" });
+    const { contentEl, t } = this;
+    contentEl.createEl("h2", { text: t("settings_internxt_login_title") });
 
     new Setting(contentEl)
-      .setName("Email")
+      .setName(t("settings_internxt_email"))
       .addText(text => text.onChange(v => this.email = v));
 
     new Setting(contentEl)
-      .setName("Password")
+      .setName(t("settings_internxt_password"))
       .addText(text => {
         text.inputEl.type = "password";
         text.onChange(v => this.password = v);
@@ -92,7 +95,7 @@ class InternxtLoginModal extends Modal {
 
     new Setting(contentEl)
       .addButton(btn => btn
-        .setButtonText("Login")
+        .setButtonText(t("settings_internxt_login_button"))
         .setCta()
         .onClick(async () => {
           try {
@@ -114,12 +117,12 @@ class InternxtLoginModal extends Modal {
             };
 
             await this.plugin.saveSettings();
-            new Notice("Connected to Internxt!");
+            new Notice(t("settings_internxt_connect_succ"));
             this.callback();
             this.close();
           } catch (e: any) {
             console.error(e);
-            new Notice(`Login failed: ${e.message}`);
+            new Notice(`${t("settings_internxt_login_button")} failed: ${e.message}`);
           }
         })
       );

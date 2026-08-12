@@ -1,4 +1,3 @@
-import cloneDeep from "lodash/cloneDeep";
 import { type App, Modal, Notice, Setting } from "obsidian";
 import { BaseSettingsManager } from "../settingsManager";
 import type { QRExportType } from "../../core/baseTypes";
@@ -214,7 +213,7 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
               if (parsed.status === "error") {
                 new Notice(parsed.message);
               } else {
-                const copied = cloneDeep(parsed.result);
+                const copied = structuredClone(parsed.result);
                 plugin.settings = Object.assign(
                   {},
                   plugin.settings,

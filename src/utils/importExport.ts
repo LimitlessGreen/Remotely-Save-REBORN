@@ -1,4 +1,3 @@
-import cloneDeep from "lodash/cloneDeep";
 import QRCode from "qrcode";
 
 import { getShrinkedSettings } from "../services/onedrive/OneDriveFileSystem";
@@ -18,7 +17,7 @@ export const exportQrCodeUri = async (
   let settings2: Partial<RemotelySavePluginSettings> = {};
 
   if (exportFields === "basic_and_advanced") {
-    settings2 = cloneDeep(settings);
+    settings2 = structuredClone(settings);
     delete settings2.s3;
     delete settings2.dropbox;
     delete settings2.onedrive;
@@ -33,9 +32,9 @@ export const exportQrCodeUri = async (
     delete settings2.azureblobstorage;
     delete settings2.officialAccount;
   } else if (exportFields === "s3") {
-    settings2 = { s3: cloneDeep(settings.s3) };
+    settings2 = { s3: structuredClone(settings.s3) };
   } else if (exportFields === "dropbox") {
-    settings2 = { dropbox: cloneDeep(settings.dropbox) };
+    settings2 = { dropbox: structuredClone(settings.dropbox) };
   } else if (exportFields === "onedrive") {
     settings2 = { onedrive: getShrinkedSettings(settings.onedrive) };
   } else if (exportFields === "onedrivefull") {
@@ -43,21 +42,21 @@ export const exportQrCodeUri = async (
       onedrivefull: getShrinkedSettings(settings.onedrivefull),
     };
   } else if (exportFields === "webdav") {
-    settings2 = { webdav: cloneDeep(settings.webdav) };
+    settings2 = { webdav: structuredClone(settings.webdav) };
   } else if (exportFields === "webdis") {
-    settings2 = { webdis: cloneDeep(settings.webdis) };
+    settings2 = { webdis: structuredClone(settings.webdis) };
   } else if (exportFields === "googledrive") {
-    settings2 = { googledrive: cloneDeep(settings.googledrive) };
+    settings2 = { googledrive: structuredClone(settings.googledrive) };
   } else if (exportFields === "box") {
-    settings2 = { box: cloneDeep(settings.box) };
+    settings2 = { box: structuredClone(settings.box) };
   } else if (exportFields === "pcloud") {
-    settings2 = { pcloud: cloneDeep(settings.pcloud) };
+    settings2 = { pcloud: structuredClone(settings.pcloud) };
   } else if (exportFields === "yandexdisk") {
-    settings2 = { yandexdisk: cloneDeep(settings.yandexdisk) };
+    settings2 = { yandexdisk: structuredClone(settings.yandexdisk) };
   } else if (exportFields === "koofr") {
-    settings2 = { koofr: cloneDeep(settings.koofr) };
+    settings2 = { koofr: structuredClone(settings.koofr) };
   } else if (exportFields === "azureblobstorage") {
-    settings2 = { azureblobstorage: cloneDeep(settings.azureblobstorage) };
+    settings2 = { azureblobstorage: structuredClone(settings.azureblobstorage) };
   }
 
   delete settings2.vaultRandomID;

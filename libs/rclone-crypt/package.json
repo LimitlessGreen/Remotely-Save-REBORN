@@ -29,8 +29,7 @@
     "npm-check-updates": "^16.14.17",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.3"
+    "tsx": "^4.7.1"
   },
   "dependencies": {
     "@fyears/eme": "file:../eme",

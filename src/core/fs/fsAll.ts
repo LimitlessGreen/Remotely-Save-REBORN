@@ -1,4 +1,4 @@
-import isEqual from "lodash/isEqual";
+import { isDeepEqual } from "../../utils/misc";
 import { nanoid } from "nanoid";
 import type { Entity } from "../baseTypes";
 
@@ -44,7 +44,7 @@ export abstract class FakeFs {
 
       console.info(`check connect: download file`);
       const content3 = await this.readFile(filename);
-      if (!isEqual(content2, content3)) {
+      if (!isDeepEqual(content2, content3)) {
         throw Error(`downloaded file is not equal with uploaded file!`);
       }
       // await delay(3000);

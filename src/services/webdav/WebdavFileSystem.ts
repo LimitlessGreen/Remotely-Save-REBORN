@@ -1,12 +1,10 @@
 import { Buffer } from "buffer";
 import { Queue } from "@fyears/tsqueue";
-import chunk from "lodash/chunk";
-import flatten from "lodash/flatten";
 import { Platform, requestUrl, type RequestUrlParam } from "obsidian";
 import type { FileStat, WebDAVClient } from "webdav";
 import type { Entity, WebdavConfig } from "../../core/baseTypes";
 import { VALID_REQURL } from "../../core/baseTypesObs";
-import { bufferToArrayBuffer, splitFileSizeToChunkRanges } from "../../utils/misc";
+import { bufferToArrayBuffer, chunk, splitFileSizeToChunkRanges } from "../../utils/misc";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
 

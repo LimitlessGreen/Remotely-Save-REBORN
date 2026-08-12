@@ -2,7 +2,6 @@ import type { CipherMethodType, Entity } from "../baseTypes";
 import * as openssl from "../../logic/encryption/providers/openssl";
 import { isSpecialFolderNameToSkip } from "../../utils/misc";
 
-import cloneDeep from "lodash/cloneDeep";
 import { FakeFs } from "./fsAll";
 import { type EncryptionProvider } from "../../logic/encryption/interface";
 import { getEncryptionProvider } from "../../logic/encryption/factory";
@@ -65,7 +64,7 @@ export interface PasswordCheckType {
  * Useful if isPasswordEmpty()
  */
 function copyEntityAndCopyKeyEncSizeEnc(entity: Entity) {
-  const res = cloneDeep(entity);
+  const res = structuredClone(entity);
   res["keyEnc"] = res["keyRaw"];
   res["sizeEnc"] = res["sizeRaw"];
   return res;
@@ -438,7 +437,7 @@ export class FakeFsEncrypt extends FakeFs {
     }
 
     // below is for having password
-    const local = cloneDeep(input);
+    const local = structuredClone(input);
     if (local.sizeEnc === undefined && local.size !== undefined) {
       // it's not filled yet, we fill it
       // local.size is possibly undefined if it's "prevSync" Entity

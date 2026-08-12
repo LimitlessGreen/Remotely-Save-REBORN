@@ -54,8 +54,6 @@ export class InternxtClient {
   private clientName: string;
   private clientVersion: string;
 
-  private readonly BASE_URL = 'https://gateway.internxt.com/drive';
-
   constructor(
     config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string },
     appDetails: { clientName: string; clientVersion: string } = { clientName: 'remotely-save', clientVersion: '1.0.0' }
@@ -85,15 +83,6 @@ export class InternxtClient {
         appDetails: sdkAppDetails
       });
     }
-  }
-
-  private get headers() {
-    return {
-      'Authorization': `Bearer ${this.config?.token}`,
-      'Content-Type': 'application/json',
-      'internxt-client': this.clientName,
-      'internxt-version': this.clientVersion
-    };
   }
 
   private async retryReq<T>(reqFunc: () => Promise<T>): Promise<T> {
@@ -141,97 +130,72 @@ export class InternxtClient {
   }
 
   async getFolderContents(folderUuid: string): Promise<any> {
+    if (!this.storage) throw new Error('Not authenticated');
     return this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/folders/content/${folderUuid}`, {
-        headers: this.headers
-      });
-      if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(`Get folder contents failed (${resp.status}): ${text}`);
-      }
-      return await resp.json();
+      const [promise] = this.storage!.getFolderContentByUuid({ folderUuid });
+      return await promise;
     });
   }
 
   async getFolderMeta(folderUuid: string): Promise<any> {
+    if (!this.storage) throw new Error('Not authenticated');
     return this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/folders/${folderUuid}/meta`, {
-        headers: this.headers
-      });
-      if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(`Get folder meta failed (${resp.status}): ${text}`);
-      }
-      return await resp.json();
+      return await this.storage!.getFolderMeta(folderUuid);
     });
   }
 
   async createFolder(parentFolderUuid: string, name: string): Promise<any> {
-    if (!this.config) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error('Not authenticated');
     return this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/folders`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({
+      try {
+        const [promise] = this.storage!.createFolderByUuid({
           plainName: name,
           parentFolderUuid
-        })
-      });
-
-      if (!resp.ok) {
-        if (resp.status === 409 || resp.status === 422) {
+        });
+        return await promise;
+      } catch (e: any) {
+        if (e.status === 409 || e.status === 422) {
           const contents = await this.getFolderContents(parentFolderUuid);
           const existing = contents.children?.find((c: any) => (c.plainName || c.name) === name);
           if (existing) return existing;
         }
-        const text = await resp.text();
-        throw new Error(`Create folder failed (${resp.status}): ${text}`);
+        throw e;
       }
-      return await resp.json();
     });
   }
 
   async deleteFile(fileUuid: string): Promise<void> {
+    if (!this.storage) throw new Error('Not authenticated');
     await this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/files/${fileUuid}`, {
-        method: 'DELETE',
-        headers: this.headers
-      });
-      if (!resp.ok && resp.status !== 404) {
-        const text = await resp.text();
-        throw new Error(`Delete file failed (${resp.status}): ${text}`);
+      try {
+        await this.storage!.deleteFileByUuid(fileUuid);
+      } catch (e: any) {
+        if (e.status !== 404) throw e;
       }
     });
   }
 
   async deleteFolder(folderUuid: string): Promise<void> {
+    if (!this.storage) throw new Error('Not authenticated');
     await this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/folders/${folderUuid}`, {
-        method: 'DELETE',
-        headers: this.headers
-      });
-      if (!resp.ok && resp.status !== 404) {
-        const text = await resp.text();
-        throw new Error(`Delete folder failed (${resp.status}): ${text}`);
+      try {
+        await this.storage!.deleteFolderByUuid(folderUuid);
+      } catch (e: any) {
+        if (e.status !== 404) throw e;
       }
     });
   }
 
   async getFileMeta(fileUuid: string): Promise<any> {
+    if (!this.storage) throw new Error('Not authenticated');
     return this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/files/${fileUuid}/meta`, {
-        headers: this.headers
-      });
-      if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(`Get file meta failed (${resp.status}): ${text}`);
-      }
-      return await resp.json();
+      const [promise] = this.storage!.getFile(fileUuid);
+      return await promise;
     });
   }
 
   async uploadFile(parentFolderUuid: string, filename: string, content: Buffer, size: number, mtime?: number, ctime?: number): Promise<any> {
-    if (!this.network || !this.config) throw new Error('Not authenticated');
+    if (!this.network || !this.config || !this.storage) throw new Error('Not authenticated');
 
     const bucketId = this.config.bucketId;
     const source = Readable.from(content);
@@ -245,7 +209,7 @@ export class InternxtClient {
     const payload = {
       bucket: bucketId,
       fileId: networkFileId,
-      encryptVersion: '03-aes',
+      encryptVersion: '03-aes' as any,
       folderUuid: parentFolderUuid,
       size: size,
       plainName: filename,
@@ -255,17 +219,7 @@ export class InternxtClient {
     };
 
     return this.retryReq(async () => {
-      const resp = await fetch(`${this.BASE_URL}/files`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(payload)
-      });
-
-      if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(`Create file entry failed (${resp.status}): ${text}`);
-      }
-      return await resp.json();
+      return await this.storage!.createFileEntryByUuid(payload);
     });
   }
 

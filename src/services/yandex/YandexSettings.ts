@@ -5,7 +5,7 @@ import { DEFAULT_YANDEXDISK_CONFIG, generateAuthUrl } from "./YandexFileSystem";
 export class YandexDiskSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {
     const root = containerEl.createDiv({ cls: "yandex-settings-section" });
-    root.toggleClass("yandex-hide", this.plugin.settings.serviceType !== "yandexdisk");
+    root.toggleClass("yandexdisk-hide", this.plugin.settings.serviceType !== "yandexdisk");
 
     this.addHeader(root, this.t("settings_yandexdisk"));
     this.addDescription(root, this.t("settings_yandexdisk_disclaimer1"));

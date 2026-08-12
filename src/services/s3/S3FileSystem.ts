@@ -23,7 +23,6 @@ import {
 import { requestTimeout } from "@smithy/fetch-http-handler/dist-es/request-timeout";
 import { type HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
-import AggregateError from "aggregate-error";
 import * as mime from "mime-types";
 import { requestUrl, type RequestUrlParam } from "obsidian";
 import PQueue from "p-queue";

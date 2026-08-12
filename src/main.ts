@@ -1,7 +1,4 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
-import AggregateError from "aggregate-error";
-import cloneDeep from "lodash/cloneDeep";
-import throttle from "lodash/throttle";
 import { FileText, RefreshCcw, RotateCcw, createElement } from "lucide";
 import {
   Events,
@@ -16,6 +13,7 @@ import {
   requireApiVersion,
   setIcon,
 } from "obsidian";
+import { throttle } from "./utils/misc";
 import { SERVICES } from "./services/serviceRegistry";
 import { syncer } from "./logic/sync/sync";
 import type {
@@ -179,7 +177,7 @@ const getStatusBarShortMsgFromSyncSource = (
 };
 
 export default class RemotelySavePlugin extends Plugin {
-  settings!: RemotelySavePluginSettings;
+  declare settings: RemotelySavePluginSettings;
   db!: InternalDBs;
   isSyncing!: boolean;
   hasPendingSyncOnSave!: boolean;
@@ -229,17 +227,38 @@ export default class RemotelySavePlugin extends Plugin {
 
     const configSaver = async () => await this.saveSettings();
 
-    await syncer(
-      this.app,
-      this.db,
-      this.settings,
-      this.app.vault.getName(),
-      configSaver,
-      triggerSource,
-      getNotice
-    );
+    this.isSyncing = true;
+    this.currSyncMsg = t("syncrun_shortstep1", { serviceType: this.settings.serviceType });
+    getNotice(triggerSource, this.currSyncMsg);
 
-    this.syncEvent?.trigger("SYNC_DONE");
+    try {
+      await syncer(
+        this.app,
+        this.db,
+        this.settings,
+        this.app.vault.getName(),
+        configSaver,
+        triggerSource,
+        getNotice,
+        this.manifest
+      );
+      this.currSyncMsg = t("syncrun_shortstep2");
+      getNotice(triggerSource, this.currSyncMsg);
+    } catch (err: any) {
+      console.error("Sync error caught in syncRun:", err);
+      console.error("Stack trace:", err.stack);
+      this.currSyncMsg = t("syncrun_abort", {
+        manifestID: this.manifest?.id || "unknown",
+        theDate: new Date().toISOString(),
+        triggerSource: triggerSource,
+        syncStatus: "failed",
+      });
+      getNotice(triggerSource, this.currSyncMsg);
+    } finally {
+      this.isSyncing = false;
+      this.currSyncMsg = "";
+      this.syncEvent?.trigger("SYNC_DONE");
+    }
   }
 
   async onload() {
@@ -338,7 +357,7 @@ export default class RemotelySavePlugin extends Plugin {
       if (parsed.status === "error") {
         new Notice(parsed.message);
       } else {
-        const copied = cloneDeep(parsed.result);
+        const copied = structuredClone(parsed.result);
         // new Notice(JSON.stringify(copied))
         this.settings = Object.assign({}, this.settings, copied);
         this.saveSettings();
@@ -450,11 +469,9 @@ export default class RemotelySavePlugin extends Plugin {
     );
 
     for (const service of SERVICES) {
-      if (service.callbackId) {
+      if (service.callbackId && service.handleCallback) {
         this.registerObsidianProtocolHandler(service.callbackId, async (params) => {
-          if (service.handleCallback) {
-            await service.handleCallback(this, params);
-          }
+          await service.handleCallback!(this, params);
         });
       }
     }
@@ -689,7 +706,7 @@ export default class RemotelySavePlugin extends Plugin {
   async loadSettings() {
     this.settings = Object.assign(
       {},
-      cloneDeep(DEFAULT_SETTINGS),
+      structuredClone(DEFAULT_SETTINGS),
       messyConfigToNormal(await this.loadData())
     );
 
@@ -915,7 +932,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`dropbox expired`);
       dropboxExpired = true;
-      this.settings.dropbox = cloneDeep(DEFAULT_DROPBOX_CONFIG);
+      this.settings.dropbox = structuredClone(DEFAULT_DROPBOX_CONFIG);
       needSave = true;
     }
 
@@ -926,7 +943,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`onedrive expired`);
       onedriveExpired = true;
-      this.settings.onedrive = cloneDeep(DEFAULT_ONEDRIVE_CONFIG);
+      this.settings.onedrive = structuredClone(DEFAULT_ONEDRIVE_CONFIG);
       needSave = true;
     }
 
@@ -937,7 +954,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`onedrive full expired`);
       onedriveFullExpired = true;
-      this.settings.onedrivefull = cloneDeep(DEFAULT_ONEDRIVEFULL_CONFIG);
+      this.settings.onedrivefull = structuredClone(DEFAULT_ONEDRIVEFULL_CONFIG);
       needSave = true;
     }
 
@@ -948,7 +965,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`google drive expired`);
       googleDriveExpired = true;
-      this.settings.googledrive = cloneDeep(DEFAULT_GOOGLEDRIVE_CONFIG);
+      this.settings.googledrive = structuredClone(DEFAULT_GOOGLEDRIVE_CONFIG);
       needSave = true;
     }
 
@@ -959,7 +976,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`box expired`);
       boxExpired = true;
-      this.settings.box = cloneDeep(DEFAULT_BOX_CONFIG);
+      this.settings.box = structuredClone(DEFAULT_BOX_CONFIG);
       needSave = true;
     }
 
@@ -970,7 +987,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`pcloud expired`);
       pCloudExpired = true;
-      this.settings.pcloud = cloneDeep(DEFAULT_PCLOUD_CONFIG);
+      this.settings.pcloud = structuredClone(DEFAULT_PCLOUD_CONFIG);
       needSave = true;
     }
 
@@ -981,7 +998,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`yandex disk expired`);
       yandexDiskExpired = true;
-      this.settings.yandexdisk = cloneDeep(DEFAULT_YANDEXDISK_CONFIG);
+      this.settings.yandexdisk = structuredClone(DEFAULT_YANDEXDISK_CONFIG);
       needSave = true;
     }
 
@@ -992,7 +1009,7 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       console.warn(`koofr expired`);
       koofrExpired = true;
-      this.settings.koofr = cloneDeep(DEFAULT_KOOFR_CONFIG);
+      this.settings.koofr = structuredClone(DEFAULT_KOOFR_CONFIG);
       needSave = true;
     }
 

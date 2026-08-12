@@ -11,6 +11,78 @@ declare global {
   }
 }
 
+export function chunk<T>(array: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
+export function isDeepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+
+  if (a instanceof ArrayBuffer && b instanceof ArrayBuffer) {
+    if (a.byteLength !== b.byteLength) return false;
+    const view1 = new Uint8Array(a);
+    const view2 = new Uint8Array(b);
+    for (let i = 0; i < view1.length; i++) {
+      if (view1[i] !== view2[i]) return false;
+    }
+    return true;
+  }
+
+  if (
+    typeof a !== "object" ||
+    a === null ||
+    typeof b !== "object" ||
+    b === null
+  ) {
+    return false;
+  }
+
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  if (keysA.length !== keysB.length) return false;
+
+  for (const key of keysA) {
+    if (!keysB.includes(key) || !isDeepEqual(a[key], b[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+  options: { leading?: boolean; trailing?: boolean } = {}
+): (...args: Parameters<T>) => void {
+  let timeout: any = null;
+  let previous = 0;
+  return function (this: any, ...args: Parameters<T>) {
+    const now = Date.now();
+    if (!previous && options.leading === false) previous = now;
+    const remaining = wait - (now - previous);
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      previous = now;
+      func.apply(this, args);
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout(() => {
+        previous = options.leading === false ? 0 : Date.now();
+        timeout = null;
+        func.apply(this, args);
+      }, remaining);
+    }
+  };
+}
+
 /**
  * If any part of the file starts with '.' or '_' then it's a hidden file.
  * @param item
