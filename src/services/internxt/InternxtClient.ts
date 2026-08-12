@@ -3,7 +3,6 @@ import { Environment } from '@internxt/inxt-js';
 import { EncryptFilename, DecryptFileName } from '@internxt/inxt-js/build/lib/utils/crypto/crypto';
 import CryptoJS from 'crypto-js';
 import { Readable } from 'stream';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Custom Internxt Crypto Provider
