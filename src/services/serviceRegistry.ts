@@ -5,6 +5,7 @@ import { OneDriveService } from "./onedrive/OneDriveService";
 import { BoxService } from "./box/BoxService";
 import { PCloudService } from "./pcloud/PCloudService";
 import { YandexDiskService } from "./yandex/YandexService";
+import { InternxtService } from "./internxt/InternxtService";
 import { KoofrService } from "./koofr/KoofrService";
 import { DropboxService } from "./dropbox/DropboxService";
 import { WebdavService } from "./webdav/WebdavService";
@@ -21,6 +22,7 @@ export const SERVICES: CloudService[] = [
   BoxService,
   PCloudService,
   YandexDiskService,
+  InternxtService,
   KoofrService,
   S3Service,
   DropboxService,

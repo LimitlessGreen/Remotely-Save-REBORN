@@ -84,6 +84,12 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   yandexdisk: DEFAULT_YANDEXDISK_CONFIG,
   koofr: DEFAULT_KOOFR_CONFIG,
   azureblobstorage: DEFAULT_AZUREBLOBSTORAGE_CONFIG,
+  internxt: {
+    email: "",
+    token: "",
+    mnemonic: "",
+    kind: "internxt",
+  },
   officialAccount: undefined,
   password: "",
   serviceType: "s3",

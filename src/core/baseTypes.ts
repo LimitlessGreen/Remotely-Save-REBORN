@@ -43,6 +43,7 @@ export type SUPPORTED_SERVICES_TYPE =
   | "yandexdisk"
   | "koofr"
   | "azureblobstorage"
+  | "internxt"
   | "nutstore";
 
 export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR = Exclude<
@@ -204,6 +205,18 @@ export interface KoofrConfig {
 export const KOOFR_CLIENT_ID = global.DEFAULT_KOOFR_CLIENT_ID;
 export const KOOFR_CLIENT_SECRET = global.DEFAULT_KOOFR_CLIENT_SECRET;
 
+export interface InternxtConfig {
+  email: string;
+  token: string;
+  mnemonic: string;
+  rootFolderUuid?: string;
+  bucketId?: string;
+  bridgeUser?: string;
+  userId?: string;
+  remoteBaseDir?: string;
+  kind: "internxt";
+}
+
 export interface AzureBlobStorageConfig {
   containerSasUrl: string;
   containerName: string;
@@ -287,6 +300,7 @@ export interface RemotelySavePluginSettings {
   yandexdisk: YandexDiskConfig;
   koofr: KoofrConfig;
   azureblobstorage: AzureBlobStorageConfig;
+  internxt: InternxtConfig;
   nutstore?: WebdavConfig;
 
   officialAccount?: OfficialAccountConfig;
@@ -353,6 +367,7 @@ export const COMMAND_CALLBACK_BOX = "remotely-save-cb-box";
 export const COMMAND_CALLBACK_PCLOUD = "remotely-save-cb-pcloud";
 export const COMMAND_CALLBACK_YANDEXDISK = "remotely-save-cb-yandexdisk";
 export const COMMAND_CALLBACK_KOOFR = "remotely-save-cb-koofr";
+export const COMMAND_CALLBACK_INTERNXT = "remotely-save-cb-internxt";
 export const COMMAND_CALLBACK_PRO = "remotely-save-cb-pro";
 
 export interface UriParams {
