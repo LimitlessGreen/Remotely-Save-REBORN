@@ -52,23 +52,30 @@ export class InternxtClient {
   private network?: Environment;
   private cryptoProvider: InternxtCryptoProvider;
   private config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string };
+  private clientName: string;
+  private clientVersion: string;
 
   private readonly BASE_URL = 'https://gateway.internxt.com/drive';
 
-  constructor(config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string }) {
+  constructor(
+    config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string },
+    appDetails: { clientName: string; clientVersion: string } = { clientName: 'remotely-save', clientVersion: '1.0.0' }
+  ) {
+    this.clientName = appDetails.clientName;
+    this.clientVersion = appDetails.clientVersion;
     this.cryptoProvider = new InternxtCryptoProvider();
     const apiUrl = 'https://gateway.internxt.com/drive';
     const networkUrl = 'https://gateway.internxt.com/network';
-    const appDetails = {
-      clientName: 'drive-server',
-      clientVersion: '1.0.0'
+    const sdkAppDetails = {
+      clientName: this.clientName,
+      clientVersion: this.clientVersion
     };
 
-    this.auth = Auth.client(apiUrl, appDetails);
+    this.auth = Auth.client(apiUrl, sdkAppDetails);
 
     if (config) {
       this.config = config;
-      this.storage = Drive.Storage.client(apiUrl, appDetails, {
+      this.storage = Drive.Storage.client(apiUrl, sdkAppDetails, {
         token: config.token,
       });
       this.network = new Environment({
@@ -76,7 +83,7 @@ export class InternxtClient {
         bridgeUser: config.bridgeUser,
         bridgePass: config.userId,
         encryptionKey: config.mnemonic,
-        appDetails
+        appDetails: sdkAppDetails
       });
     }
   }
@@ -85,8 +92,8 @@ export class InternxtClient {
     return {
       'Authorization': `Bearer ${this.config?.token}`,
       'Content-Type': 'application/json',
-      'internxt-client': 'drive-server',
-      'internxt-version': '1.0.0'
+      'internxt-client': this.clientName,
+      'internxt-version': this.clientVersion
     };
   }
 

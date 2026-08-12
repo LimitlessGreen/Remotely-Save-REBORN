@@ -10,7 +10,8 @@ export class RawInternxtFs implements RawFs {
 
   constructor(
     private config: InternxtConfig,
-    private saveUpdatedConfigFunc: () => Promise<any>
+    private saveUpdatedConfigFunc: () => Promise<any>,
+    appDetails?: { clientName: string; clientVersion: string }
   ) {
     this.client = new InternxtClient({
       token: config.token,
@@ -19,7 +20,7 @@ export class RawInternxtFs implements RawFs {
       userId: config.userId || "",
       rootFolderUuid: config.rootFolderUuid || "",
       bucketId: config.bucketId || ""
-    });
+    }, appDetails);
   }
 
   private async getFolderId(path: string, createIfMissing = false): Promise<string> {
@@ -201,8 +202,13 @@ export class RawInternxtFs implements RawFs {
 }
 
 export class InternxtFileSystem extends BaseCloudFs {
-  constructor(config: InternxtConfig, vaultName: string, saveUpdatedConfigFunc: () => Promise<any>) {
-    super("internxt", new RawInternxtFs(config, saveUpdatedConfigFunc), config.remoteBaseDir || vaultName);
+  constructor(
+    config: InternxtConfig,
+    vaultName: string,
+    saveUpdatedConfigFunc: () => Promise<any>,
+    appDetails?: { clientName: string; clientVersion: string }
+  ) {
+    super("internxt", new RawInternxtFs(config, saveUpdatedConfigFunc, appDetails), config.remoteBaseDir || vaultName);
   }
 
   async checkConnect(callbackFunc?: any): Promise<boolean> {

@@ -96,7 +96,10 @@ class InternxtLoginModal extends Modal {
         .setCta()
         .onClick(async () => {
           try {
-            const client = new InternxtClient();
+            const client = new InternxtClient(undefined, {
+              clientName: this.plugin.manifest.id,
+              clientVersion: this.plugin.manifest.version
+            });
             const loginRes = await client.login(this.email, this.password);
 
             this.plugin.settings.internxt = {

@@ -19,7 +19,7 @@ if (isInternxtConfigured) {
     before(async () => {
       if ((!activeToken || !activeMnemonic || !activeRootUuid || !activeBucketId) && testConfig.internxt.email && testConfig.internxt.password) {
         console.log("Logging into Internxt for integration tests via SDK...");
-        const client = new InternxtClient();
+        const client = new InternxtClient(undefined, { clientName: 'remotely-save-tests', clientVersion: '0.0.1' });
         const res = await client.login(testConfig.internxt.email, testConfig.internxt.password);
         activeToken = res.token;
         activeMnemonic = res.mnemonic;
@@ -45,7 +45,7 @@ if (isInternxtConfigured) {
           userId: activeUserId,
           remoteBaseDir: testConfig.internxt.remoteBaseDir,
           kind: "internxt",
-        }, async () => { });
+        }, async () => { }, { clientName: 'remotely-save-tests', clientVersion: '0.0.1' });
       }
       return fsInstance;
     };

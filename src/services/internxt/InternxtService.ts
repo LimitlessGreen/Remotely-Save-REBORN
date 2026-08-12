@@ -13,7 +13,8 @@ export const InternxtService: CloudService = {
     return new InternxtFileSystem(
       plugin.settings.internxt,
       app.vault.getName(),
-      () => plugin.saveSettings()
+      () => plugin.saveSettings(),
+      { clientName: plugin.manifest.id, clientVersion: plugin.manifest.version }
     );
   },
 
