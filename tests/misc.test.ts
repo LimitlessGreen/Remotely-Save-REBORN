@@ -491,3 +491,63 @@ describe("Misc: Dropbox: should fix the folder name cases", () => {
     assert.deepEqual(misc.fixEntityListCasesInplace(input), output);
   });
 });
+
+describe("Misc: chunk", () => {
+  it("should chunk array correctly", () => {
+    const input = [1, 2, 3, 4, 5];
+    const output = [[1, 2], [3, 4], [5]];
+    assert.deepStrictEqual(misc.chunk(input, 2), output);
+  });
+
+  it("should return empty array for empty input", () => {
+    assert.deepStrictEqual(misc.chunk([], 2), []);
+  });
+});
+
+describe("Misc: isDeepEqual", () => {
+  it("should compare primitives", () => {
+    assert.ok(misc.isDeepEqual(1, 1));
+    assert.ok(!misc.isDeepEqual(1, 2));
+    assert.ok(misc.isDeepEqual("a", "a"));
+    assert.ok(!misc.isDeepEqual("a", "b"));
+  });
+
+  it("should compare objects", () => {
+    assert.ok(misc.isDeepEqual({ a: 1 }, { a: 1 }));
+    assert.ok(!misc.isDeepEqual({ a: 1 }, { a: 2 }));
+    assert.ok(!misc.isDeepEqual({ a: 1 }, { b: 1 }));
+  });
+
+  it("should compare nested objects", () => {
+    assert.ok(misc.isDeepEqual({ a: { b: 1 } }, { a: { b: 1 } }));
+    assert.ok(!misc.isDeepEqual({ a: { b: 1 } }, { a: { b: 2 } }));
+  });
+
+  it("should compare ArrayBuffers", () => {
+    const b1 = new Uint8Array([1, 2, 3]).buffer;
+    const b2 = new Uint8Array([1, 2, 3]).buffer;
+    const b3 = new Uint8Array([1, 2, 4]).buffer;
+    assert.ok(misc.isDeepEqual(b1, b2));
+    assert.ok(!misc.isDeepEqual(b1, b3));
+  });
+});
+
+describe("Misc: throttle", () => {
+  it("should throttle calls", (done) => {
+    let count = 0;
+    const throttled = misc.throttle(() => {
+      count++;
+    }, 100);
+
+    throttled();
+    throttled();
+    throttled();
+
+    assert.equal(count, 1);
+    setTimeout(() => {
+      assert.equal(count, 2); // trailing call
+      done();
+    }, 150);
+  });
+});
+
