@@ -115,7 +115,8 @@ export class RawInternxtFs implements RawFs {
     if (contents.children) {
       for (const f of contents.children) {
         const name = f.plainName || f.plain_name || f.name;
-        const key = (fullPath === "" ? "" : fullPath + "/") + name + "/";
+        const separator = fullPath === "" || fullPath.endsWith("/") ? "" : "/";
+        const key = fullPath + separator + name + "/";
         entities.push({
           key, keyRaw: key,
           size: 0, sizeRaw: 0,
@@ -127,8 +128,13 @@ export class RawInternxtFs implements RawFs {
 
     if (contents.files) {
       for (const f of contents.files) {
-        const name = f.plainName || f.plain_name || f.name;
-        const key = (fullPath === "" ? "" : fullPath + "/") + name;
+        let name = f.plainName || f.plain_name || f.name;
+        if (f.type && !name.endsWith("." + f.type)) {
+            name = name + "." + f.type;
+        }
+
+        const separator = fullPath === "" || fullPath.endsWith("/") ? "" : "/";
+        const key = fullPath + separator + name;
         entities.push({
           key, keyRaw: key,
           size: Number(f.size || 0),

@@ -16,7 +16,9 @@ describe("Axios Obsidian Adapter", () => {
       return {
         status: 200,
         json: { success: true },
-        headers: { "content-type": "application/json" }
+        headers: { "content-type": "application/json" },
+        text: JSON.stringify({ success: true }),
+        arrayBuffer: new ArrayBuffer(0)
       };
     };
 
@@ -40,7 +42,9 @@ describe("Axios Obsidian Adapter", () => {
       return {
         status: 200,
         text: "OK",
-        headers: {}
+        headers: {},
+        json: {},
+        arrayBuffer: new ArrayBuffer(0)
       };
     };
 

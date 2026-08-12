@@ -1,8 +1,9 @@
 import { Auth, Drive, CryptoProvider, Keys, Password } from '@internxt/sdk';
-import { Environment } from '@internxt/inxt-js';
-import { EncryptFilename, DecryptFileName } from '@internxt/inxt-js/build/lib/utils/crypto/crypto';
+import { Network } from '@internxt/sdk/dist/network';
+import { EncryptFilename, DecryptFileName, GenerateFileKey } from '@internxt/inxt-js/build/lib/utils/crypto/crypto';
 import CryptoJS from 'crypto-js';
-import { Readable } from 'stream';
+import { requestUrl } from 'obsidian';
+import * as crypto from 'crypto';
 
 /**
  * Custom Internxt Crypto Provider
@@ -48,11 +49,13 @@ class InternxtCryptoProvider implements CryptoProvider {
 export class InternxtClient {
   private auth: Auth;
   private storage?: Drive.Storage;
-  private network?: Environment;
+  private network?: Network;
   private cryptoProvider: InternxtCryptoProvider;
   private config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string };
   private clientName: string;
   private clientVersion: string;
+  private apiUrl = 'https://gateway.internxt.com/drive';
+  private networkUrl = 'https://gateway.internxt.com/network';
 
   constructor(
     config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string },
@@ -61,26 +64,21 @@ export class InternxtClient {
     this.clientName = appDetails.clientName;
     this.clientVersion = appDetails.clientVersion;
     this.cryptoProvider = new InternxtCryptoProvider();
-    const apiUrl = 'https://gateway.internxt.com/drive';
-    const networkUrl = 'https://gateway.internxt.com/network';
     const sdkAppDetails = {
       clientName: this.clientName,
       clientVersion: this.clientVersion
     };
 
-    this.auth = Auth.client(apiUrl, sdkAppDetails);
+    this.auth = Auth.client(this.apiUrl, sdkAppDetails);
 
     if (config) {
       this.config = config;
-      this.storage = Drive.Storage.client(apiUrl, sdkAppDetails, {
+      this.storage = Drive.Storage.client(this.apiUrl, sdkAppDetails, {
         token: config.token,
       });
-      this.network = new Environment({
-        bridgeUrl: networkUrl,
+      this.network = Network.client(this.networkUrl, sdkAppDetails, {
         bridgeUser: config.bridgeUser,
-        bridgePass: config.userId,
-        encryptionKey: config.mnemonic,
-        appDetails: sdkAppDetails
+        userId: crypto.createHash('sha256').update(config.userId).digest('hex')
       });
     }
   }
@@ -148,10 +146,12 @@ export class InternxtClient {
     if (!this.storage) throw new Error('Not authenticated');
     return this.retryReq(async () => {
       try {
+        const encryptedName = await EncryptFilename(this.config!.mnemonic, this.config!.bucketId, name);
         const [promise] = this.storage!.createFolderByUuid({
           plainName: name,
+          name: encryptedName,
           parentFolderUuid
-        });
+        } as any);
         return await promise;
       } catch (e: any) {
         if (e.status === 409 || e.status === 422) {
@@ -198,63 +198,132 @@ export class InternxtClient {
     if (!this.network || !this.config || !this.storage) throw new Error('Not authenticated');
 
     const bucketId = this.config.bucketId;
-    const source = Readable.from(content);
-    const networkFileId = await this.network.upload(bucketId, {
-      source,
-      fileSize: size,
-      progressCallback: () => { }
-    });
+    let networkFileId: string | undefined = undefined;
+    let uploadSize = size;
+    let uploadContent = content;
 
-    const extension = filename.split('.').pop() || '';
+    if (size === 0) {
+      // Workaround: Internxt network doesn't support 0-byte files.
+      // Use a single space (1 byte) instead.
+      uploadSize = 1;
+      uploadContent = Buffer.from(' ');
+    }
+
+    // 1. Start upload
+    const { uploads } = await this.network.startUpload(bucketId, uploadSize);
+    const [{ url, uuid }] = uploads;
+
+    // 2. Encrypt file
+    const index = crypto.randomBytes(32);
+    const iv = index.slice(0, 16);
+    const key = await GenerateFileKey(this.config.mnemonic, bucketId, index);
+
+    const cipher = crypto.createCipheriv('aes-256-ctr', key, iv);
+    const encryptedContent = Buffer.concat([cipher.update(uploadContent), cipher.final()]);
+
+    // 3. Calculate hash (SHA256 then RIPEMD160)
+    const sha256Hash = crypto.createHash('sha256').update(encryptedContent).digest();
+    const ripemd160Hash = crypto.createHash('ripemd160').update(sha256Hash).digest('hex');
+
+    // 4. PUT to network using Obsidian requestUrl
+    // Ensure we send a clean ArrayBuffer copy to avoid ERR_INVALID_ARGUMENT
+    const body = new Uint8Array(encryptedContent).slice().buffer;
+
+    try {
+      const putRes = await requestUrl({
+        url: url!,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+        body: body
+      });
+      if (putRes.status !== 200 && putRes.status !== 201) {
+        throw new Error(`Internxt network PUT failed with status ${putRes.status}`);
+      }
+    } catch (e: any) {
+      console.error('[INTERNXT] requestUrl PUT failed:', e);
+      throw e;
+    }
+
+    // 5. Finish upload
+    const finishPayload = {
+      index: index.toString('hex'),
+      shards: [{ hash: ripemd160Hash, uuid }],
+    };
+
+    try {
+      const finishRes: any = await this.network.finishUpload(bucketId, finishPayload);
+      networkFileId = typeof finishRes === 'string' ? finishRes : finishRes.id;
+    } catch (e: any) {
+      if (e.response?.data) {
+        console.error('[INTERNXT] Finish upload failed:', JSON.stringify(e.response.data));
+      }
+      throw e;
+    }
+
+    // 6. Create Drive entry
+    const dotIdx = filename.lastIndexOf('.');
+    const nameOnly = dotIdx > 0 ? filename.substring(0, dotIdx) : filename;
+    const extension = dotIdx > 0 ? filename.substring(dotIdx + 1) : '';
+
+    // Encrypt the same string as plainName for consistency with official clients
+    const encryptedName = await EncryptFilename(this.config.mnemonic, bucketId, nameOnly);
+
     const payload = {
       bucket: bucketId,
       fileId: networkFileId,
       encryptVersion: '03-aes' as any,
       folderUuid: parentFolderUuid,
-      size: size,
-      plainName: filename,
+      size: uploadSize,
+      plainName: nameOnly,
+      name: encryptedName,
       type: extension,
       modificationTime: mtime ? new Date(mtime).toISOString() : undefined,
       creationTime: ctime ? new Date(ctime).toISOString() : undefined
     };
 
     return this.retryReq(async () => {
-      return await this.storage!.createFileEntryByUuid(payload);
+      return await this.storage!.createFileEntryByUuid(payload as any);
     });
   }
 
   async downloadFile(fileUuid: string): Promise<Buffer> {
-    if (!this.network || !this.config) throw new Error('Not authenticated');
+    if (!this.network || !this.config || !this.storage) throw new Error('Not authenticated');
 
     const fileMeta = await this.getFileMeta(fileUuid);
-
     const bucketId = fileMeta.bucket;
-    const bridgeFileId = fileMeta.fileId;
-    if (!bridgeFileId) throw new Error('File not found on network');
+    const fileId = fileMeta.fileId;
 
-    return new Promise((resolve, reject) => {
-      const opts = {
-        progressCallback: () => { },
-        finishedCallback: (err: Error | null, stream: Readable | null) => {
-          if (err) return reject(err);
-          if (!stream) return reject(new Error('No stream returned'));
+    // 1. Get download links
+    const downloads: any = await this.network.getDownloadLinks(bucketId, fileId);
+    const [{ url, hash: expectedHash }] = downloads.shards;
+    const indexHex = downloads.index;
 
-          const chunks: Buffer[] = [];
-          stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-          stream.on('end', () => resolve(Buffer.concat(chunks)));
-          stream.on('error', (err) => reject(err));
-        }
-      };
-
-      const strategy = {
-        label: 'Dynamic',
-        params: {
-          chunkSize: 1024 * 1024
-        }
-      };
-
-      this.network!.download(bucketId, bridgeFileId, opts as any, strategy as any);
+    // 2. Download encrypted content using Obsidian requestUrl
+    const res = await requestUrl({
+      url: url,
+      method: 'GET'
     });
+    const encryptedContent = Buffer.from(res.arrayBuffer);
+
+    // 3. Verify hash
+    const sha256Hash = crypto.createHash('sha256').update(encryptedContent).digest();
+    const actualHash = crypto.createHash('ripemd160').update(sha256Hash).digest('hex');
+    if (actualHash !== expectedHash) {
+      throw new Error('Hash mismatch during download');
+    }
+
+    // 4. Decrypt file
+    if (!indexHex) throw new Error('No index found for decryption');
+    const index = Buffer.from(indexHex, 'hex');
+    const iv = index.slice(0, 16);
+    const key = await GenerateFileKey(this.config.mnemonic, bucketId, index);
+
+    const decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
+    const decrypted = Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
+
+    return decrypted;
   }
 
   async decryptFilename(encryptedName: string, bucketId: string): Promise<string> {

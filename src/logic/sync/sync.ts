@@ -93,15 +93,20 @@ function buildMixedEntities(local: Entity[], remote: Entity[], prev: Record<stri
     const result = Object.values(mixed).map(m => {
       if (m.local && !m.remote) {
         m.decision = "local_is_created_then_push";
+        console.debug(`[SYNC] ${m.key}: Local exists, Remote missing -> PUSH`);
       } else if (!m.local && m.remote) {
         m.decision = "remote_is_created_then_pull";
+        console.debug(`[SYNC] ${m.key}: Remote exists, Local missing -> PULL`);
       } else if (m.local && m.remote) {
         if (m.local.mtimeCli! > m.remote.mtimeSvr!) {
           m.decision = "local_is_modified_then_push";
+          console.debug(`[SYNC] ${m.key}: Local is newer (${m.local.mtimeCli}) than Remote (${m.remote.mtimeSvr}) -> PUSH`);
         } else if (m.local.mtimeCli! < m.remote.mtimeSvr!) {
           m.decision = "remote_is_modified_then_pull";
+          console.debug(`[SYNC] ${m.key}: Remote is newer (${m.remote.mtimeSvr}) than Local (${m.local.mtimeCli}) -> PULL`);
         } else {
           m.decision = "equal";
+          // console.debug(`[SYNC] ${m.key}: Equal -> SKIP`);
         }
       }
       return m;
