@@ -7,13 +7,13 @@ import { clearDupFiles, getDupFiles } from "./clearDupFiles";
 
 class ClearDupFilesModal extends Modal {
   readonly plugin: RemotelySavePlugin;
-  readonly t: (x: TransItemType, vars?: any) => string;
+  readonly t: (x: TransItemType, vars?: Record<string, string>) => string;
   readonly files: string[];
   readonly fsLocal: FakeFsLocal;
   constructor(
     app: App,
     plugin: RemotelySavePlugin,
-    t: (x: TransItemType, vars?: any) => string,
+    t: (x: TransItemType, vars?: Record<string, string>) => string,
     files: string[],
     fsLocal: FakeFsLocal
   ) {
@@ -61,7 +61,7 @@ class ClearDupFilesModal extends Modal {
 
 export const generateClearDupFilesSettingsPart = (
   containerEl: HTMLElement,
-  t: (x: TransItemType, vars?: any) => string,
+  t: (x: TransItemType, vars?: Record<string, string>) => string,
   app: App,
   plugin: RemotelySavePlugin
 ) => {
@@ -85,8 +85,8 @@ export const generateClearDupFilesSettingsPart = (
         const files = await getDupFiles(fsLocal);
 
         if (files.length === 0) {
-            new Notice("No duplicate conflict files found.");
-            return;
+          new Notice("No duplicate conflict files found.");
+          return;
         }
 
         const modal = new ClearDupFilesModal(app, plugin, t, files, fsLocal);

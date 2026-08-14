@@ -3,14 +3,11 @@
  * FakeFs Provider for Azure Blob Storage
  */
 
+import type { AzureBlobStorageConfig, Entity } from "../../core/baseTypes";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
-import {
-  type Entity,
-  type AzureBlobStorageConfig,
-} from "../../core/baseTypes";
-import { AzureClient } from "./AzureClient";
 import { arrayBufferToHex } from "../../utils/misc";
+import { AzureClient } from "./AzureClient";
 
 export const DEFAULT_AZUREBLOBSTORAGE_CONFIG: AzureBlobStorageConfig = {
   containerSasUrl: "",
@@ -28,7 +25,7 @@ class RawAzureFs implements RawFs {
     this.api = new AzureClient(config.containerSasUrl, config.containerName);
   }
 
-  async walk(fullPath: string, partial: boolean): Promise<Entity[]> {
+  async walk(fullPath: string, _partial: boolean): Promise<Entity[]> {
     const list: Entity[] = [];
     // partial is ignored here as Azure SDK doesn't easily support MaxKeys in listBlobsFlat for simplicity
     for await (const blob of await this.api.listBlobs(fullPath)) {
@@ -37,7 +34,9 @@ class RawAzureFs implements RawFs {
         keyRaw: blob.name,
         sizeRaw: blob.properties.contentLength || 0,
         mtimeSvr: blob.properties.lastModified.valueOf(),
-        hash: blob.properties.contentMD5 ? arrayBufferToHex(blob.properties.contentMD5.buffer as ArrayBuffer) : undefined
+        hash: blob.properties.contentMD5
+          ? arrayBufferToHex(blob.properties.contentMD5.buffer as ArrayBuffer)
+          : undefined,
       });
     }
     return list;
@@ -46,7 +45,7 @@ class RawAzureFs implements RawFs {
   async stat(fullPath: string): Promise<Entity> {
     // Basic implementation via walk or direct call if available
     const all = await this.walk(fullPath, true);
-    const found = all.find(e => e.key === fullPath);
+    const found = all.find((e) => e.key === fullPath);
     if (!found) throw new Error(`Not found: ${fullPath}`);
     return found;
   }
@@ -55,13 +54,18 @@ class RawAzureFs implements RawFs {
     return await this.api.downloadBlob(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
+  async writeFile(
+    fullPath: string,
+    content: ArrayBuffer,
+    mtime: number,
+    _ctime: number
+  ): Promise<Entity> {
     const props = await this.api.uploadBlob(fullPath, content, mtime);
     return {
       key: fullPath,
       keyRaw: fullPath,
       sizeRaw: content.byteLength,
-      mtimeSvr: props.lastModified!.valueOf(),
+      mtimeSvr: props.lastModified?.valueOf(),
     };
   }
 
@@ -71,7 +75,12 @@ class RawAzureFs implements RawFs {
 
   async mkdir(fullPath: string): Promise<Entity> {
     // Virtual folders only
-    return { key: fullPath, keyRaw: fullPath, sizeRaw: 0, mtimeSvr: Date.now() };
+    return {
+      key: fullPath,
+      keyRaw: fullPath,
+      sizeRaw: 0,
+      mtimeSvr: Date.now(),
+    };
   }
 
   async checkConnect() {
@@ -81,14 +90,18 @@ class RawAzureFs implements RawFs {
 
 export class AzureFileSystem extends BaseCloudFs {
   constructor(config: AzureBlobStorageConfig, vaultName: string) {
-    super("azureblobstorage", new RawAzureFs(config), config.remotePrefix || `${vaultName}/`);
+    super(
+      "azureblobstorage",
+      new RawAzureFs(config),
+      config.remotePrefix || `${vaultName}/`
+    );
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       const ok = await (this.rawFs as RawAzureFs).checkConnect();
       if (!ok) throw Error("Connection failed");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.debug(err);
       callbackFunc?.(err);
       return false;

@@ -1,15 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
-    "ignore": ["main.js"]
+    "includes": ["**", "!**/main.js", "!.artifacts"]
   },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
-    "ignore": [],
+    "includes": ["**"],
     "attributePosition": "auto",
     "indentStyle": "space",
     "indentWidth": 2,
@@ -30,9 +28,9 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
-        "noExplicitAny": "off",
+        "noExplicitAny": "warn",
         "noPrototypeBuiltins": "off",
         "noControlCharactersInRegex": "off"
       },
@@ -41,15 +39,70 @@
         "useNodejsImportProtocol": "off",
         "noUnusedTemplateLiteral": "off",
         "useTemplate": "off",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "warn",
+        "useNamingConvention": {
+          "level": "warn",
+          "options": {
+            "strictCase": false
+          }
+        },
+        "useFilenamingConvention": {
+          "level": "warn",
+          "options": {
+            "strictCase": false,
+            "requireAscii": true,
+            "filenameCases": ["camelCase", "export"]
+          }
+        }
       },
       "performance": {
         "noDelete": "off"
       },
       "complexity": {
-        "noForEach": "off",
+        "noForEach": "warn",
         "useLiteralKeys": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/auth/oauth2.ts", "libs/rclone-crypt/src/index.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "tests/**",
+        "libs/**",
+        "src/polyfill/**",
+        "src/services/**",
+        "src/core/fs/fsLocal.ts",
+        "src/core/storage/localdb.ts",
+        "src/logic/sync/sync.ts",
+        "src/logic/encryption/providers/rclone.ts",
+        "src/logic/encryption/providers/rclone.worker.ts",
+        "src/main.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noShadowRestrictedNames": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off",
+            "useNamingConvention": "off"
+          },
+          "complexity": {
+            "noForEach": "off"
+          }
+        }
+      }
+    }
+  ]
 }

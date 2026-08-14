@@ -1,19 +1,19 @@
-import { deepStrictEqual, throws, rejects } from "assert";
 import { xsalsa20poly1305 } from "@noble/ciphers/salsa.js";
-import {
-  increment,
-  add,
-  Cipher,
-  encryptedSize,
-  decryptedSize,
-  msgErrorEncryptedFileTooShort,
-  msgErrorEncryptedFileBadHeader,
-  msgErrorBadBase32Encoding,
-} from "../src";
-import { base32hex, base64 } from "rfc4648";
+import { deepStrictEqual, rejects, throws } from "assert";
 import * as base32768 from "base32768";
 import { promises as fs } from "fs";
 import * as path from "path";
+import { base32hex, base64 } from "rfc4648";
+import {
+  add,
+  Cipher,
+  decryptedSize,
+  encryptedSize,
+  increment,
+  msgErrorBadBase32Encoding,
+  msgErrorEncryptedFileBadHeader,
+  msgErrorEncryptedFileTooShort,
+} from "../src";
 
 describe("Filename Encryption: base32", () => {
   it("TestEncryptSegmentBase32", async () => {
@@ -54,7 +54,7 @@ describe("Filename Encryption: base32", () => {
     // We've tested the forwards above, now concentrate on the errors
     const longName = new Uint8Array(3328);
     for (let i = 0; i < longName.length; ++i) {
-      longName[i] = parseInt("a");
+      longName[i] = parseInt("a", 10);
     }
     const c = new Cipher("base32");
     const cases = [
@@ -155,7 +155,7 @@ describe("Filename Encryption: base64", () => {
       // We've tested the forwards above, now concentrate on the errors
       const longName = new Uint8Array(3328);
       for (let i = 0; i < longName.length; ++i) {
-        longName[i] = parseInt("a");
+        longName[i] = parseInt("a", 10);
       }
       const c = new Cipher("base64");
       const cases = [
@@ -257,7 +257,7 @@ describe("Filename Encryption: base32768", () => {
       // We've tested the forwards above, now concentrate on the errors
       const longName = new Uint8Array(3328);
       for (let i = 0; i < longName.length; ++i) {
-        longName[i] = parseInt("a");
+        longName[i] = parseInt("a", 10);
       }
       const c = new Cipher("base32768");
       const cases = [
@@ -972,7 +972,7 @@ describe("Really RClone Files", () => {
     const testFolder = path.join(__dirname, "static_assets", "mona_lisa");
     try {
       await fs.access(testFolder);
-    } catch (e) {
+    } catch (_e) {
       this.skip();
     }
     const testFileName =

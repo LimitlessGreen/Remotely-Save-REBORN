@@ -1,5 +1,7 @@
 import { type App, Modal, Notice, Platform, Setting } from "obsidian";
+import { getClient } from "../../core/fs/fsGetter";
 import type RemotelySavePlugin from "../../main";
+import { ChangeRemoteBaseDirModal } from "../../settings";
 import { BaseSettingsManager } from "../../ui/settingsManager";
 import {
   DEFAULT_DROPBOX_CONFIG,
@@ -7,10 +9,6 @@ import {
   sendAuthReq as sendAuthReqDropbox,
   setConfigBySuccessfullAuthInplace,
 } from "./DropboxFileSystem";
-import { getClient } from "../../core/fs/fsGetter";
-import { ChangeRemoteBaseDirModal } from "../../settings";
-import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
-import type { TransItemType } from "../../core/i18n/i18n";
 
 class DropboxAuthModal extends Modal {
   readonly plugin: RemotelySavePlugin;
@@ -34,7 +32,7 @@ class DropboxAuthModal extends Modal {
   async onOpen() {
     const { contentEl } = this;
 
-    const t = (x: TransItemType, vars?: any) => {
+    const t: TFunc = (x, vars) => {
       return this.plugin.i18n.t(x, vars);
     };
 
@@ -61,23 +59,19 @@ class DropboxAuthModal extends Modal {
     );
 
     if (needManualPatse) {
-      t("modal_dropboxauth_manualsteps")
-        .split("\n")
-        .forEach((val) => {
-          contentEl.createEl("p", {
-            text: val,
-          });
+      for (const val of t("modal_dropboxauth_manualsteps").split("\n")) {
+        contentEl.createEl("p", {
+          text: val,
         });
+      }
     } else {
       this.plugin.oauth2Info.verifier = verifier;
 
-      t("modal_dropboxauth_autosteps")
-        .split("\n")
-        .forEach((val) => {
-          contentEl.createEl("p", {
-            text: val,
-          });
+      for (const val of t("modal_dropboxauth_autosteps").split("\n")) {
+        contentEl.createEl("p", {
+          text: val,
         });
+      }
     }
 
     const div2 = contentEl.createDiv();
@@ -121,7 +115,7 @@ class DropboxAuthModal extends Modal {
                 this.plugin.settings.dropbox.clientID,
                 verifier,
                 authCode,
-                async (e: any) => {
+                async (e: unknown) => {
                   new Notice(t("protocol_dropbox_connect_fail"));
                   new Notice(`${e}`);
                   throw e;
@@ -342,7 +336,7 @@ export class DropboxSettings extends BaseSettingsManager {
           );
 
           const errors = { msg: "" };
-          const res = await client.checkConnect((err: any) => {
+          const res = await client.checkConnect((err: unknown) => {
             errors.msg = `${err}`;
           });
           if (res) {

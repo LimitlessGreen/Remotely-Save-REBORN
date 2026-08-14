@@ -21,14 +21,14 @@ export const messyConfigToNormal = (
   // console.debug(x);
   if (x === null || x === undefined) {
     console.debug("the messy config is null or undefined, skip");
-    return x as any;
+    return x;
   }
   if ("readme" in x && "d" in x) {
     // we should decode
     const y = JSON.parse(
       (
         base64url.parse(reverseString(x["d"]), {
-          out: Buffer.allocUnsafe as any,
+          out: (size) => Buffer.allocUnsafe(size),
           loose: true,
         }) as Buffer
       ).toString("utf-8")

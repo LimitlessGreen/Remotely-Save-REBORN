@@ -1,10 +1,10 @@
-import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { xsalsa20poly1305 } from "@noble/ciphers/salsa.js";
 import { randomBytes } from "@noble/ciphers/utils.js";
-import { pad, unpad } from "pkcs7-padding";
-import { EMECipher, AESCipherBlock } from "../../eme/src/index";
-import { base32hex, base64url } from "rfc4648";
+import { scryptAsync } from "@noble/hashes/scrypt.js";
 import * as base32768 from "base32768";
+import { pad, unpad } from "pkcs7-padding";
+import { base32hex, base64url } from "rfc4648";
+import { AESCipherBlock, EMECipher } from "../../eme/src/index";
 
 const newNonce = () => randomBytes(xsalsa20poly1305.nonceLength); // 24
 
@@ -272,9 +272,9 @@ fileNameEnc=${this.fileNameEnc}
     // console.log(`dec size=${decryptedSize(input.byteLength)}`);
     const res = new Uint8Array(decryptedSize(input.byteLength));
     for (
-      let offsetInput = fileHeaderSize, offsetOutput = 0, i = 0;
+      let offsetInput = fileHeaderSize, offsetOutput = 0, _i = 0;
       offsetInput < input.byteLength;
-      offsetInput += blockSize, offsetOutput += blockDataSize, i += 1
+      offsetInput += blockSize, offsetOutput += blockDataSize, _i += 1
     ) {
       // console.log(`i=${i}`);
       // console.log(`offsetInput = ${offsetInput}`);

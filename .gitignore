@@ -22,7 +22,7 @@ data.json
 logs.txt
 
 # local deploy
-dev-deploy.mjs
+devDeploy.mjs
 
 # hidden files
 .*

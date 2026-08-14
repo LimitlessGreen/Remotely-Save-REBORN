@@ -1,12 +1,11 @@
 import QRCode from "qrcode";
-
-import { getShrinkedSettings } from "../services/onedrive/OneDriveFileSystem";
 import {
   COMMAND_URI,
   type QRExportType,
   type RemotelySavePluginSettings,
   type UriParams,
 } from "../core/baseTypes";
+import { getShrinkedSettings } from "../services/onedrive/OneDriveFileSystem";
 
 export const exportQrCodeUri = async (
   settings: RemotelySavePluginSettings,
@@ -49,7 +48,9 @@ export const exportQrCodeUri = async (
   } else if (exportFields === "koofr") {
     settings2 = { koofr: structuredClone(settings.koofr) };
   } else if (exportFields === "azureblobstorage") {
-    settings2 = { azureblobstorage: structuredClone(settings.azureblobstorage) };
+    settings2 = {
+      azureblobstorage: structuredClone(settings.azureblobstorage),
+    };
   }
 
   delete settings2.vaultRandomID;
@@ -118,7 +119,7 @@ export const importQrCodeUri = (
   let settings = {} as RemotelySavePluginSettings;
   try {
     settings = JSON.parse(params.data);
-  } catch (e) {
+  } catch (_e) {
     return {
       status: "error",
       message: `errors while parsing settings: ${JSON.stringify(inputParams)}`,

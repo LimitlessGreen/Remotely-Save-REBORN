@@ -1,14 +1,14 @@
-import { S3Service } from "./s3/S3Service";
 import { AzureService } from "./azure/AzureService";
-import { OneDriveService } from "./onedrive/OneDriveService";
 import { BoxService } from "./box/BoxService";
-import { PCloudService } from "./pcloud/PCloudService";
+import { DropboxService } from "./dropbox/DropboxService";
 import { InternxtService } from "./internxt/InternxtService";
 import { KoofrService } from "./koofr/KoofrService";
-import { DropboxService } from "./dropbox/DropboxService";
+import { OneDriveService } from "./onedrive/OneDriveService";
+import { PCloudService } from "./pcloud/PCloudService";
+import { S3Service } from "./s3/S3Service";
+import type { CloudService } from "./serviceInterface";
 import { WebdavService } from "./webdav/WebdavService";
 import { WebdisService } from "./webdis/WebdisService";
-import type { CloudService } from "./serviceInterface";
 
 /**
  * APACHE 2.0 CLEAN ROOM IMPLEMENTATION
@@ -25,9 +25,11 @@ export const SERVICES: CloudService[] = [
   WebdavService,
   WebdisService,
   AzureService,
-].filter(s => {
+].filter((s) => {
   if (s === undefined) {
-    console.warn("A service in registry is undefined! This is likely a circular dependency issue.");
+    console.warn(
+      "A service in registry is undefined! This is likely a circular dependency issue."
+    );
     return false;
   }
   if (s.id === undefined) {
@@ -38,13 +40,19 @@ export const SERVICES: CloudService[] = [
 });
 
 export function getServiceById(id: string): CloudService | undefined {
-  if (SERVICES.some(s => s === undefined)) {
-    console.warn("Some services in registry are undefined! This usually indicates a circular dependency.");
+  if (SERVICES.some((s) => s === undefined)) {
+    console.warn(
+      "Some services in registry are undefined! This usually indicates a circular dependency."
+    );
     console.debug("SERVICES array:", SERVICES);
   }
-  return SERVICES.find(s => s && (s.id === id || (id === "onedrivefull" && s.id === "onedrive")));
+  return SERVICES.find(
+    (s) => s && (s.id === id || (id === "onedrivefull" && s.id === "onedrive"))
+  );
 }
 
-export function getServiceByCallbackId(callbackId: string): CloudService | undefined {
-  return SERVICES.find(s => s && s.callbackId === callbackId);
+export function getServiceByCallbackId(
+  callbackId: string
+): CloudService | undefined {
+  return SERVICES.find((s) => s && s.callbackId === callbackId);
 }

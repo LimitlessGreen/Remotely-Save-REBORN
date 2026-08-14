@@ -1,22 +1,26 @@
 import { strict as assert } from "assert";
 import "../obsidianShim";
 import { RawDropboxFs } from "../../src/services/dropbox/DropboxFileSystem";
-import { testConfig, isDropboxConfigured } from "./config";
 import { runBaseFsTests } from "./baseFsTest";
+import { isDropboxConfigured, testConfig } from "./config";
 
 if (isDropboxConfigured) {
-  describe("Dropbox Integration Tests", function() {
+  describe("Dropbox Integration Tests", function () {
     this.timeout(30000); // Increase timeout for real network calls
 
-    const getFs = () => new RawDropboxFs({
-      accessToken: testConfig.dropbox.token,
-      clientID: "",
-      refreshToken: "",
-      accessTokenExpiresInSeconds: 3600,
-      accessTokenExpiresAtTime: Date.now() + 3600 * 1000,
-      accountID: "",
-      username: "test-user",
-    }, async () => {});
+    const getFs = () =>
+      new RawDropboxFs(
+        {
+          accessToken: testConfig.dropbox.token,
+          clientID: "",
+          refreshToken: "",
+          accessTokenExpiresInSeconds: 3600,
+          accessTokenExpiresAtTime: Date.now() + 3600 * 1000,
+          accountID: "",
+          username: "test-user",
+        },
+        async () => {}
+      );
 
     const rootPath = testConfig.dropbox.remoteBaseDir;
     runBaseFsTests(getFs, rootPath);
@@ -39,16 +43,21 @@ if (isDropboxConfigured) {
         assert.ok(v1Id, "Should have a rev ID for first write");
 
         // Write second revision (overwrite)
-        const e2 = await fs.writeFile(key, content2.buffer, now + 1000, now + 1000);
+        const e2 = await fs.writeFile(
+          key,
+          content2.buffer,
+          now + 1000,
+          now + 1000
+        );
         const v2Id = e2.versionId;
         assert.ok(v2Id, "Should have a rev ID for second write");
         assert.notEqual(v1Id, v2Id, "Rev IDs should be different");
 
         // List revisions
-        const versions = await fs.listVersions!(key);
+        const versions = await fs.listVersions?.(key);
         assert.ok(versions.length >= 2, "Should find at least 2 revisions");
-        assert.ok(versions.some(v => v.versionId === v1Id));
-        assert.ok(versions.some(v => v.versionId === v2Id));
+        assert.ok(versions.some((v) => v.versionId === v1Id));
+        assert.ok(versions.some((v) => v.versionId === v2Id));
 
         // Read specific revisions
         const read1 = await fs.readFile(key, v1Id);

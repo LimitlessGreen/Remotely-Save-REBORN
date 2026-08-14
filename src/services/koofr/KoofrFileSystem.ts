@@ -3,16 +3,16 @@
  * Koofr Provider using BaseCloudFs
  */
 
+import { OAuth2Handler } from "../../auth/oauth2";
 import {
   type Entity,
-  type KoofrConfig,
   KOOFR_CLIENT_ID,
   KOOFR_CLIENT_SECRET,
+  type KoofrConfig,
 } from "../../core/baseTypes";
-import { KoofrApiClient } from "./KoofrClient";
-import { OAuth2Handler } from "../../auth/oauth2";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
+import { KoofrApiClient } from "./koofrClient";
 
 export const DEFAULT_KOOFR_CONFIG: KoofrConfig = {
   accessToken: "",
@@ -41,7 +41,7 @@ class RawKoofrFs implements RawFs {
 
   constructor(
     private config: KoofrConfig,
-    private vaultName: string,
+    vaultName: string,
     private onConfigUpdate: () => Promise<void>
   ) {
     this.rootPath = config.remoteBaseDir || vaultName;
@@ -52,12 +52,13 @@ class RawKoofrFs implements RawFs {
     const list: Entity[] = [];
 
     const scan = async (currentPath: string, relBase: string) => {
-      const data = await this.api!.listItems(this.config.mountID, currentPath);
+      const data = await this.api?.listItems(this.config.mountID, currentPath);
       for (const item of data.files || []) {
         const isDir = item.type === "dir";
         const key = relBase + item.name + (isDir ? "/" : "");
         list.push({
-          key, keyRaw: key,
+          key,
+          keyRaw: key,
           sizeRaw: item.size || 0,
           mtimeSvr: item.modified || Date.now(),
         });
@@ -67,22 +68,34 @@ class RawKoofrFs implements RawFs {
 
     // fullPath passed here is relative to root.
     // Koofr API uses paths on the mount.
-    await scan(`/${this.rootPath}${fullPath === "/" ? "" : fullPath}`, fullPath === "/" ? "" : fullPath.replace(/\/$/, "") + "/");
+    await scan(
+      `/${this.rootPath}${fullPath === "/" ? "" : fullPath}`,
+      fullPath === "/" ? "" : fullPath.replace(/\/$/, "") + "/"
+    );
     return list;
   }
 
   async stat(fullPath: string): Promise<Entity> {
     await this.ensureInited();
     // Koofr listItems can give info about items in a folder.
-    const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/") + 1) || "/";
-    const data = await this.api!.listItems(this.config.mountID, `/${this.rootPath}${parentPath}`);
-    const name = fullPath.replace(/\/$/, "").split("/").pop()!;
-    const item = data.files?.find((i: any) => i.name === name);
+    const parentPath =
+      fullPath.substring(0, fullPath.lastIndexOf("/") + 1) || "/";
+    const data = await this.api?.listItems(
+      this.config.mountID,
+      `/${this.rootPath}${parentPath}`
+    );
+    const nameParts = fullPath.replace(/\/$/, "").split("/");
+    const name = nameParts.pop();
+    if (name === undefined) {
+      throw new Error(`Invalid path: ${fullPath}`);
+    }
+    const item = data.files?.find((i: { name: string }) => i.name === name);
     if (!item) throw new Error(`Not found: ${fullPath}`);
 
-    const isDir = item.type === "dir";
+    const _isDir = item.type === "dir";
     return {
-      key: fullPath, keyRaw: fullPath,
+      key: fullPath,
+      keyRaw: fullPath,
       sizeRaw: item.size || 0,
       mtimeSvr: item.modified || Date.now(),
     };
@@ -90,28 +103,49 @@ class RawKoofrFs implements RawFs {
 
   async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
-    return await this.api!.downloadFile(this.config.mountID, `/${this.rootPath}${fullPath}`);
+    return await this.api?.downloadFile(
+      this.config.mountID,
+      `/${this.rootPath}${fullPath}`
+    );
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, _mtime: number, _ctime: number): Promise<Entity> {
+  async writeFile(
+    fullPath: string,
+    content: ArrayBuffer,
+    _mtime: number,
+    _ctime: number
+  ): Promise<Entity> {
     await this.ensureInited();
-    await this.api!.uploadFile(this.config.mountID, `/${this.rootPath}${fullPath}`, content);
+    await this.api?.uploadFile(
+      this.config.mountID,
+      `/${this.rootPath}${fullPath}`,
+      content
+    );
     return {
-      key: fullPath, keyRaw: fullPath,
+      key: fullPath,
+      keyRaw: fullPath,
       sizeRaw: content.byteLength,
-      mtimeSvr: Date.now()
+      mtimeSvr: Date.now(),
     };
   }
 
   async rm(fullPath: string, _versionId?: string): Promise<void> {
     await this.ensureInited();
-    await this.api!.delete(this.config.mountID, `/${this.rootPath}${fullPath}`);
+    await this.api?.delete(this.config.mountID, `/${this.rootPath}${fullPath}`);
   }
 
   async mkdir(fullPath: string): Promise<Entity> {
     await this.ensureInited();
-    await this.api!.createFolder(this.config.mountID, `/${this.rootPath}${fullPath}`);
-    return { key: fullPath, keyRaw: fullPath, sizeRaw: 0, mtimeSvr: Date.now() };
+    await this.api?.createFolder(
+      this.config.mountID,
+      `/${this.rootPath}${fullPath}`
+    );
+    return {
+      key: fullPath,
+      keyRaw: fullPath,
+      sizeRaw: 0,
+      mtimeSvr: Date.now(),
+    };
   }
 
   private async ensureInited() {
@@ -123,13 +157,14 @@ class RawKoofrFs implements RawFs {
       authEndpoint: `${this.config.api}/oauth2/auth`,
       tokenEndpoint: `${this.config.api}/oauth2/token`,
       redirectUri: "obsidian://remotely-save-cb-koofr",
-      scopes: ["public"]
+      scopes: ["public"],
     });
 
     if (Date.now() >= this.config.accessTokenExpiresAtTimeMs) {
       const res = await oauth.refreshToken(this.config.refreshToken);
       this.config.accessToken = res.access_token;
-      this.config.accessTokenExpiresAtTimeMs = Date.now() + (res.expires_in * 1000) - 300000;
+      this.config.accessTokenExpiresAtTimeMs =
+        Date.now() + res.expires_in * 1000 - 300000;
       await this.onConfigUpdate();
     }
 
@@ -138,12 +173,17 @@ class RawKoofrFs implements RawFs {
     // Ensure root exists
     try {
       await this.api.createFolder(this.config.mountID, `/${this.rootPath}`);
-    } catch { /* ignore if exists */ }
+    } catch {
+      /* ignore if exists */
+    }
   }
 
   async checkConnect(fullPath: string): Promise<boolean> {
     await this.ensureInited();
-    await this.api!.listItems(this.config.mountID, `/${this.rootPath}${fullPath === "/" ? "" : fullPath.replace(/\/$/, "")}`);
+    await this.api?.listItems(
+      this.config.mountID,
+      `/${this.rootPath}${fullPath === "/" ? "" : fullPath.replace(/\/$/, "")}`
+    );
     return true;
   }
 }
@@ -154,13 +194,17 @@ export class KoofrFileSystem extends BaseCloudFs {
     vaultName: string,
     onConfigUpdate: () => Promise<void>
   ) {
-    super("koofr", new RawKoofrFs(config, vaultName, onConfigUpdate), config.remoteBaseDir || vaultName);
+    super(
+      "koofr",
+      new RawKoofrFs(config, vaultName, onConfigUpdate),
+      config.remoteBaseDir || vaultName
+    );
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       await (this.rawFs as RawKoofrFs).checkConnect(this.toFullPath(""));
-    } catch (err) {
+    } catch (err: unknown) {
       callbackFunc?.(err);
       return false;
     }

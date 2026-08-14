@@ -550,4 +550,3 @@ describe("Misc: throttle", () => {
     }, 150);
   });
 });
-

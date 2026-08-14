@@ -13,8 +13,12 @@ export const getDupFiles = async (fsLocal: FakeFsLocal) => {
   const conflictPattern = /\(Conflict - .* - .*\)/;
 
   const filesToBeRemoved = allFilesAndFolders
-    .map(f => f.keyRaw)
-    .filter(key => !key.endsWith("/") && (key.includes(".dup") || conflictPattern.test(key)));
+    .map((f) => f.keyRaw)
+    .filter(
+      (key) =>
+        !key.endsWith("/") &&
+        (key.includes(".dup") || conflictPattern.test(key))
+    );
 
   return filesToBeRemoved;
 };

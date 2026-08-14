@@ -1,11 +1,14 @@
 import { Setting } from "obsidian";
-import { BaseSettingsManager } from "../../ui/settingsManager";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
+import { BaseSettingsManager } from "../../ui/settingsManager";
 
 export class AzureSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {
     const root = containerEl.createDiv({ cls: "azure-settings-section" });
-    root.toggleClass("azureblobstorage-hide", this.plugin.settings.serviceType !== "azureblobstorage");
+    root.toggleClass(
+      "azureblobstorage-hide",
+      this.plugin.settings.serviceType !== "azureblobstorage"
+    );
 
     this.addHeader(root, this.t("settings_azureblobstorage"));
     this.addDescription(root, this.t("settings_azureblobstorage_disclaimer1"));
@@ -16,10 +19,11 @@ export class AzureSettings extends BaseSettingsManager {
   private addConnectionSettings(el: HTMLElement) {
     new Setting(el)
       .setName(this.t("settings_azureblobstorage_containersasurl"))
-      .addText(text => {
+      .addText((text) => {
         wrapTextWithPasswordHide(text);
-        text.setValue(this.plugin.settings.azureblobstorage.containerSasUrl)
-          .onChange(async v => {
+        text
+          .setValue(this.plugin.settings.azureblobstorage.containerSasUrl)
+          .onChange(async (v) => {
             this.plugin.settings.azureblobstorage.containerSasUrl = v.trim();
             await this.plugin.saveSettings();
           });
@@ -27,9 +31,10 @@ export class AzureSettings extends BaseSettingsManager {
 
     new Setting(el)
       .setName(this.t("settings_azureblobstorage_containername"))
-      .addText(text => {
-        text.setValue(this.plugin.settings.azureblobstorage.containerName)
-          .onChange(async v => {
+      .addText((text) => {
+        text
+          .setValue(this.plugin.settings.azureblobstorage.containerName)
+          .onChange(async (v) => {
             this.plugin.settings.azureblobstorage.containerName = v.trim();
             await this.plugin.saveSettings();
           });

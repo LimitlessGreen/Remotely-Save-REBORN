@@ -1,14 +1,13 @@
-import { DEFAULT_DEBUG_FOLDER, type Entity } from "../baseTypes";
-import { FakeFs } from "./fsAll";
-
 import { TFile, TFolder, type Vault } from "obsidian";
 import { mkdirpInVault, statFix, unixTimeToStr } from "../../utils/misc";
+import type { Profiler } from "../../utils/profiler";
+import { DEFAULT_DEBUG_FOLDER, type Entity } from "../baseTypes";
+import { FakeFs } from "./fsAll";
 import {
   getHiddenAllowListRoots,
   listFilesByAdapterPaths,
   listFilesInObsFolder,
 } from "./obsFolderLister";
-import type { Profiler } from "../../utils/profiler";
 
 export class FakeFsLocal extends FakeFs {
   vault: Vault;
@@ -51,7 +50,7 @@ export class FakeFsLocal extends FakeFs {
     const localTAbstractFiles = this.vault.getAllLoadedFiles();
     this.profiler?.insert("finish getting walk for local");
     for (const entry of localTAbstractFiles) {
-      let r: Entity | undefined = undefined;
+      let r: Entity | undefined;
       let key = entry.path;
       if (key.startsWith("/")) {
         // why?
@@ -167,7 +166,7 @@ export class FakeFsLocal extends FakeFs {
     };
   }
 
-  async mkdir(key: string, mtime?: number, ctime?: number): Promise<Entity> {
+  async mkdir(key: string, _mtime?: number, _ctime?: number): Promise<Entity> {
     // console.debug(`mkdir: ${key}`);
     await mkdirpInVault(key, this.vault);
     return await this.stat(key);
@@ -204,7 +203,7 @@ export class FakeFsLocal extends FakeFs {
       }
     }
   }
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(_callbackFunc?: (err?: any) => void): Promise<boolean> {
     return true;
   }
 
@@ -212,7 +211,7 @@ export class FakeFsLocal extends FakeFs {
     throw new Error("Method not implemented.");
   }
 
-  async revokeAuth(): Promise<any> {
+  async revokeAuth(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

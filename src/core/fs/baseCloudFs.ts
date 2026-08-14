@@ -40,7 +40,9 @@ export class BaseCloudFs extends FakeFs {
     const prefix = this.normalizedPrefix;
     if (!prefix) return fullPath;
     if (!fullPath.startsWith(prefix)) {
-      throw new Error(`Path "${fullPath}" does not start with prefix "${prefix}"`);
+      throw new Error(
+        `Path "${fullPath}" does not start with prefix "${prefix}"`
+      );
     }
     return fullPath.slice(prefix.length);
   }
@@ -48,7 +50,7 @@ export class BaseCloudFs extends FakeFs {
   async walk(): Promise<Entity[]> {
     const fullPath = this.toFullPath("");
     const entities = await this.rawFs.walk(fullPath, false);
-    return entities.map(e => ({
+    return entities.map((e) => ({
       ...e,
       key: this.toLocalKey(e.key || ""),
       keyRaw: this.toLocalKey(e.keyRaw || e.key || ""),
@@ -58,7 +60,7 @@ export class BaseCloudFs extends FakeFs {
   async walkPartial(): Promise<Entity[]> {
     const fullPath = this.toFullPath("");
     const entities = await this.rawFs.walk(fullPath, true);
-    return entities.map(e => ({
+    return entities.map((e) => ({
       ...e,
       key: this.toLocalKey(e.key || ""),
       keyRaw: this.toLocalKey(e.keyRaw || e.key || ""),
@@ -117,7 +119,7 @@ export class BaseCloudFs extends FakeFs {
     }
     const fullPath = this.toFullPath(key);
     const entities = await this.rawFs.listVersions(fullPath);
-    return entities.map(e => ({
+    return entities.map((e) => ({
       ...e,
       key: key,
       keyRaw: key,

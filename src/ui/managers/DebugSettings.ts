@@ -1,10 +1,17 @@
 import { Notice, Setting } from "obsidian";
-import { BaseSettingsManager } from "../settingsManager";
 import { messyConfigToNormal } from "../../core/storage/configPersist";
-import { exportVaultProfilerResultsToFiles, exportVaultSyncPlansToFiles } from "../../utils/debugMode";
-import { clearAllPrevSyncRecordByVault, clearAllSyncPlanRecords, destroyDBs } from "../../core/storage/localdb";
+import {
+  clearAllPrevSyncRecordByVault,
+  clearAllSyncPlanRecords,
+  destroyDBs,
+} from "../../core/storage/localdb";
+import {
+  exportVaultProfilerResultsToFiles,
+  exportVaultSyncPlansToFiles,
+} from "../../utils/debugMode";
 import { stringToFragment } from "../../utils/misc";
 import { DEFAULT_PROFILER_CONFIG } from "../../utils/profiler";
+import { BaseSettingsManager } from "../settingsManager";
 
 export class DebugSettingsManager extends BaseSettingsManager {
   render(containerEl: HTMLElement): void {
@@ -50,9 +57,7 @@ export class DebugSettingsManager extends BaseSettingsManager {
 
         dropdown
           .setValue(
-            `${
-              plugin.settings.obfuscateSettingFile ? "enable" : "disable"
-            }`
+            `${plugin.settings.obfuscateSettingFile ? "enable" : "disable"}`
           )
           .onChange(async (val) => {
             if (val === "enable") {
@@ -156,10 +161,7 @@ export class DebugSettingsManager extends BaseSettingsManager {
       .addButton(async (button) => {
         button.setButtonText(t("settings_delprevsync_button"));
         button.onClick(async () => {
-          await clearAllPrevSyncRecordByVault(
-            plugin.db,
-            plugin.vaultRandomID
-          );
+          await clearAllPrevSyncRecordByVault(plugin.db, plugin.vaultRandomID);
           new Notice(t("settings_delprevsync_notice"));
         });
       });
@@ -186,9 +188,7 @@ export class DebugSettingsManager extends BaseSettingsManager {
         dropdown.addOption("enable", t("enable"));
         dropdown.addOption("disable", t("disable"));
         dropdown
-          .setValue(
-            plugin.settings.profiler?.enable ? "enable" : "disable"
-          )
+          .setValue(plugin.settings.profiler?.enable ? "enable" : "disable")
           .onChange(async (val: string) => {
             if (plugin.settings.profiler === undefined) {
               plugin.settings.profiler = DEFAULT_PROFILER_CONFIG;
@@ -224,9 +224,7 @@ export class DebugSettingsManager extends BaseSettingsManager {
         dropdown.addOption("enable", t("enable"));
         dropdown.addOption("disable", t("disable"));
         dropdown
-          .setValue(
-            plugin.settings.profiler?.recordSize ? "enable" : "disable"
-          )
+          .setValue(plugin.settings.profiler?.recordSize ? "enable" : "disable")
           .onChange(async (val: string) => {
             if (plugin.settings.profiler === undefined) {
               plugin.settings.profiler = DEFAULT_PROFILER_CONFIG;

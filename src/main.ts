@@ -1,21 +1,18 @@
-// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
-import { FileText, RefreshCw, RotateCw, createElement } from "lucide";
+import { createElement, FileText, RefreshCw, RotateCw } from "lucide";
 import {
+  addIcon,
   Events,
   FileSystemAdapter,
   type Modal,
   Notice,
   Platform,
   Plugin,
-  type Setting,
-  TFolder,
-  addIcon,
   requireApiVersion,
+  type Setting,
   setIcon,
+  TFile,
+  TFolder,
 } from "obsidian";
-import { throttle } from "./utils/misc";
-import { SERVICES } from "./services/serviceRegistry";
-import { syncer } from "./logic/sync/sync";
 import type {
   RemotelySavePluginSettings,
   SyncTriggerSourceType,
@@ -23,51 +20,51 @@ import type {
 import {
   COMMAND_CALLBACK,
   COMMAND_CALLBACK_DROPBOX,
-  COMMAND_CALLBACK_ONEDRIVE,
   COMMAND_URI,
 } from "./core/baseTypes";
 import { API_VER_ENSURE_REQURL_OK } from "./core/baseTypesObs";
-import { messyConfigToNormal, normalConfigToMessy } from "./core/storage/configPersist";
-import { exportVaultSyncPlansToFiles } from "./utils/debugMode";
+import { getClient } from "./core/fs/fsGetter";
+import { FakeFsLocal } from "./core/fs/fsLocal";
+import type { LangTypeAndAuto, TransItemType } from "./core/i18n/i18n";
+import { I18n } from "./core/i18n/i18n";
+import {
+  messyConfigToNormal,
+  normalConfigToMessy,
+} from "./core/storage/configPersist";
+import {
+  clearAllLoggerOutputRecords,
+  clearExpiredSyncPlanRecords,
+  getLastFailedSyncTimeByVault,
+  getLastSuccessSyncTimeByVault,
+  type InternalDBs,
+  prepareDBs,
+  upsertPluginVersionByVault,
+} from "./core/storage/localdb";
+import { syncer } from "./logic/sync/sync";
+import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "./services/azure/AzureFileSystem";
+import { DEFAULT_BOX_CONFIG } from "./services/box/BoxFileSystem";
 import {
   DEFAULT_DROPBOX_CONFIG,
   sendAuthReq as sendAuthReqDropbox,
   setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceDropbox,
 } from "./services/dropbox/DropboxFileSystem";
-import { FakeFsEncrypt } from "./core/fs/fsEncrypt";
-import { getClient } from "./core/fs/fsGetter";
-import { FakeFsLocal } from "./core/fs/fsLocal";
+import { DEFAULT_KOOFR_CONFIG } from "./services/koofr/KoofrFileSystem";
 import {
   DEFAULT_ONEDRIVE_CONFIG,
   DEFAULT_ONEDRIVEFULL_CONFIG,
 } from "./services/onedrive/OneDriveFileSystem";
-import { DEFAULT_BOX_CONFIG } from "./services/box/BoxFileSystem";
 import { DEFAULT_PCLOUD_CONFIG } from "./services/pcloud/PCloudFileSystem";
-import { DEFAULT_KOOFR_CONFIG } from "./services/koofr/KoofrFileSystem";
-import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "./services/azure/AzureFileSystem";
 import { DEFAULT_S3_CONFIG } from "./services/s3/S3FileSystem";
+import { SERVICES } from "./services/serviceRegistry";
 import { DEFAULT_WEBDAV_CONFIG } from "./services/webdav/WebdavFileSystem";
 import { DEFAULT_WEBDIS_CONFIG } from "./services/webdis/WebdisFileSystem";
-import { I18n } from "./core/i18n/i18n";
-import type { LangTypeAndAuto, TransItemType } from "./core/i18n/i18n";
-import { importQrCodeUri } from "./utils/importExport";
-import {
-  type InternalDBs,
-  clearAllLoggerOutputRecords,
-  clearExpiredSyncPlanRecords,
-  getLastFailedSyncTimeByVault,
-  getLastSuccessSyncTimeByVault,
-  prepareDBs,
-  upsertLastFailedSyncTimeByVault,
-  upsertLastSuccessSyncTimeByVault,
-  upsertPluginVersionByVault,
-} from "./core/storage/localdb";
-import { changeMobileStatusBar } from "./utils/misc";
-import { DEFAULT_PROFILER_CONFIG, Profiler } from "./utils/profiler";
 import { RemotelySaveSettingTab } from "./settings";
 import { SyncAlgoV3Modal } from "./ui/modals/syncAlgoV3Notice";
 import { VersionHistoryModal } from "./ui/modals/versionHistoryModal";
-import { TFile } from "obsidian";
+import { exportVaultSyncPlansToFiles } from "./utils/debugMode";
+import { importQrCodeUri } from "./utils/importExport";
+import { changeMobileStatusBar, throttle } from "./utils/misc";
+import { DEFAULT_PROFILER_CONFIG } from "./utils/profiler";
 
 const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   s3: DEFAULT_S3_CONFIG,
@@ -225,7 +222,9 @@ export default class RemotelySavePlugin extends Plugin {
     const configSaver = async () => await this.saveSettings();
 
     this.isSyncing = true;
-    this.currSyncMsg = t("syncrun_shortstep1", { serviceType: this.settings.serviceType });
+    this.currSyncMsg = t("syncrun_shortstep1", {
+      serviceType: this.settings.serviceType,
+    });
     getNotice(triggerSource, this.currSyncMsg);
 
     if (this.syncRibbon) {
@@ -456,9 +455,12 @@ export default class RemotelySavePlugin extends Plugin {
 
     for (const service of SERVICES) {
       if (service.callbackId && service.handleCallback) {
-        this.registerObsidianProtocolHandler(service.callbackId, async (params) => {
-          await service.handleCallback!(this, params);
-        });
+        this.registerObsidianProtocolHandler(
+          service.callbackId,
+          async (params) => {
+            await service.handleCallback?.(this, params);
+          }
+        );
       }
     }
 
@@ -663,7 +665,7 @@ export default class RemotelySavePlugin extends Plugin {
     }
 
     // compare versions and read new versions
-    const { oldVersion } = await upsertPluginVersionByVault(
+    await upsertPluginVersionByVault(
       this.db,
       this.vaultRandomID,
       this.manifest.version
@@ -906,7 +908,7 @@ export default class RemotelySavePlugin extends Plugin {
     let dropboxExpired = false;
     if (
       this.settings.dropbox.refreshToken !== "" &&
-      current >= this.settings!.dropbox!.credentialsShouldBeDeletedAtTime!
+      current >= (this.settings.dropbox.credentialsShouldBeDeletedAtTime ?? 0)
     ) {
       console.warn(`dropbox expired`);
       dropboxExpired = true;
@@ -917,7 +919,7 @@ export default class RemotelySavePlugin extends Plugin {
     let onedriveExpired = false;
     if (
       this.settings.onedrive.refreshToken !== "" &&
-      current >= this.settings!.onedrive!.credentialsShouldBeDeletedAtTime!
+      current >= (this.settings.onedrive.credentialsShouldBeDeletedAtTime ?? 0)
     ) {
       console.warn(`onedrive expired`);
       onedriveExpired = true;
@@ -928,7 +930,8 @@ export default class RemotelySavePlugin extends Plugin {
     let onedriveFullExpired = false;
     if (
       this.settings.onedrivefull.refreshToken !== "" &&
-      current >= this.settings!.onedrivefull!.credentialsShouldBeDeletedAtTime!
+      current >=
+        (this.settings.onedrivefull.credentialsShouldBeDeletedAtTime ?? 0)
     ) {
       console.warn(`onedrive full expired`);
       onedriveFullExpired = true;
@@ -939,7 +942,7 @@ export default class RemotelySavePlugin extends Plugin {
     let boxExpired = false;
     if (
       this.settings.box.refreshToken !== "" &&
-      current >= this.settings!.box!.credentialsShouldBeDeletedAtTimeMs!
+      current >= (this.settings.box.credentialsShouldBeDeletedAtTimeMs ?? 0)
     ) {
       console.warn(`box expired`);
       boxExpired = true;
@@ -950,7 +953,7 @@ export default class RemotelySavePlugin extends Plugin {
     let pCloudExpired = false;
     if (
       this.settings.pcloud.accessToken !== "" &&
-      current >= this.settings!.pcloud!.credentialsShouldBeDeletedAtTimeMs!
+      current >= (this.settings.pcloud.credentialsShouldBeDeletedAtTimeMs ?? 0)
     ) {
       console.warn(`pcloud expired`);
       pCloudExpired = true;
@@ -961,7 +964,7 @@ export default class RemotelySavePlugin extends Plugin {
     let koofrExpired = false;
     if (
       this.settings.koofr.refreshToken !== "" &&
-      current >= this.settings!.koofr!.credentialsShouldBeDeletedAtTimeMs!
+      current >= (this.settings.koofr.credentialsShouldBeDeletedAtTimeMs ?? 0)
     ) {
       console.warn(`koofr expired`);
       koofrExpired = true;
@@ -1164,9 +1167,11 @@ export default class RemotelySavePlugin extends Plugin {
     ) {
       this.app.workspace.onLayoutReady(() => {
         // listen to sync done
-        this.registerEvent(
-          this.syncEvent?.on("SYNC_DONE", this._syncOnSaveEvent1)!
-        );
+        if (this.syncEvent) {
+          this.registerEvent(
+            this.syncEvent.on("SYNC_DONE", this._syncOnSaveEvent1)
+          );
+        }
 
         // listen to current file save changes
         this.registerEvent(this.app.vault.on("modify", this._syncOnSaveEvent2));
@@ -1389,7 +1394,7 @@ export default class RemotelySavePlugin extends Plugin {
         // no need to await
         this.app.vault.adapter.write(ignoreFile, contentText);
       }
-    } catch (error) {
+    } catch (_error) {
       // just skip
     }
   }

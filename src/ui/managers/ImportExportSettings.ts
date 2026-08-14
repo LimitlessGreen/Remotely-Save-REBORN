@@ -1,9 +1,13 @@
 import { type App, Modal, Notice, Setting } from "obsidian";
-import { BaseSettingsManager } from "../settingsManager";
 import type { QRExportType } from "../../core/baseTypes";
 import type { TransItemType } from "../../core/i18n/i18n";
-import { exportQrCodeUri, importQrCodeUri, parseUriByHand } from "../../utils/importExport";
 import type RemotelySavePlugin from "../../main";
+import {
+  exportQrCodeUri,
+  importQrCodeUri,
+  parseUriByHand,
+} from "../../utils/importExport";
+import { BaseSettingsManager } from "../settingsManager";
 
 class ExportSettingsQrCodeModal extends Modal {
   plugin: RemotelySavePlugin;
@@ -100,31 +104,19 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
       .addButton(async (button) => {
         button.setButtonText(t("settings_export_dropbox_button"));
         button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "dropbox"
-          ).open();
+          new ExportSettingsQrCodeModal(app, plugin, "dropbox").open();
         });
       })
       .addButton(async (button) => {
         button.setButtonText(t("settings_export_onedrive_button"));
         button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "onedrive"
-          ).open();
+          new ExportSettingsQrCodeModal(app, plugin, "onedrive").open();
         });
       })
       .addButton(async (button) => {
         button.setButtonText(t("settings_export_onedrivefull_button"));
         button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "onedrivefull"
-          ).open();
+          new ExportSettingsQrCodeModal(app, plugin, "onedrivefull").open();
         });
       })
       .addButton(async (button) => {
@@ -160,11 +152,7 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
       .addButton(async (button) => {
         button.setButtonText(t("settings_export_azureblobstorage_button"));
         button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "azureblobstorage"
-          ).open();
+          new ExportSettingsQrCodeModal(app, plugin, "azureblobstorage").open();
         });
       });
 
@@ -186,19 +174,12 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
           if (importSettingVal !== "") {
             try {
               const inputParams = parseUriByHand(importSettingVal);
-              const parsed = importQrCodeUri(
-                inputParams,
-                app.vault.getName()
-              );
+              const parsed = importQrCodeUri(inputParams, app.vault.getName());
               if (parsed.status === "error") {
                 new Notice(parsed.message);
               } else {
                 const copied = structuredClone(parsed.result);
-                plugin.settings = Object.assign(
-                  {},
-                  plugin.settings,
-                  copied
-                );
+                plugin.settings = Object.assign({}, plugin.settings, copied);
                 plugin.saveSettings();
                 new Notice(
                   t("protocol_saveqr", {

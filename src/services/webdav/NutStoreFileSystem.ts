@@ -1,13 +1,14 @@
-import type { Entity, WebdavConfig } from "../../core/baseTypes";
-import { WebdavFileSystem } from "./WebdavFileSystem";
-import localforage from "localforage";
+import Bottleneck from "bottleneck";
 import { XMLParser } from "fast-xml-parser";
 import { Base64 } from "js-base64";
+import localforage from "localforage";
 import { requestUrl } from "obsidian";
-import type { FileStat } from "webdav";
-import Bottleneck from "bottleneck";
-import { DEFAULT_DB_NAME, DEFAULT_TBL_NUTSTORE_DELTA_CACHE } from "../../core/storage/localdb";
-import { dirname } from "path";
+import type { Entity, WebdavConfig } from "../../core/baseTypes";
+import {
+  DEFAULT_DB_NAME,
+  DEFAULT_TBL_NUTSTORE_DELTA_CACHE,
+} from "../../core/storage/localdb";
+import { WebdavFileSystem } from "./WebdavFileSystem";
 
 interface DeltaCache {
   files: Entity[];
@@ -47,18 +48,27 @@ const limiter = new Bottleneck({
  * NutStore is a specialized WebDAV service with delta sync support.
  */
 export class NutStoreFileSystem extends WebdavFileSystem {
-  constructor(config: WebdavConfig, vaultName: string, saveUpdatedConfigFunc: () => Promise<any>) {
+  constructor(
+    config: WebdavConfig,
+    vaultName: string,
+    saveUpdatedConfigFunc: () => Promise<any>
+  ) {
     super(config, vaultName, saveUpdatedConfigFunc, "nutstore");
   }
 
-  private async getDelta(folderName: string, cursor?: string): Promise<{ response: DeltaResponse }> {
+  private async getDelta(
+    folderName: string,
+    cursor?: string
+  ): Promise<{ response: DeltaResponse }> {
     return limiter.schedule(async () => {
       const body = `<?xml version="1.0" encoding="utf-8"?>
               <s:delta xmlns:s="http://ns.jianguoyun.com">
                   <s:folderName>${folderName}</s:folderName>
                   <s:cursor>${cursor ?? ""}</s:cursor>
               </s:delta>`;
-      const token = Base64.encode(`${(this as any).config.username}:${(this as any).config.password}`);
+      const token = Base64.encode(
+        `${(this as any).config.username}:${(this as any).config.password}`
+      );
       const xml = await requestUrl({
         url: `https://dav.jianguoyun.com/nsdav/delta`,
         method: "POST",
@@ -68,7 +78,10 @@ export class NutStoreFileSystem extends WebdavFileSystem {
         },
         body,
       });
-      const parser = new XMLParser({ attributeNamePrefix: "", removeNSPrefix: true });
+      const parser = new XMLParser({
+        attributeNamePrefix: "",
+        removeNSPrefix: true,
+      });
       const result = parser.parse(xml.text) as { response: DeltaResponse };
       if (result?.response?.cursor != null) {
         result.response.cursor = result.response.cursor.toString();
@@ -84,20 +97,30 @@ export class NutStoreFileSystem extends WebdavFileSystem {
     });
   }
 
-  private async getLatestDeltaCursor(folderName: string): Promise<{ response: { cursor: string } }> {
+  private async getLatestDeltaCursor(
+    folderName: string
+  ): Promise<{ response: { cursor: string } }> {
     return limiter.schedule(async () => {
       const body = `<?xml version="1.0" encoding="utf-8"?>
               <s:delta xmlns:s="http://ns.jianguoyun.com">
                   <s:folderName>${folderName}</s:folderName>
               </s:delta>`;
-      const token = Base64.encode(`${(this as any).config.username}:${(this as any).config.password}`);
+      const token = Base64.encode(
+        `${(this as any).config.username}:${(this as any).config.password}`
+      );
       const response = await requestUrl({
         url: `https://dav.jianguoyun.com/nsdav/latestDeltaCursor`,
         method: "POST",
-        headers: { Authorization: `Basic ${token}`, "Content-Type": "application/xml" },
+        headers: {
+          Authorization: `Basic ${token}`,
+          "Content-Type": "application/xml",
+        },
         body,
       });
-      const parser = new XMLParser({ attributeNamePrefix: "", removeNSPrefix: true });
+      const parser = new XMLParser({
+        attributeNamePrefix: "",
+        removeNSPrefix: true,
+      });
       return parser.parse(response.text) as any;
     });
   }
@@ -114,7 +137,8 @@ export class NutStoreFileSystem extends WebdavFileSystem {
         if (events.response.reset) {
           cache.deltas = [];
           cache.files = await super.walk();
-          cursor = (await this.getLatestDeltaCursor(remoteBaseDir)).response.cursor;
+          cursor = (await this.getLatestDeltaCursor(remoteBaseDir)).response
+            .cursor;
         } else if (events.response.delta.entry.length > 0) {
           cache.deltas.push(events.response);
           if (events.response.hasMore) cursor = events.response.cursor;
@@ -123,27 +147,31 @@ export class NutStoreFileSystem extends WebdavFileSystem {
       }
     } else {
       const files = await super.walk();
-      const { response: { cursor: originCursor } } = await this.getLatestDeltaCursor(remoteBaseDir);
+      const {
+        response: { cursor: originCursor },
+      } = await this.getLatestDeltaCursor(remoteBaseDir);
       cache = { files, originCursor, deltas: [] };
     }
 
     await deltaCache.setItem(remoteBaseDir, cache);
 
-    const filesMap = new Map(cache.files.map(f => [f.key, f]));
-    for (const delta of cache.deltas.flatMap(d => d.delta.entry)) {
+    const filesMap = new Map(cache.files.map((f) => [f.key, f]));
+    for (const delta of cache.deltas.flatMap((d) => d.delta.entry)) {
       const key = this.toLocalKey(delta.path);
       if (delta.isDeleted) {
         filesMap.delete(key);
       } else {
         filesMap.set(key, {
-          key, keyRaw: key,
+          key,
+          keyRaw: key,
           mtimeSvr: Date.parse(delta.modified).valueOf(),
           mtimeCli: Date.parse(delta.modified).valueOf(),
-          size: delta.size, sizeRaw: delta.size,
-          synthesizedFolder: delta.isDir
+          size: delta.size,
+          sizeRaw: delta.size,
+          synthesizedFolder: delta.isDir,
         });
       }
     }
-    return [...filesMap.values()].filter(x => x.key !== "" && x.key !== "/");
+    return [...filesMap.values()].filter((x) => x.key !== "" && x.key !== "/");
   }
 }

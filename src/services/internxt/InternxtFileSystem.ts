@@ -1,6 +1,6 @@
+import type { Entity, InternxtConfig } from "../../core/baseTypes";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
-import type { Entity, InternxtConfig } from "../../core/baseTypes";
 import { InternxtClient } from "./InternxtClient";
 
 export class RawInternxtFs implements RawFs {
@@ -10,23 +10,30 @@ export class RawInternxtFs implements RawFs {
 
   constructor(
     private config: InternxtConfig,
-    private saveUpdatedConfigFunc: () => Promise<any>,
+    _saveUpdatedConfigFunc: () => Promise<void>,
     appDetails?: { clientName: string; clientVersion: string }
   ) {
-    this.client = new InternxtClient({
-      token: config.token,
-      mnemonic: config.mnemonic,
-      bridgeUser: config.bridgeUser || config.email,
-      userId: config.userId || "",
-      rootFolderUuid: config.rootFolderUuid || "",
-      bucketId: config.bucketId || ""
-    }, appDetails);
+    this.client = new InternxtClient(
+      {
+        token: config.token,
+        mnemonic: config.mnemonic,
+        bridgeUser: config.bridgeUser || config.email,
+        userId: config.userId || "",
+        rootFolderUuid: config.rootFolderUuid || "",
+        bucketId: config.bucketId || "",
+      },
+      appDetails
+    );
   }
 
-  private async getFolderId(path: string, createIfMissing = false): Promise<string> {
+  private async getFolderId(
+    path: string,
+    createIfMissing = false
+  ): Promise<string> {
     const cacheKey = `${path}:${createIfMissing}`;
-    if (this.inFlightGetFolderId.has(cacheKey)) {
-      return this.inFlightGetFolderId.get(cacheKey)!;
+    const inFlight = this.inFlightGetFolderId.get(cacheKey);
+    if (inFlight) {
+      return inFlight;
     }
 
     const promise = (async () => {
@@ -41,32 +48,39 @@ export class RawInternxtFs implements RawFs {
     return promise;
   }
 
-  private async getFolderIdInternal(path: string, createIfMissing = false): Promise<string> {
+  private async getFolderIdInternal(
+    path: string,
+    createIfMissing = false
+  ): Promise<string> {
     if (path === "" || path === "/") {
-      if (!this.config.rootFolderUuid) throw new Error("Root folder UUID not set");
-      return this.config.rootFolderUuid;
+      const rootId = this.config.rootFolderUuid;
+      if (!rootId) throw new Error("Root folder UUID not set");
+      return rootId;
     }
-    if (this.folderIdCache.has(path)) return this.folderIdCache.get(path)!;
+    const cached = this.folderIdCache.get(path);
+    if (cached) return cached;
 
-    const parts = path.split("/").filter(p => p !== "");
-    let currentId = this.config.rootFolderUuid!;
+    const parts = path.split("/").filter((p) => p !== "");
+    let currentId = this.config.rootFolderUuid;
+    if (!currentId) throw new Error("Root folder UUID not set");
     let currentPath = "";
 
     for (const part of parts) {
       currentPath += (currentPath === "" ? "" : "/") + part;
 
-      if (this.folderIdCache.has(currentPath)) {
-        currentId = this.folderIdCache.get(currentPath)!;
+      const cachedPart = this.folderIdCache.get(currentPath);
+      if (cachedPart) {
+        currentId = cachedPart;
         continue;
       }
 
       const contents = await this.client.getFolderContents(currentId);
-      let folder: any = null;
+      let folder: { uuid: string } | null = null;
       if (contents.children) {
         for (const child of contents.children) {
           const name = child.plainName || child.plain_name || child.name;
           if (name === part) {
-            folder = child;
+            folder = child as { uuid: string };
             break;
           }
         }
@@ -79,12 +93,16 @@ export class RawInternxtFs implements RawFs {
 
           // Wait for folder to be recognized by Drive API in parent's children
           for (let i = 0; i < 15; i++) {
-            const parentContents = await this.client.getFolderContents(currentId);
-            const found = parentContents.children?.find((c: any) => c.uuid === folder.uuid);
+            const parentContents =
+              await this.client.getFolderContents(currentId);
+            const found = parentContents.children?.find(
+              (c: { uuid: string }) =>
+                c.uuid === (folder as { uuid: string }).uuid
+            );
             if (found) {
               break;
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         } else {
           throw new Error(`Folder not found: ${part} in ${currentPath}`);
@@ -98,7 +116,7 @@ export class RawInternxtFs implements RawFs {
     return currentId;
   }
 
-  async walk(fullPath: string, partial: boolean): Promise<Entity[]> {
+  async walk(fullPath: string, _partial: boolean): Promise<Entity[]> {
     let folderId: string;
     try {
       folderId = await this.getFolderId(fullPath);
@@ -118,9 +136,11 @@ export class RawInternxtFs implements RawFs {
         const separator = fullPath === "" || fullPath.endsWith("/") ? "" : "/";
         const key = fullPath + separator + name + "/";
         entities.push({
-          key, keyRaw: key,
-          size: 0, sizeRaw: 0,
-          synthesizedFolder: true
+          key,
+          keyRaw: key,
+          size: 0,
+          sizeRaw: 0,
+          synthesizedFolder: true,
         });
         this.folderIdCache.set(key.replace(/\/$/, ""), f.uuid);
       }
@@ -130,17 +150,18 @@ export class RawInternxtFs implements RawFs {
       for (const f of contents.files) {
         let name = f.plainName || f.plain_name || f.name;
         if (f.type && !name.endsWith("." + f.type)) {
-            name = name + "." + f.type;
+          name = name + "." + f.type;
         }
 
         const separator = fullPath === "" || fullPath.endsWith("/") ? "" : "/";
         const key = fullPath + separator + name;
         entities.push({
-          key, keyRaw: key,
+          key,
+          keyRaw: key,
           size: Number(f.size || 0),
           sizeRaw: Number(f.size || 0),
           mtimeSvr: Date.parse(f.updatedAt).valueOf(),
-          versionId: f.uuid
+          versionId: f.uuid,
         });
       }
     }
@@ -150,10 +171,15 @@ export class RawInternxtFs implements RawFs {
 
   async stat(fullPath: string): Promise<Entity> {
     const cleanPath = fullPath.replace(/\/$/, "");
-    const parentPath = cleanPath.includes("/") ? cleanPath.split("/").slice(0, -1).join("/") : "";
+    const parentPath = cleanPath.includes("/")
+      ? cleanPath.split("/").slice(0, -1).join("/")
+      : "";
 
     const entities = await this.walk(parentPath, false);
-    const found = entities.find(e => e.key === fullPath || e.key === cleanPath || e.key === cleanPath + "/");
+    const found = entities.find(
+      (e) =>
+        e.key === fullPath || e.key === cleanPath || e.key === cleanPath + "/"
+    );
     if (!found) throw new Error(`Not found: ${fullPath}`);
     return found;
   }
@@ -164,27 +190,45 @@ export class RawInternxtFs implements RawFs {
     return await this.stat(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, ctime: number): Promise<Entity> {
-    const parentPath = fullPath.includes("/") ? fullPath.split("/").slice(0, -1).join("/") : "";
+  async writeFile(
+    fullPath: string,
+    content: ArrayBuffer,
+    mtime: number,
+    ctime: number
+  ): Promise<Entity> {
+    const parentPath = fullPath.includes("/")
+      ? fullPath.split("/").slice(0, -1).join("/")
+      : "";
     const name = fullPath.split("/").pop()!;
     const parentId = await this.getFolderId(parentPath, true); // Auto-create parent
 
-    await this.client.uploadFile(parentId, name, Buffer.from(content), content.byteLength, mtime, ctime);
+    await this.client.uploadFile(
+      parentId,
+      name,
+      Buffer.from(content),
+      content.byteLength,
+      mtime,
+      ctime
+    );
 
     // Polling for metadata consistency
     for (let i = 0; i < 10; i++) {
       try {
         return await this.stat(fullPath);
-      } catch (e) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (_e) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
-    throw new Error(`Upload succeeded but metadata for ${fullPath} did not appear in time.`);
+    throw new Error(
+      `Upload succeeded but metadata for ${fullPath} did not appear in time.`
+    );
   }
 
   async readFile(fullPath: string, versionId?: string): Promise<ArrayBuffer> {
     const entity = await this.stat(fullPath);
-    const data = await this.client.downloadFile(versionId || entity.versionId!);
+    const id = versionId || entity.versionId;
+    if (!id) throw new Error(`Missing version ID for ${fullPath}`);
+    const data = await this.client.downloadFile(id);
 
     const ab = new ArrayBuffer(data.length);
     const view = new Uint8Array(ab);
@@ -200,15 +244,17 @@ export class RawInternxtFs implements RawFs {
       const folderId = await this.getFolderId(fullPath.replace(/\/$/, ""));
       await this.client.deleteFolder(folderId);
     } else {
-      await this.client.deleteFile(versionId || entity.versionId!);
+      const id = versionId || entity.versionId;
+      if (!id) throw new Error(`Missing version ID for ${fullPath}`);
+      await this.client.deleteFile(id);
     }
 
     // Polling for deletion consistency
     for (let i = 0; i < 10; i++) {
       try {
         await this.stat(fullPath);
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (e) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (_e) {
         return; // Success, it's gone
       }
     }
@@ -219,18 +265,22 @@ export class InternxtFileSystem extends BaseCloudFs {
   constructor(
     config: InternxtConfig,
     vaultName: string,
-    saveUpdatedConfigFunc: () => Promise<any>,
+    saveUpdatedConfigFunc: () => Promise<void>,
     appDetails?: { clientName: string; clientVersion: string }
   ) {
-    super("internxt", new RawInternxtFs(config, saveUpdatedConfigFunc, appDetails), config.remoteBaseDir || vaultName);
+    super(
+      "internxt",
+      new RawInternxtFs(config, saveUpdatedConfigFunc, appDetails),
+      config.remoteBaseDir || vaultName
+    );
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       // Basic check: list root
-      await this.walk();
+      await this.walk("/", true);
       return true;
-    } catch (err) {
+    } catch (err: unknown) {
       callbackFunc?.(err);
       return false;
     }

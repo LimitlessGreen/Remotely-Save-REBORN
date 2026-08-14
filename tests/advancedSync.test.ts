@@ -1,4 +1,4 @@
-import { deepStrictEqual, throws, rejects } from "assert";
+import { deepStrictEqual, rejects } from "assert";
 import type { Entity, RemotelySavePluginSettings } from "../src/core/baseTypes";
 
 /**
@@ -13,7 +13,12 @@ import type { Entity, RemotelySavePluginSettings } from "../src/core/baseTypes";
  */
 interface MockFs {
   readFile(key: string): Promise<ArrayBuffer>;
-  writeFile(key: string, content: ArrayBuffer, mtime: number, ctime: number): Promise<Entity>;
+  writeFile(
+    key: string,
+    content: ArrayBuffer,
+    mtime: number,
+    ctime: number
+  ): Promise<Entity>;
   stat(key: string): Promise<Entity | undefined>;
   rename(oldKey: string, newKey: string): Promise<void>;
 }
@@ -86,32 +91,43 @@ describe("Advanced Sync: Binary & Large Files", () => {
     const newName = SmartSyncLogic.getFileRenameForDup(key, device);
 
     // Check pattern: images/photo (Conflict - Mobile-Phone - ...).png
-    deepStrictEqual(newName.startsWith("images/photo (Conflict - Mobile-Phone -"), true);
+    deepStrictEqual(
+      newName.startsWith("images/photo (Conflict - Mobile-Phone -"),
+      true
+    );
     deepStrictEqual(newName.endsWith(".png"), true);
   });
 
   it("should probe BOTH local and remote when choosing a duplicate name", async () => {
     // AUDIT FIX (PR #1175): A duplicate must be free on both sides to prevent
     // silent overwriting of remote-only files.
-    const key = "file.zip";
-    const localFs: MockFs = {
-      async readFile() { return new ArrayBuffer(0); },
-      async writeFile() { return {} as any; },
+    const _key = "file.zip";
+    const _localFs: MockFs = {
+      async readFile() {
+        return new ArrayBuffer(0);
+      },
+      async writeFile() {
+        return {} as any;
+      },
       async stat(k: string) {
         if (k === "file.zip") return { sizeRaw: 10 } as any;
         return undefined; // name free locally
       },
-      async rename() { },
+      async rename() {},
     };
-    const remoteFs: MockFs = {
-      async readFile() { return new ArrayBuffer(0); },
-      async writeFile() { return {} as any; },
+    const _remoteFs: MockFs = {
+      async readFile() {
+        return new ArrayBuffer(0);
+      },
+      async writeFile() {
+        return {} as any;
+      },
       async stat(k: string) {
         // Name looks free locally, but is ALREADY TAKEN on remote (e.g. by another device)
         if (k.includes("Conflict")) return { sizeRaw: 20 } as any;
         return undefined;
       },
-      async rename() { },
+      async rename() {},
     };
 
     // The logic should detect it's taken on remote and try a new name
@@ -119,12 +135,12 @@ describe("Advanced Sync: Binary & Large Files", () => {
   });
 
   it("should decide to duplicate based on size and time mismatch", async () => {
-    const localEntity: Entity = {
+    const _localEntity: Entity = {
       keyRaw: "large.zip",
       sizeRaw: 1024 * 1024 * 10, // 10MB
       mtimeCli: 1000,
     };
-    const remoteEntity: Entity = {
+    const _remoteEntity: Entity = {
       keyRaw: "large.zip",
       sizeRaw: 1024 * 1024 * 10,
       mtimeCli: 2000, // Conflict: Same size, different time
@@ -132,8 +148,8 @@ describe("Advanced Sync: Binary & Large Files", () => {
 
     // This test describes the decision logic interface
     const decision = await (async () => {
-        // Logic: If conflict detected and not mergable (binary/large), duplicate
-        return "duplicate";
+      // Logic: If conflict detected and not mergable (binary/large), duplicate
+      return "duplicate";
     })();
 
     deepStrictEqual(decision, "duplicate");
@@ -158,25 +174,40 @@ describe("Advanced Sync: Edge Cases", () => {
 
   it("should survive network interruptions during multi-file sync", async () => {
     const mockFs: MockFs = {
-        async readFile() { throw new Error("Network timeout"); },
-        async writeFile() { return {} as any; },
-        async stat() { return undefined; },
-        async rename() { },
+      async readFile() {
+        throw new Error("Network timeout");
+      },
+      async writeFile() {
+        return {} as any;
+      },
+      async stat() {
+        return undefined;
+      },
+      async rename() {},
     };
 
     // The sync orchestrator should catch this and ensure no state is corrupted
-    await rejects(async () => {
+    await rejects(
+      async () => {
         await mockFs.readFile("any.md");
-    }, (err: any) => {
+      },
+      (err: any) => {
         return err.message === "Network timeout";
-    });
+      }
+    );
   });
 });
 
 describe("Advanced Sync: Cloud Service Interface", () => {
   it("should correctly handle standard CRUD operations", async () => {
     // This defines the contract for ANY storage service (GDrive, OneDrive, etc.)
-    const serviceMethods = ["readFile", "writeFile", "deleteFile", "listFiles", "renameFile"];
+    const serviceMethods = [
+      "readFile",
+      "writeFile",
+      "deleteFile",
+      "listFiles",
+      "renameFile",
+    ];
 
     // In a real test, we would iterate through a list of service instances
     // For the spec, we just define the expected presence of these methods
@@ -188,7 +219,7 @@ describe("Advanced Sync: Cloud Service Interface", () => {
       renameFile: async () => {},
     };
 
-    serviceMethods.forEach(method => {
+    serviceMethods.forEach((method) => {
       deepStrictEqual(typeof (mockService as any)[method], "function");
     });
   });
@@ -213,7 +244,7 @@ describe("Advanced Sync: Utilities", () => {
     ];
 
     // Logic: Identify files matching the conflict pattern
-    const conflicts = files.filter(f => f.keyRaw.includes("(Conflict -"));
+    const conflicts = files.filter((f) => f.keyRaw.includes("(Conflict -"));
     deepStrictEqual(conflicts.length, 2);
   });
 

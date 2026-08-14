@@ -6,12 +6,15 @@ import {
   Setting,
   type TextComponent,
 } from "obsidian";
-import { BaseSettingsManager } from "../settingsManager";
-import type { ConflictActionType, SyncDirectionType } from "../../core/baseTypes";
+import type {
+  ConflictActionType,
+  SyncDirectionType,
+} from "../../core/baseTypes";
 import type { TransItemType } from "../../core/i18n/i18n";
+import { generateClearDupFilesSettingsPart } from "../../logic/sync/settingsClearDupFiles";
 import type RemotelySavePlugin from "../../main";
 import { changeMobileStatusBar, stringToFragment } from "../../utils/misc";
-import { generateClearDupFilesSettingsPart } from "../../logic/sync/settingsClearDupFiles";
+import { BaseSettingsManager } from "../settingsManager";
 
 class SyncConfigDirModal extends Modal {
   plugin: RemotelySavePlugin;
@@ -88,7 +91,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
         dropdown
           .setValue(`${plugin.settings.concurrency}`)
           .onChange(async (val) => {
-            const realVal = Number.parseInt(val);
+            const realVal = Number.parseInt(val, 10);
             plugin.settings.concurrency = realVal;
             await plugin.saveSettings();
           });
@@ -125,9 +128,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
           secondConfirm: false,
         };
         dropdown
-          .setValue(
-            `${plugin.settings.syncConfigDir ? "enable" : "disable"}`
-          )
+          .setValue(`${plugin.settings.syncConfigDir ? "enable" : "disable"}`)
           .onChange(async (val) => {
             if (val === "enable" && !bridge.secondConfirm) {
               dropdown.setValue("disable");
@@ -155,9 +156,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
         dropdown.addOption("enable", t("enable"));
 
         dropdown
-          .setValue(
-            `${plugin.settings.syncBookmarks ? "enable" : "disable"}`
-          )
+          .setValue(`${plugin.settings.syncBookmarks ? "enable" : "disable"}`)
           .onChange(async (val) => {
             plugin.settings.syncBookmarks = val === "enable";
             await plugin.saveSettings();
@@ -182,9 +181,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
       });
 
     let conflictActionSettingOrigDesc = t("settings_conflictaction_desc");
-    if (
-      (plugin.settings.conflictAction ?? "keep_newer") === "smart_conflict"
-    ) {
+    if ((plugin.settings.conflictAction ?? "keep_newer") === "smart_conflict") {
       conflictActionSettingOrigDesc += t(
         "settings_conflictaction_smart_conflict_desc"
       );
@@ -232,7 +229,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
     if ((plugin.settings.protectModifyPercentage ?? 50) % 10 === 0) {
       percentage2.settingEl.addClass("settings-percentage-custom-hide");
     }
-    let percentage2Text: TextComponent | undefined = undefined;
+    let percentage2Text: TextComponent | undefined;
     percentage2.addText((text) => {
       text.inputEl.type = "number";
       percentage2Text = text;
@@ -256,7 +253,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
     });
 
     percentage1.addDropdown((dropdown) => {
-      for (const i of Array.from({ length: 11 }, (x, i) => i * 10)) {
+      for (const i of Array.from({ length: 11 }, (_x, i) => i * 10)) {
         let desc = `${i}`;
         if (i === 0) {
           desc = t("settings_protectmodifypercentage_000_desc");
@@ -280,7 +277,7 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
         percentage2.settingEl.removeClass("settings-percentage-custom");
       }
       dropdown.setValue(initVal).onChange(async (val) => {
-        const k = Number.parseInt(val);
+        const k = Number.parseInt(val, 10);
         if (val === "custom" || Number.isNaN(k)) {
           percentage2.settingEl.removeClass("settings-percentage-custom-hide");
         } else {
@@ -336,23 +333,15 @@ export class AdvancedSettingsManager extends BaseSettingsManager {
 
           dropdown
             .setValue(
-              `${
-                plugin.settings.enableMobileStatusBar
-                  ? "enable"
-                  : "disable"
-              }`
+              `${plugin.settings.enableMobileStatusBar ? "enable" : "disable"}`
             )
             .onChange(async (val) => {
               if (val === "enable") {
                 plugin.settings.enableMobileStatusBar = true;
-                plugin.appContainerObserver =
-                  changeMobileStatusBar("enable");
+                plugin.appContainerObserver = changeMobileStatusBar("enable");
               } else {
                 plugin.settings.enableMobileStatusBar = false;
-                changeMobileStatusBar(
-                  "disable",
-                  plugin.appContainerObserver
-                );
+                changeMobileStatusBar("disable", plugin.appContainerObserver);
                 plugin.appContainerObserver?.disconnect();
                 plugin.appContainerObserver = undefined;
               }

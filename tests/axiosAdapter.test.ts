@@ -1,6 +1,6 @@
-import obsidianMock from "./obsidianShim";
 import { strict as assert } from "assert";
-import obsidianAdapter from "../src/polyfill/axios-obsidian-adapter";
+import obsidianAdapter from "../src/polyfill/axiosObsidianAdapter";
+import obsidianMock from "./obsidianShim";
 
 describe("Axios Obsidian Adapter", () => {
   const originalRequestUrl = obsidianMock.requestUrl;
@@ -18,7 +18,7 @@ describe("Axios Obsidian Adapter", () => {
         json: { success: true },
         headers: { "content-type": "application/json" },
         text: JSON.stringify({ success: true }),
-        arrayBuffer: new ArrayBuffer(0)
+        arrayBuffer: new ArrayBuffer(0),
       };
     };
 
@@ -26,7 +26,7 @@ describe("Axios Obsidian Adapter", () => {
       method: "get",
       url: "https://example.com/get",
       headers: { "X-Test": "test" },
-      params: { foo: "bar" }
+      params: { foo: "bar" },
     };
 
     const response: any = await obsidianAdapter(config);
@@ -44,7 +44,7 @@ describe("Axios Obsidian Adapter", () => {
         text: "OK",
         headers: {},
         json: null,
-        arrayBuffer: new ArrayBuffer(0)
+        arrayBuffer: new ArrayBuffer(0),
       };
     };
 
@@ -53,7 +53,7 @@ describe("Axios Obsidian Adapter", () => {
       baseURL: "https://example.com",
       url: "/post",
       data: JSON.stringify({ hello: "world" }),
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     };
 
     const response: any = await obsidianAdapter(config);
@@ -62,4 +62,3 @@ describe("Axios Obsidian Adapter", () => {
     assert.equal(response.data, "OK");
   });
 });
-

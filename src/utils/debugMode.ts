@@ -6,11 +6,11 @@ import {
   DEFAULT_PROFILER_RESULT_FILE_PREFIX,
   DEFAULT_SYNC_PLANS_HISTORY_FILE_PREFIX,
 } from "../core/baseTypes";
+import type { InternalDBs } from "../core/storage/localdb";
 import {
   readAllProfilerResultsByVault,
   readAllSyncPlanRecordTextsByVault,
 } from "../core/storage/localdb";
-import type { InternalDBs } from "../core/storage/localdb";
 import { mkdirpInVault } from "./misc";
 
 const getSubsetOfSyncPlan = (x: string, onlyChange: boolean) => {

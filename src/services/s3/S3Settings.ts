@@ -1,10 +1,13 @@
-import { type App, Modal, Notice, Setting, requireApiVersion } from "obsidian";
-import type RemotelySavePlugin from "../../main";
-import { BaseSettingsManager } from "../../ui/settingsManager";
-import { API_VER_ENSURE_REQURL_OK, VALID_REQURL } from "../../core/baseTypesObs";
-import { getClient } from "../../core/fs/fsGetter";
-import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
+import { type App, Modal, Notice, requireApiVersion, Setting } from "obsidian";
 import * as path from "path";
+import {
+  API_VER_ENSURE_REQURL_OK,
+  VALID_REQURL,
+} from "../../core/baseTypesObs";
+import { getClient } from "../../core/fs/fsGetter";
+import type RemotelySavePlugin from "../../main";
+import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
+import { BaseSettingsManager } from "../../ui/settingsManager";
 
 export const simpleTransRemotePrefix = (x: string) => {
   if (x === undefined) {
@@ -282,7 +285,7 @@ export class S3Settings extends BaseSettingsManager {
         dropdown
           .setValue(`${this.plugin.settings.s3.partsConcurrency}`)
           .onChange(async (val) => {
-            const realVal = Number.parseInt(val);
+            const realVal = Number.parseInt(val, 10);
             this.plugin.settings.s3.partsConcurrency = realVal;
             await this.plugin.saveSettings();
           });

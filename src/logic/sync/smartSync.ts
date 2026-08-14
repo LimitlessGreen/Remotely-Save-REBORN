@@ -33,7 +33,7 @@ function getLCSText(a: string, b: string): string {
   const commonLines: string[] = [];
   while (lcsResult && lcsResult.buffer1index !== -1) {
     commonLines.unshift(linesA[lcsResult.buffer1index]);
-    lcsResult = lcsResult.chain as any;
+    lcsResult = (lcsResult as { chain: typeof lcsResult }).chain;
   }
 
   return commonLines.join("\n");
@@ -77,7 +77,10 @@ export function getFileRenameForDup(key: string, deviceName: string): string {
   }
 
   const segs = key.split("/");
-  const fileName = segs.pop()!;
+  const fileName = segs.pop();
+  if (fileName === undefined) {
+    throw new Error(`Cannot rename key: ${key}`);
+  }
   const lastDotIndex = fileName.lastIndexOf(".");
 
   let baseName = fileName;

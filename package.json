@@ -4,13 +4,14 @@
   "description": "This is yet another sync plugin for Obsidian app.",
   "scripts": {
     "dev": "node esbuild.config.mjs --watch",
-    "deploy:dev": "node dev-deploy.mjs",
+    "deploy:dev": "node devDeploy.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "format": "npx @biomejs/biome check --write .",
     "clean": "npx rimraf main.js",
     "test": "mocha --import=tsx \"tests/**/*.ts\"",
     "test:deep": "mocha --import=tsx \"tests/integration/*.deep.test.ts\"",
-    "test:libs": "npm test --workspaces --if-present"
+    "test:libs": "npm test --workspaces --if-present",
+    "prepare": "husky"
   },
   "browser": {
     "path": "path-browserify",
@@ -28,6 +29,11 @@
   "workspaces": [
     "libs/*"
   ],
+  "lint-staged": {
+    "*.{js,ts,mjs,json,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
   "devDependencies": {
     "@biomejs/biome": "2.5.8",
     "@microsoft/microsoft-graph-types": "^2.43.1",
@@ -46,7 +52,9 @@
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.2",
     "esbuild-plugin-inline-worker": "^0.1.1",
+    "husky": "^9.1.7",
     "jsdom": "^30.0.1",
+    "lint-staged": "^17.3.0",
     "mocha": "^11.8.0",
     "npm-check-updates": "^23.0.2",
     "obsidian": "^1.13.1",

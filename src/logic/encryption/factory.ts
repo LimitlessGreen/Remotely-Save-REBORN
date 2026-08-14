@@ -1,5 +1,5 @@
-import { type CipherMethodType } from "../../core/baseTypes";
-import { type EncryptionProvider } from "./interface";
+import type { CipherMethodType } from "../../core/baseTypes";
+import type { EncryptionProvider } from "./interface";
 import { OpenSSLEncryptionProvider } from "./providers/openssl";
 import { RCloneEncryptionProvider } from "./providers/rclone";
 

@@ -1,6 +1,10 @@
 import { base32, base64url } from "rfc4648";
-import { type EncryptionProvider } from "../interface";
-import { bufferToArrayBuffer, hexStringToTypedArray, isVaildText } from "../../../utils/misc";
+import {
+  bufferToArrayBuffer,
+  hexStringToTypedArray,
+  isVaildText,
+} from "../../../utils/misc";
+import type { EncryptionProvider } from "../interface";
 
 const DEFAULT_ITER = 20000;
 
@@ -82,7 +86,7 @@ export const decryptArrayBuffer = async (
   password: string,
   rounds: number = DEFAULT_ITER
 ) => {
-  const prefix = arrBuf.slice(0, 8);
+  const _prefix = arrBuf.slice(0, 8);
   const salt = arrBuf.slice(8, 16);
   const derivedKey = await getKeyIVFromPassword(
     new Uint8Array(salt),
@@ -226,7 +230,7 @@ export class OpenSSLEncryptionProvider implements EncryptionProvider {
         if (res !== undefined && isVaildText(res)) {
           return res;
         }
-      } catch (error) {
+      } catch (_error) {
         // ignore and throw below
       }
     } else if (name.startsWith(MAGIC_ENCRYPTED_PREFIX_BASE64URL)) {
@@ -235,7 +239,7 @@ export class OpenSSLEncryptionProvider implements EncryptionProvider {
         if (res !== undefined && isVaildText(res)) {
           return res;
         }
-      } catch (error) {
+      } catch (_error) {
         // ignore and throw below
       }
     }

@@ -1,16 +1,16 @@
 import localforage from "localforage";
 import { extendPrototype as ep1 } from "localforage-getitems";
 import { extendPrototype as ep2 } from "localforage-removeitems";
+
 ep1(localforage);
 ep2(localforage);
 export type LocalForage = typeof localforage;
+
 import { nanoid } from "nanoid";
-
-import type { SyncPlanType } from "../baseTypes";
-import type { Entity, SUPPORTED_SERVICES_TYPE } from "../baseTypes";
 import { unixTimeToStr } from "../../utils/misc";
+import type { Entity, SupportedServicesType, SyncPlanType } from "../baseTypes";
 
-const DB_VERSION_NUMBER_IN_HISTORY = [20211114, 20220108, 20220326, 20240220];
+const _DB_VERSION_NUMBER_IN_HISTORY = [20211114, 20220108, 20220326, 20240220];
 export const DEFAULT_DB_VERSION_NUMBER: number = 20240220;
 export const DEFAULT_DB_NAME = "remotelysavedb";
 export const DEFAULT_TBL_VERSION = "schemaversion";
@@ -44,7 +44,7 @@ interface SyncMetaMappingRecord {
   localMtime: number;
   remoteMtime: number;
   remoteExtraKey: string;
-  remoteType: SUPPORTED_SERVICES_TYPE;
+  remoteType: SupportedServicesType;
   keyType: "folder" | "file";
   vaultRandomID: string;
 }
@@ -301,10 +301,10 @@ export const destroyDBs = async () => {
   // });
   // console.info("db deleted");
   const req = indexedDB.deleteDatabase(DEFAULT_DB_NAME);
-  req.onsuccess = (event) => {
+  req.onsuccess = (_event) => {
     console.info("db deleted");
   };
-  req.onblocked = (event) => {
+  req.onblocked = (_event) => {
     console.warn("trying to delete db but it was blocked");
   };
   req.onerror = (event) => {
@@ -367,7 +367,7 @@ export const insertSyncPlanRecordByVault = async (
   db: InternalDBs,
   syncPlan: SyncPlanType,
   vaultRandomID: string,
-  remoteType: SUPPORTED_SERVICES_TYPE
+  remoteType: SupportedServicesType
 ) => {
   const now = Date.now();
   const record = {
@@ -389,7 +389,7 @@ export const readAllSyncPlanRecordTextsByVault = async (
   vaultRandomID: string
 ) => {
   const records = [] as SyncPlanRecord[];
-  await db.syncPlansTbl.iterate((value, key, iterationNumber) => {
+  await db.syncPlansTbl.iterate((value, key, _iterationNumber) => {
     if (key.startsWith(`${vaultRandomID}\t`)) {
       records.push(value as SyncPlanRecord);
     }
@@ -409,14 +409,14 @@ export const readAllSyncPlanRecordTextsByVault = async (
  * @param db
  */
 export const clearExpiredSyncPlanRecords = async (db: InternalDBs) => {
-  const MILLISECONDS_OLD = 1000 * 60 * 60 * 24 * 1; // 1 days
-  const COUNT_TO_MANY = 20;
+  const MillisecondsOld = 1000 * 60 * 60 * 24 * 1; // 1 days
+  const CountToMany = 20;
 
   const currTs = Date.now();
-  const expiredTs = currTs - MILLISECONDS_OLD;
+  const expiredTs = currTs - MillisecondsOld;
 
   let records = (await db.syncPlansTbl.keys()).map((key) => {
-    const ts = Number.parseInt(key.split("\t")[1]);
+    const ts = Number.parseInt(key.split("\t")[1], 10);
     const expired = ts <= expiredTs;
     return {
       ts: ts,
@@ -429,13 +429,13 @@ export const clearExpiredSyncPlanRecords = async (db: InternalDBs) => {
     records.filter((x) => x.expired).map((x) => x.key)
   );
 
-  if (records.length - keysToRemove.size > COUNT_TO_MANY) {
+  if (records.length - keysToRemove.size > CountToMany) {
     // we need to find out records beyond 100 records
     records = records.filter((x) => !x.expired); // shrink the array
     records.sort((a, b) => -(a.ts - b.ts)); // descending
-    records.slice(COUNT_TO_MANY).forEach((element) => {
+    for (const element of records.slice(CountToMany)) {
       keysToRemove.add(element.key);
-    });
+    }
   }
 
   // const ps = [] as Promise<void>[];
@@ -569,7 +569,7 @@ export const insertProfilerResultByVault = async (
   db: InternalDBs,
   profilerStr: string,
   vaultRandomID: string,
-  remoteType: SUPPORTED_SERVICES_TYPE
+  _remoteType: SupportedServicesType
 ) => {
   const now = Date.now();
   await db.profilerResultsTbl.setItem(`${vaultRandomID}\t${now}`, profilerStr);
@@ -577,11 +577,13 @@ export const insertProfilerResultByVault = async (
   // clear older one while writing
   const records = (await db.profilerResultsTbl.keys())
     .filter((x) => x.startsWith(`${vaultRandomID}\t`))
-    .map((x) => Number.parseInt(x.split("\t")[1]));
+    .map((x) => Number.parseInt(x.split("\t")[1], 10));
   records.sort((a, b) => -(a - b)); // descending
   while (records.length > 5) {
-    const ts = records.pop()!;
-    await db.profilerResultsTbl.removeItem(`${vaultRandomID}\t${ts}`);
+    const ts = records.pop();
+    if (ts !== undefined) {
+      await db.profilerResultsTbl.removeItem(`${vaultRandomID}\t${ts}`);
+    }
   }
 };
 
@@ -590,11 +592,11 @@ export const readAllProfilerResultsByVault = async (
   vaultRandomID: string
 ) => {
   const records = [] as { val: string; ts: number }[];
-  await db.profilerResultsTbl.iterate((value, key, iterationNumber) => {
+  await db.profilerResultsTbl.iterate((value, key, _iterationNumber) => {
     if (key.startsWith(`${vaultRandomID}\t`)) {
       records.push({
         val: value as string,
-        ts: Number.parseInt(key.split("\t")[1]),
+        ts: Number.parseInt(key.split("\t")[1], 10),
       });
     }
   });

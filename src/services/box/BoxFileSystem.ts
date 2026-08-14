@@ -3,16 +3,16 @@
  * Box Provider using BaseCloudFs
  */
 
+import { OAuth2Handler } from "../../auth/oauth2";
 import {
-  type Entity,
-  type BoxConfig,
   BOX_CLIENT_ID,
   BOX_CLIENT_SECRET,
+  type BoxConfig,
+  type Entity,
 } from "../../core/baseTypes";
-import { BoxApiClient } from "./BoxClient";
-import { OAuth2Handler } from "../../auth/oauth2";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
+import { BoxApiClient } from "./boxClient";
 
 export const DEFAULT_BOX_CONFIG: BoxConfig = {
   accessToken: "",
@@ -35,6 +35,14 @@ export const generateAuthUrl = () => {
   return oauth.getAuthUrl("state");
 };
 
+interface BoxItem {
+  id: string;
+  name: string;
+  type: string;
+  size?: number;
+  modifiedAt?: string;
+}
+
 class RawBoxFs implements RawFs {
   private api: BoxApiClient | null = null;
   private rootId: string | null = null;
@@ -51,22 +59,28 @@ class RawBoxFs implements RawFs {
     const list: Entity[] = [];
 
     const scan = async (folderId: string, path: string) => {
-      const items = await this.api!.listItems(folderId);
-      for (const item of items.entries || []) {
+      const items = await this.api?.listItems(folderId);
+      for (const item of (items?.entries as unknown as BoxItem[]) || []) {
         const isDir = item.type === "folder";
         const key = path + item.name + (isDir ? "/" : "");
         this.cache.set(key, item.id);
         list.push({
-          key, keyRaw: key,
-          sizeRaw: (item as any).size || 0,
-          mtimeSvr: (item as any).modifiedAt ? Date.parse((item as any).modifiedAt as any).valueOf() : Date.now(),
+          key,
+          keyRaw: key,
+          sizeRaw: item.size || 0,
+          mtimeSvr: item.modifiedAt
+            ? Date.parse(item.modifiedAt).valueOf()
+            : Date.now(),
         });
         if (!partial && isDir) await scan(item.id, key);
       }
     };
 
     const startFolderId = await this.resolvePathToId(fullPath);
-    await scan(startFolderId, fullPath === "/" ? "" : fullPath.replace(/\/$/, "") + "/");
+    await scan(
+      startFolderId,
+      fullPath === "/" ? "" : fullPath.replace(/\/$/, "") + "/"
+    );
     return list;
   }
 
@@ -77,48 +91,73 @@ class RawBoxFs implements RawFs {
     // but we can list parent and find it, or add a method to client.
     // For simplicity, let's assume it's in cache or we list children of parent.
     const normalized = fullPath.replace(/\/$/, "");
-    const parentPath = normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
+    const parentPath =
+      normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
     const parentId = await this.resolvePathToId(parentPath);
-    const items = await this.api!.listItems(parentId);
-    const item = items.entries?.find(i => i.id === id);
+    const items = await this.api?.listItems(parentId);
+    const item = (items?.entries as unknown as BoxItem[])?.find(
+      (i) => i.id === id
+    );
     if (!item) throw new Error(`Not found: ${fullPath}`);
 
-    const isDir = item.type === "folder";
+    const _isDir = item.type === "folder";
     return {
-      key: fullPath, keyRaw: fullPath,
-      sizeRaw: (item as any).size || 0,
-      mtimeSvr: (item as any).modifiedAt ? Date.parse((item as any).modifiedAt as any).valueOf() : Date.now(),
+      key: fullPath,
+      keyRaw: fullPath,
+      sizeRaw: item.size || 0,
+      mtimeSvr: item.modifiedAt
+        ? Date.parse(item.modifiedAt).valueOf()
+        : Date.now(),
     };
   }
 
   async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
     const id = await this.resolvePathToId(fullPath);
-    return await this.api!.downloadFile(id);
+    return await this.api?.downloadFile(id);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, _ctime: number): Promise<Entity> {
+  async writeFile(
+    fullPath: string,
+    content: ArrayBuffer,
+    mtime: number,
+    _ctime: number
+  ): Promise<Entity> {
     await this.ensureInited();
     const existingId = await this.resolvePathToId(fullPath).catch(() => null);
     const normalized = fullPath.replace(/\/$/, "");
-    const fileName = normalized.split("/").pop()!;
-    const parentPath = normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
+    const fileName = normalized.split("/").pop();
+    if (fileName === undefined) {
+      throw new Error(`Invalid path: ${fullPath}`);
+    }
+    const parentPath =
+      normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
     const parentId = await this.resolvePathToId(parentPath);
 
-    let file;
+    let file: BoxItem | undefined;
     if (existingId) {
-      const res = await this.api!.updateFile(existingId, content);
-      file = res.entries![0];
+      const res = await this.api?.updateFile(existingId, content);
+      file = res?.entries?.[0] as unknown as BoxItem;
     } else {
-      const res = await this.api!.uploadFile(parentId, fileName, content, mtime);
-      file = res.entries![0];
+      const res = await this.api?.uploadFile(
+        parentId,
+        fileName,
+        content,
+        mtime
+      );
+      file = res?.entries?.[0] as unknown as BoxItem;
+    }
+
+    if (!file) {
+      throw new Error(`Upload failed for ${fullPath}`);
     }
 
     this.cache.set(fullPath, file.id);
     return {
-      key: fullPath, keyRaw: fullPath,
+      key: fullPath,
+      keyRaw: fullPath,
       sizeRaw: file.size || 0,
-      mtimeSvr: Date.parse(file.modifiedAt as any).valueOf(),
+      mtimeSvr: Date.parse(file.modifiedAt || "").valueOf(),
     };
   }
 
@@ -126,9 +165,9 @@ class RawBoxFs implements RawFs {
     await this.ensureInited();
     try {
       const id = await this.resolvePathToId(fullPath);
-      await this.api!.deleteFile(id);
+      await this.api?.deleteFile(id);
       this.cache.delete(fullPath);
-    } catch (e) {
+    } catch (_e) {
       // Ignore
     }
   }
@@ -136,32 +175,46 @@ class RawBoxFs implements RawFs {
   async mkdir(fullPath: string): Promise<Entity> {
     await this.ensureInited();
     const normalized = fullPath.replace(/\/$/, "");
-    const name = normalized.split("/").pop()!;
-    const parentPath = normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
+    const name = normalized.split("/").pop();
+    if (name === undefined) {
+      throw new Error(`Invalid path: ${fullPath}`);
+    }
+    const parentPath =
+      normalized.substring(0, normalized.lastIndexOf("/") + 1) || "/";
     const parentId = await this.resolvePathToId(parentPath);
 
-    const res = await this.api!.createFolder(parentId, name);
+    const res = await this.api?.createFolder(parentId, name);
     this.cache.set(fullPath, res.id);
-    return { key: fullPath, keyRaw: fullPath, sizeRaw: 0, mtimeSvr: Date.now() };
+    return {
+      key: fullPath,
+      keyRaw: fullPath,
+      sizeRaw: 0,
+      mtimeSvr: Date.now(),
+    };
   }
 
   private async resolvePathToId(fullPath: string): Promise<string> {
     const normalized = fullPath === "/" ? "/" : fullPath.replace(/\/$/, "");
-    if (normalized === "/") return this.rootId!;
-    if (this.cache.has(fullPath)) return this.cache.get(fullPath)!;
-    if (this.cache.has(normalized)) return this.cache.get(normalized)!;
+    if (normalized === "/") {
+      if (!this.rootId) throw new Error("Root ID not initialized");
+      return this.rootId;
+    }
+    const cached = this.cache.get(fullPath) ?? this.cache.get(normalized);
+    if (cached) return cached;
 
     const parts = normalized.split("/").filter(Boolean);
-    let currId = this.rootId!;
+    let currId = this.rootId;
+    if (!currId) throw new Error("Root ID not initialized");
     let currPath = "";
     for (const part of parts) {
       currPath += "/" + part;
-      if (this.cache.has(currPath)) {
-        currId = this.cache.get(currPath)!;
+      const cachedPart = this.cache.get(currPath);
+      if (cachedPart) {
+        currId = cachedPart;
         continue;
       }
-      const items = await this.api!.listItems(currId);
-      const found = items.entries?.find(i => i.name === part);
+      const items = await this.api?.listItems(currId);
+      const found = items?.entries?.find((i) => i.name === part);
       if (!found) throw new Error(`Path not found: ${currPath}`);
       currId = found.id;
       this.cache.set(currPath, currId);
@@ -178,13 +231,14 @@ class RawBoxFs implements RawFs {
       authEndpoint: "https://account.box.com/api/oauth2/authorize",
       tokenEndpoint: "https://api.box.com/oauth2/token",
       redirectUri: "obsidian://remotely-save-cb-box",
-      scopes: []
+      scopes: [],
     });
 
     if (Date.now() >= this.config.accessTokenExpiresAtTimeMs) {
       const res = await oauth.refreshToken(this.config.refreshToken);
       this.config.accessToken = res.access_token;
-      this.config.accessTokenExpiresAtTimeMs = Date.now() + (res.expires_in * 1000) - 300000;
+      this.config.accessTokenExpiresAtTimeMs =
+        Date.now() + res.expires_in * 1000 - 300000;
       await this.onConfigUpdate();
     }
 
@@ -201,9 +255,10 @@ class RawBoxFs implements RawFs {
     this.cache.set("/", this.rootId);
   }
 
-  async checkConnect(fullPath: string): Promise<boolean> {
+  async checkConnect(_fullPath: string): Promise<boolean> {
     await this.ensureInited();
-    await this.api!.listItems(this.rootId!);
+    if (!this.rootId) throw new Error("Root ID not initialized");
+    await this.api?.listItems(this.rootId);
     return true;
   }
 }
@@ -214,13 +269,17 @@ export class BoxFileSystem extends BaseCloudFs {
     vaultName: string,
     onConfigUpdate: () => Promise<void>
   ) {
-    super("box", new RawBoxFs(config, vaultName, onConfigUpdate), config.remoteBaseDir || vaultName);
+    super(
+      "box",
+      new RawBoxFs(config, vaultName, onConfigUpdate),
+      config.remoteBaseDir || vaultName
+    );
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       await (this.rawFs as RawBoxFs).checkConnect(this.toFullPath(""));
-    } catch (err) {
+    } catch (err: unknown) {
       callbackFunc?.(err);
       return false;
     }

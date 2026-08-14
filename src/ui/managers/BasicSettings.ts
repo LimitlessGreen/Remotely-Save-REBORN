@@ -1,4 +1,4 @@
-import { Eye, EyeOff, createElement } from "lucide";
+import { createElement, Eye, EyeOff } from "lucide";
 import {
   type App,
   Modal,
@@ -7,12 +7,15 @@ import {
   Setting,
   type TextComponent,
 } from "obsidian";
-import { BaseSettingsManager } from "../settingsManager";
 import type { CipherMethodType } from "../../core/baseTypes";
 import type { TransItemType } from "../../core/i18n/i18n";
-import { upsertLastFailedSyncTimeByVault, upsertLastSuccessSyncTimeByVault } from "../../core/storage/localdb";
+import {
+  upsertLastFailedSyncTimeByVault,
+  upsertLastSuccessSyncTimeByVault,
+} from "../../core/storage/localdb";
 import type RemotelySavePlugin from "../../main";
 import { stringToFragment } from "../../utils/misc";
+import { BaseSettingsManager } from "../settingsManager";
 
 class PasswordModal extends Modal {
   plugin: RemotelySavePlugin;
@@ -40,7 +43,7 @@ class PasswordModal extends Modal {
     contentEl.createEl("h2", { text: t("modal_password_title") });
     t("modal_password_shortdesc")
       .split("\n")
-      .forEach((val, idx) => {
+      .forEach((val, _idx) => {
         contentEl.createEl("p", {
           text: val,
         });
@@ -117,7 +120,7 @@ class EncryptionMethodModal extends Modal {
     contentEl.createEl("h2", { text: t("modal_encryptionmethod_title") });
     t("modal_encryptionmethod_shortdesc")
       .split("\n")
-      .forEach((val, idx) => {
+      .forEach((val, _idx) => {
         contentEl.createEl("p", {
           text: stringToFragment(val),
         });
@@ -151,7 +154,7 @@ export const wrapTextWithPasswordHide = (text: TextComponent) => {
   const { eye, eyeOff } = getEyesElements();
   const hider = text.inputEl.insertAdjacentElement("afterend", createSpan())!;
   hider.innerHTML = eyeOff;
-  hider.addEventListener("click", (e) => {
+  hider.addEventListener("click", (_e) => {
     const isText = text.inputEl.getAttribute("type") === "text";
     hider.innerHTML = isText ? eyeOff : eye;
     text.inputEl.setAttribute("type", isText ? "password" : "text");
@@ -232,7 +235,7 @@ export class BasicSettingsManager extends BaseSettingsManager {
         dropdown
           .setValue(`${plugin.settings.autoRunEveryMilliseconds}`)
           .onChange(async (val: string) => {
-            const realVal = Number.parseInt(val);
+            const realVal = Number.parseInt(val, 10);
             plugin.settings.autoRunEveryMilliseconds = realVal;
             await plugin.saveSettings();
             if (
@@ -276,7 +279,7 @@ export class BasicSettingsManager extends BaseSettingsManager {
         dropdown
           .setValue(`${plugin.settings.initRunAfterMilliseconds}`)
           .onChange(async (val: string) => {
-            const realVal = Number.parseInt(val);
+            const realVal = Number.parseInt(val, 10);
             plugin.settings.initRunAfterMilliseconds = realVal;
             await plugin.saveSettings();
           });
@@ -295,8 +298,10 @@ export class BasicSettingsManager extends BaseSettingsManager {
         dropdown
           .setValue(`${syncOnSaveEnabled ? "1000" : "-1"}`)
           .onChange(async (val: string) => {
-            plugin.settings.syncOnSaveAfterMilliseconds =
-              Number.parseInt(val);
+            plugin.settings.syncOnSaveAfterMilliseconds = Number.parseInt(
+              val,
+              10
+            );
             await plugin.saveSettings();
             plugin.toggleSyncOnSaveIfSet();
           });
@@ -315,7 +320,7 @@ export class BasicSettingsManager extends BaseSettingsManager {
         dropdown
           .setValue(`${plugin.settings.skipSizeLargerThan}`)
           .onChange(async (val) => {
-            plugin.settings.skipSizeLargerThan = Number.parseInt(val);
+            plugin.settings.skipSizeLargerThan = Number.parseInt(val, 10);
             await plugin.saveSettings();
           });
       });

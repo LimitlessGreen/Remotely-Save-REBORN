@@ -1,12 +1,8 @@
-import { Buffer } from "buffer";
-import * as path from "path";
-import { Readable } from "stream";
-import type { PutObjectCommandInput, _Object } from "@aws-sdk/client-s3";
+import type { _Object, PutObjectCommandInput } from "@aws-sdk/client-s3";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
-  type HeadObjectCommandOutput,
   ListObjectsV2Command,
   type ListObjectsV2CommandInput,
   ListObjectVersionsCommand,
@@ -19,18 +15,24 @@ import {
   FetchHttpHandler,
   type FetchHttpHandlerOptions,
 } from "@smithy/fetch-http-handler";
-// @ts-ignore
+// @ts-expect-error
 import { requestTimeout } from "@smithy/fetch-http-handler/dist-es/request-timeout";
 import { type HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
+import { Buffer } from "buffer";
 import * as mime from "mime-types";
-import { requestUrl, type RequestUrlParam } from "obsidian";
+import { type RequestUrlParam, requestUrl } from "obsidian";
 import PQueue from "p-queue";
-import { DEFAULT_CONTENT_TYPE, type Entity, type S3Config } from "../../core/baseTypes";
+import { Readable } from "stream";
+import {
+  DEFAULT_CONTENT_TYPE,
+  type Entity,
+  type S3Config,
+} from "../../core/baseTypes";
 import { VALID_REQURL } from "../../core/baseTypesObs";
-import { bufferToArrayBuffer, getFolderLevels } from "../../utils/misc";
 import { BaseCloudFs } from "../../core/fs/baseCloudFs";
 import type { RawFs } from "../../core/fs/rawFsInterface";
+import { bufferToArrayBuffer, getFolderLevels } from "../../utils/misc";
 
 export const DEFAULT_S3_CONFIG: S3Config = {
   s3Endpoint: "",
@@ -103,7 +105,7 @@ class ObsHttpHandler extends FetchHttpHandler {
       transformedHeaders[keyLower] = request.headers[key];
     }
 
-    let contentType: string | undefined = undefined;
+    let contentType: string | undefined;
     if (transformedHeaders["content-type"] !== undefined) {
       contentType = transformedHeaders["content-type"];
     }
@@ -147,7 +149,7 @@ class ObsHttpHandler extends FetchHttpHandler {
 
     if (abortSignal) {
       raceOfPromises.push(
-        new Promise<never>((resolve, reject) => {
+        new Promise<never>((_resolve, reject) => {
           abortSignal.onabort = () => {
             const abortError = new Error("Request aborted");
             abortError.name = "AbortError";
@@ -204,7 +206,10 @@ export class RawS3Fs implements RawFs {
           accessKeyId: config.s3AccessKeyID,
           secretAccessKey: config.s3SecretAccessKey,
         },
-        requestHandler: new ObsHttpHandler(undefined, config.reverseProxyNoSignUrl),
+        requestHandler: new ObsHttpHandler(
+          undefined,
+          config.reverseProxyNoSignUrl
+        ),
       });
     } else {
       this.s3Client = new S3Client({
@@ -227,7 +232,10 @@ export class RawS3Fs implements RawFs {
     );
   }
 
-  private fromS3ObjectToEntity(x: _Object, mtimeRecords: Record<string, number>): Entity {
+  private fromS3ObjectToEntity(
+    x: _Object,
+    mtimeRecords: Record<string, number>
+  ): Entity {
     if (x.LastModified === undefined) throw Error(`Missing LastModified`);
     const mtimeSvr = Math.floor(x.LastModified.valueOf() / 1000.0) * 1000;
     let mtimeCli = mtimeSvr;
@@ -256,7 +264,9 @@ export class RawS3Fs implements RawFs {
 
     const contents: _Object[] = [];
     const mtimeRecords: Record<string, number> = {};
-    const queueHead = new PQueue({ concurrency: partial ? 1 : this.config.partsConcurrency });
+    const queueHead = new PQueue({
+      concurrency: partial ? 1 : this.config.partsConcurrency,
+    });
 
     let isTruncated = true;
     do {
@@ -267,9 +277,18 @@ export class RawS3Fs implements RawFs {
         for (const content of rsp.Contents) {
           queueHead.add(async () => {
             try {
-              const rspHead = await this.s3Client.send(new HeadObjectCommand({ Bucket: this.config.s3BucketName, Key: content.Key }));
+              const rspHead = await this.s3Client.send(
+                new HeadObjectCommand({
+                  Bucket: this.config.s3BucketName,
+                  Key: content.Key,
+                })
+              );
               if (rspHead.Metadata) {
-                mtimeRecords[content.Key!] = Math.floor(Number.parseFloat(rspHead.Metadata.mtime || rspHead.Metadata.MTime || "0"));
+                mtimeRecords[content.Key!] = Math.floor(
+                  Number.parseFloat(
+                    rspHead.Metadata.mtime || rspHead.Metadata.MTime || "0"
+                  )
+                );
               }
             } catch (e) {
               console.warn(`Failed to HEAD ${content.Key}`, e);
@@ -300,10 +319,17 @@ export class RawS3Fs implements RawFs {
           delete this.synthFoldersCache[f];
           continue;
         }
-        if (!this.synthFoldersCache[f] || entity.mtimeSvr! >= this.synthFoldersCache[f].mtimeSvr!) {
+        if (
+          !this.synthFoldersCache[f] ||
+          entity.mtimeSvr! >= this.synthFoldersCache[f].mtimeSvr!
+        ) {
           this.synthFoldersCache[f] = {
-            key: f, keyRaw: f, size: 0, sizeRaw: 0,
-            mtimeSvr: entity.mtimeSvr, mtimeCli: entity.mtimeCli,
+            key: f,
+            keyRaw: f,
+            size: 0,
+            sizeRaw: 0,
+            mtimeSvr: entity.mtimeSvr,
+            mtimeCli: entity.mtimeCli,
             synthesizedFolder: true,
           };
         }
@@ -313,26 +339,48 @@ export class RawS3Fs implements RawFs {
   }
 
   async stat(fullPath: string): Promise<Entity> {
-    if (this.synthFoldersCache[fullPath]) return this.synthFoldersCache[fullPath];
-    const res = await this.s3Client.send(new HeadObjectCommand({ Bucket: this.config.s3BucketName, Key: fullPath }));
+    if (this.synthFoldersCache[fullPath])
+      return this.synthFoldersCache[fullPath];
+    const res = await this.s3Client.send(
+      new HeadObjectCommand({ Bucket: this.config.s3BucketName, Key: fullPath })
+    );
     if (!res.LastModified) throw Error(`Missing LastModified`);
     const mtimeSvr = Math.floor(res.LastModified.valueOf() / 1000.0) * 1000;
     let mtimeCli = mtimeSvr;
     if (this.config.useAccurateMTime && res.Metadata) {
-      const m2 = Math.floor(Number.parseFloat(res.Metadata.mtime || res.Metadata.MTime || "0"));
+      const m2 = Math.floor(
+        Number.parseFloat(res.Metadata.mtime || res.Metadata.MTime || "0")
+      );
       mtimeCli = m2 >= 1000000000000 ? m2 : m2 * 1000;
     }
     return {
-      key: fullPath, keyRaw: fullPath, mtimeSvr, mtimeCli,
-      sizeRaw: res.ContentLength || 0, size: res.ContentLength || 0,
-      etag: res.ETag, synthesizedFolder: false,
+      key: fullPath,
+      keyRaw: fullPath,
+      mtimeSvr,
+      mtimeCli,
+      sizeRaw: res.ContentLength || 0,
+      size: res.ContentLength || 0,
+      etag: res.ETag,
+      synthesizedFolder: false,
       versionId: res.VersionId,
     };
   }
 
-  async mkdir(fullPath: string, mtime?: number, ctime?: number): Promise<Entity> {
+  async mkdir(
+    fullPath: string,
+    mtime?: number,
+    ctime?: number
+  ): Promise<Entity> {
     if (!this.config.generateFolderObject) {
-      const synth = { key: fullPath, keyRaw: fullPath, size: 0, sizeRaw: 0, mtimeSvr: mtime, mtimeCli: mtime, synthesizedFolder: true };
+      const synth = {
+        key: fullPath,
+        keyRaw: fullPath,
+        size: 0,
+        sizeRaw: 0,
+        mtimeSvr: mtime,
+        mtimeCli: mtime,
+        synthesizedFolder: true,
+      };
       this.synthFoldersCache[fullPath] = synth;
       return synth;
     }
@@ -343,13 +391,20 @@ export class RawS3Fs implements RawFs {
       Body: "",
       ContentType: DEFAULT_CONTENT_TYPE,
       ContentLength: 0,
-      Metadata: mtime ? { MTime: `${mtime / 1000.0}`, CTime: `${(ctime || mtime) / 1000.0}` } : undefined,
+      Metadata: mtime
+        ? { MTime: `${mtime / 1000.0}`, CTime: `${(ctime || mtime) / 1000.0}` }
+        : undefined,
     };
     await this.s3Client.send(new PutObjectCommand(p));
     return await this.stat(fullPath);
   }
 
-  async writeFile(fullPath: string, content: ArrayBuffer, mtime: number, ctime: number): Promise<Entity> {
+  async writeFile(
+    fullPath: string,
+    content: ArrayBuffer,
+    mtime: number,
+    ctime: number
+  ): Promise<Entity> {
     const upload = new Upload({
       client: this.s3Client,
       queueSize: this.config.partsConcurrency,
@@ -358,7 +413,9 @@ export class RawS3Fs implements RawFs {
         Bucket: this.config.s3BucketName,
         Key: fullPath,
         Body: new Uint8Array(content),
-        ContentType: mime.contentType(mime.lookup(fullPath) || DEFAULT_CONTENT_TYPE) || DEFAULT_CONTENT_TYPE,
+        ContentType:
+          mime.contentType(mime.lookup(fullPath) || DEFAULT_CONTENT_TYPE) ||
+          DEFAULT_CONTENT_TYPE,
         Metadata: { MTime: `${mtime / 1000.0}`, CTime: `${ctime / 1000.0}` },
       },
     });
@@ -367,41 +424,53 @@ export class RawS3Fs implements RawFs {
   }
 
   async readFile(fullPath: string, versionId?: string): Promise<ArrayBuffer> {
-    const data = await this.s3Client.send(new GetObjectCommand({
-      Bucket: this.config.s3BucketName,
-      Key: fullPath,
-      VersionId: versionId,
-    }));
+    const data = await this.s3Client.send(
+      new GetObjectCommand({
+        Bucket: this.config.s3BucketName,
+        Key: fullPath,
+        VersionId: versionId,
+      })
+    );
     return await getObjectBodyToArrayBuffer(data.Body);
   }
 
   async rm(fullPath: string, versionId?: string): Promise<void> {
-    if (fullPath.endsWith("/") && this.synthFoldersCache[fullPath] && !versionId) {
+    if (
+      fullPath.endsWith("/") &&
+      this.synthFoldersCache[fullPath] &&
+      !versionId
+    ) {
       delete this.synthFoldersCache[fullPath];
       return;
     }
     try {
-      await this.s3Client.send(new DeleteObjectCommand({
-        Bucket: this.config.s3BucketName,
-        Key: fullPath,
-        VersionId: versionId,
-      }));
-    } catch (e) {
+      await this.s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: this.config.s3BucketName,
+          Key: fullPath,
+          VersionId: versionId,
+        })
+      );
+    } catch (_e) {
       // Best effort
     }
   }
 
   async listVersions(fullPath: string): Promise<Entity[]> {
-    const res = await this.s3Client.send(new ListObjectVersionsCommand({
-      Bucket: this.config.s3BucketName,
-      Prefix: fullPath,
-    }));
+    const res = await this.s3Client.send(
+      new ListObjectVersionsCommand({
+        Bucket: this.config.s3BucketName,
+        Prefix: fullPath,
+      })
+    );
 
     const versions: Entity[] = [];
     if (res.Versions) {
       for (const v of res.Versions) {
         if (v.Key !== fullPath) continue;
-        const mtimeSvr = v.LastModified ? Math.floor(v.LastModified.valueOf() / 1000.0) * 1000 : 0;
+        const mtimeSvr = v.LastModified
+          ? Math.floor(v.LastModified.valueOf() / 1000.0) * 1000
+          : 0;
         versions.push({
           key: v.Key,
           keyRaw: v.Key!,
@@ -419,7 +488,9 @@ export class RawS3Fs implements RawFs {
   }
 
   async checkConnect(): Promise<boolean> {
-    const rsp = await this.s3Client.send(new ListObjectsV2Command({ Bucket: this.config.s3BucketName, MaxKeys: 1 }));
+    const rsp = await this.s3Client.send(
+      new ListObjectsV2Command({ Bucket: this.config.s3BucketName, MaxKeys: 1 })
+    );
     return rsp.$metadata.httpStatusCode === 200;
   }
 }

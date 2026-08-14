@@ -1,5 +1,8 @@
-import type { ProfilerConfig, SUPPORTED_SERVICES_TYPE } from "../core/baseTypes";
-import { type InternalDBs, insertProfilerResultByVault } from "../core/storage/localdb";
+import type { ProfilerConfig, SupportedServicesType } from "../core/baseTypes";
+import {
+  type InternalDBs,
+  insertProfilerResultByVault,
+} from "../core/storage/localdb";
 import { roughSizeOfObject, unixTimeToStr } from "./misc";
 
 interface BreakPoint {
@@ -141,7 +144,7 @@ export class Profiler {
   async save(
     db: InternalDBs,
     vaultRandomID: string,
-    remoteType: SUPPORTED_SERVICES_TYPE
+    remoteType: SupportedServicesType
   ) {
     await insertProfilerResultByVault(
       db,

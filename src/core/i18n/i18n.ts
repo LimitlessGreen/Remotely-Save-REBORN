@@ -6,6 +6,10 @@ import { LANGS } from "./langs";
 export type LangType = keyof typeof LANGS;
 export type LangTypeAndAuto = LangType | "auto";
 export type TransItemType = keyof (typeof LANGS)["en"];
+export type TFunc = (
+  key: TransItemType,
+  vars?: Record<string, string>
+) => string;
 
 export class I18n {
   lang: LangTypeAndAuto;
@@ -23,11 +27,22 @@ export class I18n {
   }
 
   _get(key: TransItemType) {
-    let realLang = this.lang;
-    if (this.lang === "auto" && moment.locale().replace("-", "_") in LANGS) {
-      realLang = moment.locale().replace("-", "_") as LangType;
+    let realLang: LangType = "en";
+    if (this.lang === "auto") {
+      const locale = moment.locale().toLowerCase();
+      if (locale.startsWith("zh-cn") || locale.startsWith("zh-hans")) {
+        realLang = "zhCn";
+      } else if (locale.startsWith("zh-tw") || locale.startsWith("zh-hant")) {
+        realLang = "zhTw";
+      } else if (locale.startsWith("ja")) {
+        realLang = "ja";
+      } else if (locale.startsWith("ko")) {
+        realLang = "ko";
+      } else {
+        realLang = "en";
+      }
     } else {
-      realLang = "en";
+      realLang = this.lang;
     }
 
     const res: string =

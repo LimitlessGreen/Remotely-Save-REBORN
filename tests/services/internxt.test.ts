@@ -1,8 +1,8 @@
 import "./../obsidianShim";
-import { expect } from "chai";
-import { InternxtClient } from "../../src/services/internxt/InternxtClient";
 import { Auth, Drive } from "@internxt/sdk";
+import { expect } from "chai";
 import sinon from "sinon";
+import { InternxtClient } from "../../src/services/internxt/InternxtClient";
 
 describe("Internxt Service Tests", () => {
   let authStub: sinon.SinonStub;
@@ -24,7 +24,7 @@ describe("Internxt Service Tests", () => {
       bridgeUser: "user",
       userId: "id",
       rootFolderUuid: "root",
-      bucketId: "bucket"
+      bucketId: "bucket",
     };
 
     new InternxtClient(config);
@@ -32,7 +32,7 @@ describe("Internxt Service Tests", () => {
     expect(authStub.calledOnce).to.be.true;
     expect(storageStub.calledOnce).to.be.true;
 
-    const apiUrl = 'https://gateway.internxt.com/drive';
+    const apiUrl = "https://gateway.internxt.com/drive";
     expect(authStub.firstCall.args[0]).to.equal(apiUrl);
     expect(storageStub.firstCall.args[0]).to.equal(apiUrl);
   });
@@ -43,19 +43,21 @@ describe("Internxt Service Tests", () => {
       user: {
         mnemonic: "encrypted-mnemonic",
         rootFolderId: "root",
-        bucket: "bucket"
-      }
+        bucket: "bucket",
+      },
     });
 
     authStub.returns({
-      loginWithoutKeys: loginWithoutKeysStub
+      loginWithoutKeys: loginWithoutKeysStub,
     });
 
     const client = new InternxtClient();
 
     // We need to bypass actual crypto for mnemonic decryption in this simple test
     // or just mock the decryption method.
-    (client as any).decryptMnemonic = sinon.stub().returns("decrypted-mnemonic");
+    (client as any).decryptMnemonic = sinon
+      .stub()
+      .returns("decrypted-mnemonic");
 
     const res = await client.login("test@example.com", "password");
 
@@ -63,4 +65,3 @@ describe("Internxt Service Tests", () => {
     expect(res.mnemonic).to.equal("decrypted-mnemonic");
   });
 });
-

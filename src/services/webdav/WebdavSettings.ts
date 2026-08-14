@@ -1,10 +1,10 @@
 import { Notice, Setting } from "obsidian";
-import { BaseSettingsManager } from "../../ui/settingsManager";
+import type { WebdavAuthType } from "../../core/baseTypes";
+import { VALID_REQURL } from "../../core/baseTypesObs";
 import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
-import { VALID_REQURL } from "../../core/baseTypesObs";
-import type { WebdavAuthType } from "../../core/baseTypes";
+import { BaseSettingsManager } from "../../ui/settingsManager";
 import { stringToFragment } from "../../utils/misc";
 
 export class WebdavSettings extends BaseSettingsManager {
@@ -141,7 +141,10 @@ export class WebdavSettings extends BaseSettingsManager {
       .setDesc(this.t("settings_webdav_depth_desc"))
       .addDropdown((dropdown) => {
         dropdown.addOption("manual_1", this.t("settings_webdav_depth_1"));
-        dropdown.addOption("manual_infinity", this.t("settings_webdav_depth_inf"));
+        dropdown.addOption(
+          "manual_infinity",
+          this.t("settings_webdav_depth_inf")
+        );
 
         dropdown
           .setValue(this.plugin.settings.webdav.depth || "manual_1")

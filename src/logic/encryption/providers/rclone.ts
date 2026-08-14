@@ -2,16 +2,16 @@ import {
   Cipher as CipherRCloneCryptPack,
   encryptedSize,
 } from "@fyears/rclone-crypt";
-import { type EncryptionProvider } from "../interface";
+import type { EncryptionProvider } from "../interface";
 
-// @ts-ignore
+// @ts-expect-error
 import EncryptWorker from "./rclone.worker";
 
 interface RecvMsg {
   status: "ok" | "error";
   outputName?: string;
   outputContent?: ArrayBuffer;
-  error?: any;
+  error?: unknown;
 }
 
 export const getSizeFromOrigToEnc = encryptedSize;
@@ -34,7 +34,7 @@ export class CipherRclone {
     // console.debug("begin creating EncryptWorker");
     this.workers = [];
     for (let i = 0; i < workerNum; ++i) {
-      this.workers.push(new (EncryptWorker as any)() as Worker);
+      this.workers.push(new (EncryptWorker as unknown as { new (): Worker })());
     }
 
     // console.debug("finish creating EncryptWorker");

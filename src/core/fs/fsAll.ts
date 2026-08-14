@@ -1,5 +1,5 @@
-import { isDeepEqual } from "../../utils/misc";
 import { nanoid } from "nanoid";
+import { isDeepEqual } from "../../utils/misc";
 import type { Entity } from "../baseTypes";
 
 export abstract class FakeFs {
@@ -13,15 +13,15 @@ export abstract class FakeFs {
     ctime: number
   ): Promise<Entity>;
   abstract readFile(key: string, versionId?: string): Promise<ArrayBuffer>;
-  async rename(key1: string, key2: string): Promise<void> {
+  async rename(_key1: string, _key2: string): Promise<void> {
     throw new Error("Rename not implemented.");
   }
   abstract rm(key: string, versionId?: string): Promise<void>;
   async listVersions?(key: string): Promise<Entity[]>;
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     return await this.checkConnectCommonOps(callbackFunc);
   }
-  async checkConnectCommonOps(callbackFunc?: any) {
+  async checkConnectCommonOps(callbackFunc?: (err?: unknown) => void) {
     try {
       console.info(`check connect: create folder`);
       const folderName = `rs-test-folder-${nanoid()}/`;
@@ -67,7 +67,7 @@ export abstract class FakeFs {
   async getUserDisplayName(): Promise<string> {
     return "Unknown User";
   }
-  async revokeAuth(): Promise<any> {
+  async revokeAuth(): Promise<void> {
     // do nothing
   }
   allowEmptyFile(): boolean {
@@ -78,7 +78,7 @@ export abstract class FakeFs {
   }
   async stat(key: string): Promise<Entity> {
     const all = await this.walk();
-    const found = all.find(e => e.key === key || e.keyRaw === key);
+    const found = all.find((e) => e.key === key || e.keyRaw === key);
     if (!found) throw new Error(`Not found: ${key}`);
     return found;
   }

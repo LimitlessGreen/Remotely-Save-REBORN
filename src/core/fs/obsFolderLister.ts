@@ -1,8 +1,7 @@
-import type { ListedFiles, Vault } from "obsidian";
-import type { Entity } from "../baseTypes";
-
 import { Queue } from "@fyears/tsqueue";
+import type { ListedFiles, Vault } from "obsidian";
 import { chunk, isSpecialFolderNameToSkip, statFix } from "../../utils/misc";
+import type { Entity } from "../baseTypes";
 
 const isPluginDirItself = (x: string, pluginId: string) => {
   return (
@@ -36,7 +35,7 @@ export const listFilesInObsFolder = async (
   bookmarksOnly: boolean
 ): Promise<Entity[]> => {
   const q = new Queue([configDir]);
-  const CHUNK_SIZE = 10;
+  const ChunkSize = 10;
   let contents: Entity[] = [];
 
   let iterRound = 0;
@@ -44,10 +43,13 @@ export const listFilesInObsFolder = async (
   while (q.length > 0) {
     const itemsToFetch: string[] = [];
     while (q.length > 0) {
-      itemsToFetch.push(q.pop()!);
+      const item = q.pop();
+      if (item !== undefined) {
+        itemsToFetch.push(item);
+      }
     }
 
-    const itemsToFetchChunks = chunk(itemsToFetch, CHUNK_SIZE);
+    const itemsToFetchChunks = chunk(itemsToFetch, ChunkSize);
     for (const singleChunk of itemsToFetchChunks) {
       const r = singleChunk.map(async (x) => {
         const statRes = await statFix(vault, x);
@@ -56,7 +58,7 @@ export const listFilesInObsFolder = async (
           throw Error("something goes wrong while listing hidden folder");
         }
         const isFolder = statRes.type === "folder";
-        let children: ListedFiles | undefined = undefined;
+        let children: ListedFiles | undefined;
         if (isFolder) {
           children = await vault.adapter.list(x);
         }
@@ -195,26 +197,29 @@ export const listFilesByAdapterPaths = async (
     .filter((r) => r !== "");
 
   const q = new Queue(uniqueRoots);
-  const CHUNK_SIZE = 10;
+  const ChunkSize = 10;
   const contents: Entity[] = [];
 
   while (q.length > 0) {
     const itemsToFetch: string[] = [];
     while (q.length > 0) {
-      itemsToFetch.push(q.pop()!);
+      const item = q.pop();
+      if (item !== undefined) {
+        itemsToFetch.push(item);
+      }
     }
 
-    const itemsToFetchChunks = chunk(itemsToFetch, CHUNK_SIZE);
+    const itemsToFetchChunks = chunk(itemsToFetch, ChunkSize);
     for (const singleChunk of itemsToFetchChunks) {
       const r = singleChunk.map(async (x) => {
         let statRes: { type: string; mtime: number; size: number } | undefined;
         try {
           statRes = await statFix(vault, x);
-        } catch (err: any) {
+        } catch (_err: unknown) {
           return undefined;
         }
         const isFolder = statRes.type === "folder";
-        let children: ListedFiles | undefined = undefined;
+        let children: ListedFiles | undefined;
         if (isFolder) {
           children = await vault.adapter.list(x);
         }

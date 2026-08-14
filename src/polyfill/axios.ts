@@ -1,9 +1,9 @@
-// @ts-ignore
-import axios from '../../node_modules/axios/index.js';
-import obsidianAdapter from './axios-obsidian-adapter';
+// @ts-expect-error
+import axios from "../../node_modules/axios/index.js";
+import obsidianAdapter from "./axiosObsidianAdapter";
 
-if (axios && axios.defaults) {
-  // @ts-ignore
+if (axios?.defaults) {
+  // @ts-expect-error
   axios.defaults.adapter = obsidianAdapter;
 }
 

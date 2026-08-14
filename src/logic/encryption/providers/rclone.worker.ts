@@ -1,7 +1,7 @@
 import { Cipher as CipherRCloneCryptPack } from "@fyears/rclone-crypt";
 import { nanoid } from "nanoid";
 
-const ctx: WorkerGlobalScope = self as any;
+const ctx: WorkerGlobalScope = self as unknown as WorkerGlobalScope;
 
 const workerNanoID = nanoid();
 const cipher = new CipherRCloneCryptPack("base64");
@@ -25,7 +25,7 @@ async function decryptContentBuf(input: ArrayBuffer) {
   return (await cipher.decryptData(new Uint8Array(input))).buffer;
 }
 
-ctx.addEventListener("message", async (event: any) => {
+ctx.addEventListener("message", async (event: MessageEvent) => {
   const port: MessagePort = event.ports[0];
   const {
     action,

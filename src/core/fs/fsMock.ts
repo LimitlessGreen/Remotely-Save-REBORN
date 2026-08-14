@@ -17,36 +17,36 @@ export class FakeFsMock extends FakeFs {
     return await this.walk();
   }
 
-  async stat(key: string): Promise<Entity> {
+  async stat(_key: string): Promise<Entity> {
     throw new Error("Method not implemented.");
   }
 
-  async mkdir(key: string, mtime: number, ctime: number): Promise<Entity> {
+  async mkdir(_key: string, _mtime: number, _ctime: number): Promise<Entity> {
     throw new Error("Method not implemented.");
   }
 
   async writeFile(
-    key: string,
-    content: ArrayBuffer,
-    mtime: number,
-    ctime: number
+    _key: string,
+    _content: ArrayBuffer,
+    _mtime: number,
+    _ctime: number
   ): Promise<Entity> {
     throw new Error("Method not implemented.");
   }
 
-  async readFile(key: string): Promise<ArrayBuffer> {
+  async readFile(_key: string): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
 
-  async rename(key1: string, key2: string): Promise<void> {
+  async rename(_key1: string, _key2: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  async rm(key: string): Promise<void> {
+  async rm(_key: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     return await this.checkConnectCommonOps(callbackFunc);
   }
 
@@ -54,7 +54,7 @@ export class FakeFsMock extends FakeFs {
     throw new Error("Method not implemented.");
   }
 
-  async revokeAuth(): Promise<any> {
+  async revokeAuth(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

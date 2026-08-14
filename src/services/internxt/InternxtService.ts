@@ -1,9 +1,10 @@
-import { type App } from "obsidian";
+import type { App } from "obsidian";
+import { COMMAND_CALLBACK_INTERNXT } from "../../core/baseTypes";
+import type { TFunc } from "../../core/i18n/i18n";
 import type RemotelySavePlugin from "../../main";
+import type { CloudService } from "../serviceInterface";
 import { InternxtFileSystem } from "./InternxtFileSystem";
 import { InternxtSettings } from "./InternxtSettings";
-import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_INTERNXT } from "../../core/baseTypes";
 
 export const InternxtService: CloudService = {
   id: "internxt",
@@ -18,7 +19,7 @@ export const InternxtService: CloudService = {
     );
   },
 
-  getSettings(plugin: RemotelySavePlugin, app: App, t: any) {
+  getSettings(plugin: RemotelySavePlugin, app: App, t: TFunc) {
     return new InternxtSettings(plugin, app, t);
   },
 };

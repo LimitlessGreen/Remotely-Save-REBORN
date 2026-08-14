@@ -1,20 +1,15 @@
 import { type App, Modal, Notice, Platform, Setting } from "obsidian";
+import { getClient } from "../../core/fs/fsGetter";
+import type { TransItemType } from "../../core/i18n/i18n";
 import type RemotelySavePlugin from "../../main";
+import { ChangeRemoteBaseDirModal } from "../../settings";
 import { BaseSettingsManager } from "../../ui/settingsManager";
+import { stringToFragment } from "../../utils/misc";
 import {
   DEFAULT_ONEDRIVE_CONFIG,
   DEFAULT_ONEDRIVEFULL_CONFIG,
   getAuthUrlAndVerifier as getAuthUrlAndVerifierOnedrive,
-  OneDriveFileSystem,
 } from "./OneDriveFileSystem";
-import {
-  type OnedriveConfig,
-  type OnedriveFullConfig,
-} from "../../core/baseTypes";
-import { getClient } from "../../core/fs/fsGetter";
-import { ChangeRemoteBaseDirModal } from "../../settings";
-import type { TransItemType } from "../../core/i18n/i18n";
-import { stringToFragment } from "../../utils/misc";
 
 export class OnedriveAuthModal extends Modal {
   readonly plugin: RemotelySavePlugin;
@@ -184,7 +179,8 @@ export class OneDriveSettings extends BaseSettingsManager {
     const root = containerEl.createDiv({ cls: `${prefix}-settings-section` });
     root.toggleClass(
       `${prefix}-hide`,
-      this.plugin.settings.serviceType !== (isFull ? "onedrivefull" : "onedrive")
+      this.plugin.settings.serviceType !==
+        (isFull ? "onedrivefull" : "onedrive")
     );
 
     this.addHeader(
@@ -217,10 +213,13 @@ export class OneDriveSettings extends BaseSettingsManager {
       : this.plugin.settings.onedrive;
 
     onedriveLongDescDiv.createEl("p", {
-      text: this.t(isFull ? "settings_onedrivefull_folder" : "settings_onedrive_folder", {
-        pluginID: this.plugin.manifest.id,
-        remoteBaseDir: config.remoteBaseDir || this.app.vault.getName(),
-      }),
+      text: this.t(
+        isFull ? "settings_onedrivefull_folder" : "settings_onedrive_folder",
+        {
+          pluginID: this.plugin.manifest.id,
+          remoteBaseDir: config.remoteBaseDir || this.app.vault.getName(),
+        }
+      ),
     });
 
     if (!isFull) {
@@ -238,14 +237,29 @@ export class OneDriveSettings extends BaseSettingsManager {
     });
 
     const onedriveRevokeAuthSetting = new Setting(onedriveRevokeAuthDiv)
-      .setName(this.t(isFull ? "settings_onedrivefull_revoke" : "settings_onedrive_revoke"))
+      .setName(
+        this.t(
+          isFull ? "settings_onedrivefull_revoke" : "settings_onedrive_revoke"
+        )
+      )
       .setDesc(
-        this.t(isFull ? "settings_onedrivefull_revoke_desc" : "settings_onedrive_revoke_desc", {
-          username: config.username,
-        })
+        this.t(
+          isFull
+            ? "settings_onedrivefull_revoke_desc"
+            : "settings_onedrive_revoke_desc",
+          {
+            username: config.username,
+          }
+        )
       )
       .addButton(async (button) => {
-        button.setButtonText(this.t(isFull ? "settings_onedrivefull_revoke_button" : "settings_onedrive_revoke_button"));
+        button.setButtonText(
+          this.t(
+            isFull
+              ? "settings_onedrivefull_revoke_button"
+              : "settings_onedrive_revoke_button"
+          )
+        );
         button.onClick(async () => {
           new OnedriveRevokeAuthModal(
             this.app,
@@ -257,10 +271,24 @@ export class OneDriveSettings extends BaseSettingsManager {
       });
 
     new Setting(onedriveAuthDiv)
-      .setName(this.t(isFull ? "settings_onedrivefull_auth" : "settings_onedrive_auth"))
-      .setDesc(this.t(isFull ? "settings_onedrivefull_auth_desc" : "settings_onedrive_auth_desc"))
+      .setName(
+        this.t(isFull ? "settings_onedrivefull_auth" : "settings_onedrive_auth")
+      )
+      .setDesc(
+        this.t(
+          isFull
+            ? "settings_onedrivefull_auth_desc"
+            : "settings_onedrive_auth_desc"
+        )
+      )
       .addButton(async (button) => {
-        button.setButtonText(this.t(isFull ? "settings_onedrivefull_auth_button" : "settings_onedrive_auth_button"));
+        button.setButtonText(
+          this.t(
+            isFull
+              ? "settings_onedrivefull_auth_button"
+              : "settings_onedrive_auth_button"
+          )
+        );
         button.onClick(async () => {
           const modal = new OnedriveAuthModal(
             this.app,
@@ -311,12 +339,38 @@ export class OneDriveSettings extends BaseSettingsManager {
       });
 
     new Setting(root)
-      .setName(this.t(isFull ? "settings_onedrivefull_emptyfile" : "settings_onedrive_emptyfile"))
-      .setDesc(this.t(isFull ? "settings_onedrivefull_emptyfile_desc" : "settings_onedrive_emptyfile_desc"))
+      .setName(
+        this.t(
+          isFull
+            ? "settings_onedrivefull_emptyfile"
+            : "settings_onedrive_emptyfile"
+        )
+      )
+      .setDesc(
+        this.t(
+          isFull
+            ? "settings_onedrivefull_emptyfile_desc"
+            : "settings_onedrive_emptyfile_desc"
+        )
+      )
       .addDropdown(async (dropdown) => {
         dropdown
-          .addOption("skip", this.t(isFull ? "settings_onedrivefull_emptyfile_skip" : "settings_onedrive_emptyfile_skip"))
-          .addOption("error", this.t(isFull ? "settings_onedrivefull_emptyfile_error" : "settings_onedrive_emptyfile_error"))
+          .addOption(
+            "skip",
+            this.t(
+              isFull
+                ? "settings_onedrivefull_emptyfile_skip"
+                : "settings_onedrive_emptyfile_skip"
+            )
+          )
+          .addOption(
+            "error",
+            this.t(
+              isFull
+                ? "settings_onedrivefull_emptyfile_error"
+                : "settings_onedrive_emptyfile_error"
+            )
+          )
           .setValue(config.emptyFile)
           .onChange(async (val) => {
             config.emptyFile = val as any;
@@ -341,9 +395,21 @@ export class OneDriveSettings extends BaseSettingsManager {
             errors.msg = `${err}`;
           });
           if (res) {
-            new Notice(this.t(isFull ? "settings_onedrivefull_connect_succ" : "settings_onedrive_connect_succ"));
+            new Notice(
+              this.t(
+                isFull
+                  ? "settings_onedrivefull_connect_succ"
+                  : "settings_onedrive_connect_succ"
+              )
+            );
           } else {
-            new Notice(this.t(isFull ? "settings_onedrivefull_connect_fail" : "settings_onedrive_connect_fail"));
+            new Notice(
+              this.t(
+                isFull
+                  ? "settings_onedrivefull_connect_fail"
+                  : "settings_onedrive_connect_fail"
+              )
+            );
             new Notice(errors.msg);
           }
         });

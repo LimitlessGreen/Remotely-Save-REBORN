@@ -99,10 +99,16 @@ describe("Encryption OpenSSL tests", () => {
     // openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -pass pass:somepassword -in mona_lisa/1374px-Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg -out mona_lisa/1374px-Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg.enc
 
     if (!Buffer.from(enc).equals(Buffer.from(opensslArrBuf))) {
-        console.log("Enc length:", enc.byteLength);
-        console.log("Openssl length:", opensslArrBuf.byteLength);
-        console.log("Enc (first 32):", Buffer.from(enc.slice(0, 32)).toString('hex'));
-        console.log("Openssl (first 32):", Buffer.from(opensslArrBuf.slice(0, 32)).toString('hex'));
+      console.log("Enc length:", enc.byteLength);
+      console.log("Openssl length:", opensslArrBuf.byteLength);
+      console.log(
+        "Enc (first 32):",
+        Buffer.from(enc.slice(0, 32)).toString("hex")
+      );
+      console.log(
+        "Openssl (first 32):",
+        Buffer.from(opensslArrBuf.slice(0, 32)).toString("hex")
+      );
     }
     assert.ok(Buffer.from(enc).equals(Buffer.from(opensslArrBuf)));
   });

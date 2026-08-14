@@ -1,6 +1,6 @@
-import { type App } from "obsidian";
-import type RemotelySavePlugin from "../main";
+import type { App } from "obsidian";
 import type { FakeFs } from "../core/fs/fsAll";
+import type RemotelySavePlugin from "../main";
 import type { SettingsSection } from "../ui/settingsManager";
 
 /**
@@ -13,5 +13,8 @@ export interface CloudService {
 
   getProvider(plugin: RemotelySavePlugin, app: App): FakeFs;
   getSettings(plugin: RemotelySavePlugin, app: App, t: any): SettingsSection;
-  handleCallback?(plugin: RemotelySavePlugin, params: Record<string, string>): Promise<void>;
+  handleCallback?(
+    plugin: RemotelySavePlugin,
+    params: Record<string, string>
+  ): Promise<void>;
 }

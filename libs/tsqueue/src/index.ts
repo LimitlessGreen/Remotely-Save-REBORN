@@ -1,4 +1,3 @@
-
 export class Stack<T> {
   readonly stackBack: T[];
   length: number;
@@ -6,8 +5,7 @@ export class Stack<T> {
     if (x === undefined) {
       this.stackBack = [];
       this.length = 0;
-    }
-    else {
+    } else {
       this.stackBack = [...x];
       this.length = this.stackBack.length;
     }

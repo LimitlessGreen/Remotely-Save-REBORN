@@ -1,37 +1,26 @@
-import {
-  type App,
-  Modal,
-  Notice,
-  PluginSettingTab,
-  Setting,
-  Platform,
-} from "obsidian";
+import { type App, Modal, Notice, PluginSettingTab, Setting } from "obsidian";
 import type {
-  SUPPORTED_SERVICES_TYPE,
-  SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR,
+  SupportedServicesType,
+  SupportedServicesTypeWithRemoteBaseDir,
 } from "./core/baseTypes";
-
-import { SERVICES } from "./services/serviceRegistry";
 import type { TransItemType } from "./core/i18n/i18n";
 import type RemotelySavePlugin from "./main"; // unavoidable
-import {
-  checkHasSpecialCharForDir,
-  stringToFragment,
-} from "./utils/misc";
-import { BasicSettingsManager } from "./ui/managers/BasicSettings";
+import { SERVICES } from "./services/serviceRegistry";
 import { AdvancedSettingsManager } from "./ui/managers/AdvancedSettings";
-import { ImportExportSettingsManager } from "./ui/managers/ImportExportSettings";
+import { BasicSettingsManager } from "./ui/managers/BasicSettings";
 import { DebugSettingsManager } from "./ui/managers/DebugSettings";
+import { ImportExportSettingsManager } from "./ui/managers/ImportExportSettings";
+import { checkHasSpecialCharForDir } from "./utils/misc";
 
 export class ChangeRemoteBaseDirModal extends Modal {
   readonly plugin: RemotelySavePlugin;
   readonly newRemoteBaseDir: string;
-  readonly service: SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR;
+  readonly service: SupportedServicesTypeWithRemoteBaseDir;
   constructor(
     app: App,
     plugin: RemotelySavePlugin,
     newRemoteBaseDir: string,
-    service: SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR
+    service: SupportedServicesTypeWithRemoteBaseDir
   ) {
     super(app);
     this.plugin = plugin;
@@ -49,7 +38,7 @@ export class ChangeRemoteBaseDirModal extends Modal {
     contentEl.createEl("h2", { text: t("modal_remotebasedir_title") });
     t("modal_remotebasedir_shortdesc")
       .split("\n")
-      .forEach((val, idx) => {
+      .forEach((val, _idx) => {
         contentEl.createEl("p", {
           text: val,
         });
@@ -66,7 +55,8 @@ export class ChangeRemoteBaseDirModal extends Modal {
           );
           button.onClick(async () => {
             // in the settings, the value is reset to the special case ""
-            const s = (this.service as any) === "nutstore" ? "webdav" : this.service;
+            const s =
+              (this.service as any) === "nutstore" ? "webdav" : this.service;
             (this.plugin.settings as any)[s].remoteBaseDir = "";
             await this.plugin.saveSettings();
             new Notice(t("modal_remotebasedir_notice"));
@@ -95,7 +85,8 @@ export class ChangeRemoteBaseDirModal extends Modal {
         .addButton((button) => {
           button.setButtonText(t("modal_remotebasedir_secondconfirm_change"));
           button.onClick(async () => {
-            const s = (this.service as any) === "nutstore" ? "webdav" : this.service;
+            const s =
+              (this.service as any) === "nutstore" ? "webdav" : this.service;
             (this.plugin.settings as any)[s].remoteBaseDir =
               this.newRemoteBaseDir;
             await this.plugin.saveSettings();
@@ -172,7 +163,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         dropdown
           .setValue(this.plugin.settings.serviceType)
           .onChange(async (val) => {
-            this.plugin.settings.serviceType = val as SUPPORTED_SERVICES_TYPE;
+            this.plugin.settings.serviceType = val as SupportedServicesType;
             await this.plugin.saveSettings();
             this.display();
           });
@@ -184,7 +175,9 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     new BasicSettingsManager(this.plugin, this.app, t).render(containerEl);
     new AdvancedSettingsManager(this.plugin, this.app, t).render(containerEl);
-    new ImportExportSettingsManager(this.plugin, this.app, t).render(containerEl);
+    new ImportExportSettingsManager(this.plugin, this.app, t).render(
+      containerEl
+    );
     new DebugSettingsManager(this.plugin, this.app, t).render(containerEl);
   }
 

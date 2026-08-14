@@ -1,27 +1,31 @@
-import { type App, Notice } from "obsidian";
+import { type App, Notice, requestUrl } from "obsidian";
+import {
+  COMMAND_CALLBACK_PCLOUD,
+  PCLOUD_CLIENT_ID,
+  PCLOUD_CLIENT_SECRET,
+} from "../../core/baseTypes";
+import type { TFunc } from "../../core/i18n/i18n";
 import type RemotelySavePlugin from "../../main";
+import type { CloudService } from "../serviceInterface";
 import { PCloudFileSystem } from "./PCloudFileSystem";
 import { PCloudSettings } from "./PCloudSettings";
-import type { CloudService } from "../serviceInterface";
-import { COMMAND_CALLBACK_PCLOUD, PCLOUD_CLIENT_ID, PCLOUD_CLIENT_SECRET } from "../../core/baseTypes";
-import { requestUrl } from "obsidian";
 
 export const PCloudService: CloudService = {
   id: "pcloud",
   callbackId: COMMAND_CALLBACK_PCLOUD,
 
   getProvider(plugin: RemotelySavePlugin, app: App) {
-    return new PCloudFileSystem(
-      plugin.settings.pcloud,
-      app.vault.getName()
-    );
+    return new PCloudFileSystem(plugin.settings.pcloud, app.vault.getName());
   },
 
-  getSettings(plugin: RemotelySavePlugin, app: App, t: any) {
+  getSettings(plugin: RemotelySavePlugin, app: App, t: TFunc) {
     return new PCloudSettings(plugin, app, t);
   },
 
-  async handleCallback(plugin: RemotelySavePlugin, params: Record<string, string>) {
+  async handleCallback(
+    plugin: RemotelySavePlugin,
+    params: Record<string, string>
+  ) {
     const code = params.code;
     if (!code) {
       new Notice("pCloud connection failed: No code received.");
@@ -47,7 +51,8 @@ export const PCloudService: CloudService = {
         plugin.settings.pcloud.accessToken = data.access_token;
         if (data.locationid) {
           plugin.settings.pcloud.locationid = data.locationid as 1 | 2;
-          plugin.settings.pcloud.hostname = data.locationid === 2 ? "eapi.pcloud.com" : "api.pcloud.com";
+          plugin.settings.pcloud.hostname =
+            data.locationid === 2 ? "eapi.pcloud.com" : "api.pcloud.com";
         }
         await plugin.saveSettings();
         new Notice("pCloud connected!");
@@ -56,7 +61,9 @@ export const PCloudService: CloudService = {
       }
     } catch (err) {
       console.error(err);
-      new Notice(`pCloud connection failed: ${err instanceof Error ? err.message : String(err)}`);
+      new Notice(
+        `pCloud connection failed: ${err instanceof Error ? err.message : String(err)}`
+      );
     }
-  }
+  },
 };

@@ -21,14 +21,23 @@ export interface AuthConfig {
 export class OAuth2Handler {
   constructor(private config: AuthConfig) {}
 
-  public static async generatePkce(): Promise<{ verifier: string; challenge: string }> {
+  public static async generatePkce(): Promise<{
+    verifier: string;
+    challenge: string;
+  }> {
     const verifier = nanoid(64);
-    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+    const hash = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(verifier)
+    );
     const challenge = base64url.stringify(new Uint8Array(hash), { pad: false });
     return { verifier, challenge };
   }
 
-  public getAuthUrl(state: string, extraParams: Record<string, string> = {}): string {
+  public getAuthUrl(
+    state: string,
+    extraParams: Record<string, string> = {}
+  ): string {
     const url = new URL(this.config.authEndpoint);
     url.searchParams.set("client_id", this.config.clientId);
     url.searchParams.set("response_type", "code");
@@ -36,12 +45,17 @@ export class OAuth2Handler {
     url.searchParams.set("scope", this.config.scopes.join(" "));
     url.searchParams.set("state", state);
 
-    Object.entries(extraParams).forEach(([k, v]) => url.searchParams.set(k, v));
+    for (const [k, v] of Object.entries(extraParams)) {
+      url.searchParams.set(k, v);
+    }
 
     return url.toString();
   }
 
-  public async exchangeCode(code: string, verifier?: string): Promise<TokenResponse> {
+  public async exchangeCode(
+    code: string,
+    verifier?: string
+  ): Promise<TokenResponse> {
     const body: Record<string, string> = {
       client_id: this.config.clientId,
       grant_type: "authorization_code",
@@ -67,7 +81,9 @@ export class OAuth2Handler {
     return this.postToTokenEndpoint(body);
   }
 
-  private async postToTokenEndpoint(body: Record<string, string>): Promise<TokenResponse> {
+  private async postToTokenEndpoint(
+    body: Record<string, string>
+  ): Promise<TokenResponse> {
     const response = await fetch(this.config.tokenEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

@@ -1,5 +1,5 @@
-import { isDeepEqual, reverseString } from "../../utils/misc";
 import { base64url } from "rfc4648";
+import { isDeepEqual, reverseString } from "../../utils/misc";
 
 const DEFAULT_README_FOR_METADATAONREMOTE =
   "Do NOT edit or delete the file manually. This file is for the plugin remotely-save to store some necessary meta data on the remote services. Its content is slightly obfuscated.";
@@ -69,16 +69,16 @@ export const deserializeMetadataOnRemote = (x: string | ArrayBuffer) => {
     y1 = new TextDecoder().decode(x);
   }
 
-  let y2: any;
+  let y2: { readme: string; d: string };
   try {
     y2 = JSON.parse(y1);
-  } catch (e) {
+  } catch (_e) {
     throw new Error(
       `invalid remote meta data file with first few chars: ${y1.slice(0, 5)}`
     );
   }
 
-  if (!("readme" in y2 && "d" in y2)) {
+  if (!(y2 && typeof y2 === "object" && "readme" in y2 && "d" in y2)) {
     throw new Error(
       'invalid remote meta data file (no "readme" or "d" fields)!'
     );
@@ -88,20 +88,20 @@ export const deserializeMetadataOnRemote = (x: string | ArrayBuffer) => {
   try {
     y3 = (
       base64url.parse(reverseString(y2["d"]), {
-        out: Buffer.allocUnsafe as any,
+        out: (size) => Buffer.allocUnsafe(size),
         loose: true,
       }) as Buffer
     ).toString("utf-8");
-  } catch (e) {
+  } catch (_e) {
     throw new Error('invalid remote meta data file (invalid "d" field)!');
   }
 
   let y4: MetadataOnRemote;
   try {
     y4 = JSON.parse(y3) as MetadataOnRemote;
-  } catch (e) {
+  } catch (_e) {
     throw new Error(
-      `invalid remote meta data file with \"d\" field with first few chars: ${y3.slice(
+      `invalid remote meta data file with "d" field with first few chars: ${y3.slice(
         0,
         5
       )}`

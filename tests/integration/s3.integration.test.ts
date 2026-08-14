@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 import "../obsidianShim";
 import { RawS3Fs } from "../../src/services/s3/S3FileSystem";
-import { testConfig, isS3Configured } from "./config";
 import { runBaseFsTests } from "./baseFsTest";
+import { isS3Configured, testConfig } from "./config";
 
 if (isS3Configured) {
   describe("S3 Integration Tests", () => {
@@ -19,11 +19,12 @@ if (isS3Configured) {
       generateFolderObject: false,
     };
 
-    const getFs = (overrides = {}) => new RawS3Fs({ ...baseConfig, ...overrides });
+    const getFs = (overrides = {}) =>
+      new RawS3Fs({ ...baseConfig, ...overrides });
 
     runBaseFsTests(() => getFs(), testConfig.s3.remotePrefix);
 
-    describe("Extra S3-specific Features", function() {
+    describe("Extra S3-specific Features", function () {
       this.timeout(30000); // Increase timeout for multipart uploads
 
       let fs: RawS3Fs;
@@ -50,15 +51,25 @@ if (isS3Configured) {
         // Set a fixed date: 2023-01-01 12:00:00 UTC
         const specificMtime = 1672574400000;
 
-        await fs.writeFile(key, new TextEncoder().encode("accurate mtime test").buffer, specificMtime, specificMtime);
+        await fs.writeFile(
+          key,
+          new TextEncoder().encode("accurate mtime test").buffer,
+          specificMtime,
+          specificMtime
+        );
         const entity = await fs.stat(key);
 
         // The plugin stores the specific mtime in Metadata and returns it as mtimeCli
         const diff = Math.abs((entity.mtimeCli || 0) - specificMtime);
         if (diff >= 2000) {
-           console.log(`Debug MTime: expected=${specificMtime}, got mtimeCli=${entity.mtimeCli}, mtimeSvr=${entity.mtimeSvr}, diff=${diff}`);
+          console.log(
+            `Debug MTime: expected=${specificMtime}, got mtimeCli=${entity.mtimeCli}, mtimeSvr=${entity.mtimeSvr}, diff=${diff}`
+          );
         }
-        assert.ok(diff < 2000, `MTime difference too large: ${diff}ms. Expected ~${specificMtime}, got ${entity.mtimeCli}`);
+        assert.ok(
+          diff < 2000,
+          `MTime difference too large: ${diff}ms. Expected ~${specificMtime}, got ${entity.mtimeCli}`
+        );
 
         await fs.rm(key);
       });
@@ -71,8 +82,11 @@ if (isS3Configured) {
         await fsWithFolders.mkdir(folderKey);
 
         // In S3, if generateFolderObject is true, a walk should see the folder itself as an object
-        const entities = await fsWithFolders.walk(testConfig.s3.remotePrefix, false);
-        const folderEntity = entities.find(e => e.keyRaw === folderKey);
+        const entities = await fsWithFolders.walk(
+          testConfig.s3.remotePrefix,
+          false
+        );
+        const folderEntity = entities.find((e) => e.keyRaw === folderKey);
 
         assert.ok(folderEntity, "Folder object should exist in listing");
         assert.equal(folderEntity.sizeRaw, 0);
@@ -92,16 +106,21 @@ if (isS3Configured) {
         assert.ok(v1Id, "Should have a version ID for first write");
 
         // Write second version (overwrite)
-        const e2 = await fs.writeFile(key, content2.buffer, now + 1000, now + 1000);
+        const e2 = await fs.writeFile(
+          key,
+          content2.buffer,
+          now + 1000,
+          now + 1000
+        );
         const v2Id = e2.versionId;
         assert.ok(v2Id, "Should have a version ID for second write");
         assert.notEqual(v1Id, v2Id, "Version IDs should be different");
 
         // List versions
-        const versions = await fs.listVersions!(key);
+        const versions = await fs.listVersions?.(key);
         assert.equal(versions.length, 2, "Should find 2 versions");
-        assert.ok(versions.some(v => v.versionId === v1Id));
-        assert.ok(versions.some(v => v.versionId === v2Id));
+        assert.ok(versions.some((v) => v.versionId === v1Id));
+        assert.ok(versions.some((v) => v.versionId === v2Id));
 
         // Read specific versions
         const read1 = await fs.readFile(key, v1Id);
@@ -116,7 +135,7 @@ if (isS3Configured) {
         }
 
         // Verify it's gone
-        const finalVersions = await fs.listVersions!(key);
+        const finalVersions = await fs.listVersions?.(key);
         assert.equal(finalVersions.length, 0, "All versions should be deleted");
       });
     });

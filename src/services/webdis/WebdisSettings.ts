@@ -1,8 +1,8 @@
 import { Notice, Setting } from "obsidian";
-import { BaseSettingsManager } from "../../ui/settingsManager";
 import { getClient } from "../../core/fs/fsGetter";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { wrapTextWithPasswordHide } from "../../ui/managers/BasicSettings";
+import { BaseSettingsManager } from "../../ui/settingsManager";
 
 export class WebdisSettings extends BaseSettingsManager {
   render(containerEl: HTMLElement) {

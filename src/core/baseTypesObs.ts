@@ -12,4 +12,4 @@ export const API_VER_ENSURE_REQURL_OK = "1.0.0"; // always bypass CORS here
 // 20241227: On Android, requestUrl causes OOM for large files (Base64 encoding).
 // We disable it on Android to prevent crashes.
 export const VALID_REQURL =
-  (!Platform.isAndroidApp && requireApiVersion(API_VER_REQURL));
+  !Platform.isAndroidApp && requireApiVersion(API_VER_REQURL);

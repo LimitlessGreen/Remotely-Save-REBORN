@@ -26,7 +26,7 @@ export const ONEDRIVE_AUTHORITY = global.DEFAULT_ONEDRIVE_AUTHORITY;
 
 export const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
-export type SUPPORTED_SERVICES_TYPE =
+export type SupportedServicesType =
   | "s3"
   | "webdav"
   | "dropbox"
@@ -40,8 +40,8 @@ export type SUPPORTED_SERVICES_TYPE =
   | "internxt"
   | "nutstore";
 
-export type SUPPORTED_SERVICES_TYPE_WITH_REMOTE_BASE_DIR = Exclude<
-  SUPPORTED_SERVICES_TYPE,
+export type SupportedServicesTypeWithRemoteBaseDir = Exclude<
+  SupportedServicesType,
   "s3" | "azureblobstorage"
 >;
 
@@ -215,7 +215,7 @@ export type SyncDirectionType =
 
 export type CipherMethodType = "rclone-base64" | "openssl-base64" | "unknown";
 
-export type QRExportType = "basic_and_advanced" | SUPPORTED_SERVICES_TYPE;
+export type QRExportType = "basic_and_advanced" | SupportedServicesType;
 
 export interface ProfilerConfig {
   enable?: boolean;
@@ -238,7 +238,7 @@ export interface RemotelySavePluginSettings {
   nutstore?: WebdavConfig;
 
   password: string;
-  serviceType: SUPPORTED_SERVICES_TYPE;
+  serviceType: SupportedServicesType;
   currLogLevel?: string;
   autoRunEveryMilliseconds?: number;
   initRunAfterMilliseconds?: number;
@@ -390,7 +390,7 @@ export interface MixedEntity {
 
   change?: boolean;
 
-  sideNotes?: any;
+  sideNotes?: Record<string, unknown>;
 }
 
 export type SyncPlanType = Record<string, MixedEntity>;

@@ -37,7 +37,7 @@ export class SyncAlgoV3Modal extends Modal {
 
     // code modified partially from BART released under MIT License
     contentEl.createDiv("modal-button-container", (buttonContainerEl) => {
-      let agreeBtn: HTMLButtonElement | undefined = undefined;
+      let agreeBtn: HTMLButtonElement | undefined;
 
       buttonContainerEl.createEl(
         "label",

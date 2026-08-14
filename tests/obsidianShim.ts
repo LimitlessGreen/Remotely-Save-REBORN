@@ -1,6 +1,6 @@
-import moment from "moment";
-import Module from "module";
 import dns from "node:dns";
+import Module from "module";
+import moment from "moment";
 
 // Prefer IPv4 to avoid timeouts on broken IPv6 networks
 if (dns.setDefaultResultOrder) {
@@ -10,24 +10,40 @@ if (dns.setDefaultResultOrder) {
 // Mocking Obsidian APIs for Node.js environment
 const obsidianMock = {
   moment,
-  requestUrl: async (request: any) => {
+  requestUrl: async (
+    request:
+      | string
+      | {
+          url: string;
+          method?: string;
+          headers?: Record<string, string>;
+          body?: string | ArrayBuffer;
+          throw?: boolean;
+        }
+  ) => {
     const url = typeof request === "string" ? request : request.url;
     const options: RequestInit = {
-      method: request.method || "GET",
-      headers: request.headers || {},
-      body: request.body,
+      method: (typeof request === "string" ? "GET" : request.method) || "GET",
+      headers: (typeof request === "string" ? {} : request.headers) || {},
+      body: typeof request === "string" ? undefined : (request.body as any),
     };
 
     const response = await fetch(url, options);
 
-    if (request.throw !== false && !response.ok) {
+    if (
+      typeof request !== "string" &&
+      request.throw !== false &&
+      !response.ok
+    ) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const buffer = await response.arrayBuffer();
     const text = new TextDecoder().decode(buffer);
-    let json: any = null;
-    try { json = JSON.parse(text); } catch (e) {}
+    let json: unknown = null;
+    try {
+      json = JSON.parse(text);
+    } catch (_e) {}
 
     return {
       status: response.status,
@@ -37,32 +53,42 @@ const obsidianMock = {
       text: text,
     };
   },
-  Platform: {
+  platform: {
     isAndroidApp: false,
     isIosApp: false,
     isMacOS: false,
     isMobile: false,
     isSafari: false,
   },
-  Notice: class Notice {
+  notice: class Notice {
     constructor(message: string) {
       console.log(`[Obsidian Notice] ${message}`);
     }
   },
-  Plugin: class Plugin {},
-  Modal: class Modal {
-    constructor(app: any) {}
+  plugin: class Plugin {},
+  modal: class Modal {
     open() {}
     close() {}
   },
-  Setting: class Setting {
-    constructor(containerEl: HTMLElement) {}
-    setName(name: string) { return this; }
-    setDesc(desc: string) { return this; }
-    addText(cb: any) { return this; }
-    addButton(cb: any) { return this; }
-    addDropdown(cb: any) { return this; }
-    addToggle(cb: any) { return this; }
+  setting: class Setting {
+    setName(_name: string) {
+      return this;
+    }
+    setDesc(_desc: string) {
+      return this;
+    }
+    addText(_cb: (component: unknown) => unknown) {
+      return this;
+    }
+    addButton(_cb: (component: unknown) => unknown) {
+      return this;
+    }
+    addDropdown(_cb: (component: unknown) => unknown) {
+      return this;
+    }
+    addToggle(_cb: (component: unknown) => unknown) {
+      return this;
+    }
   },
   requireApiVersion: (version: string) => {
     // Disable the Obsidian requestUrl patch for WebDAV integration tests
@@ -74,14 +100,14 @@ const obsidianMock = {
   setIcon: () => {},
 };
 
-// @ts-ignore
+// @ts-expect-error
 const originalLoad = Module._load;
-// @ts-ignore
-Module._load = function(request, parent, isMain) {
+// @ts-expect-error
+Module._load = function (request, parent, isMain) {
   if (request === "obsidian") {
     return obsidianMock;
   }
-  return originalLoad.apply(this, arguments);
+  return originalLoad.call(this, request, parent, isMain);
 };
 
 export default obsidianMock;

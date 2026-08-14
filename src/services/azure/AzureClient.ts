@@ -3,7 +3,7 @@
  * Pure API Client for Azure Blob Storage
  */
 
-import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
+import { BlobServiceClient, type ContainerClient } from "@azure/storage-blob";
 
 export class AzureClient {
   private containerClient: ContainerClient;
@@ -20,13 +20,17 @@ export class AzureClient {
   public async downloadBlob(name: string): Promise<ArrayBuffer> {
     const blobClient = this.containerClient.getBlobClient(name);
     const res = await blobClient.download();
-    return await (await res.blobBody!).arrayBuffer();
+    const blobBody = await res.blobBody;
+    if (!blobBody) {
+      throw new Error(`Blob body is empty for ${name}`);
+    }
+    return await blobBody.arrayBuffer();
   }
 
   public async uploadBlob(name: string, content: ArrayBuffer, mtime: number) {
     const blockBlobClient = this.containerClient.getBlockBlobClient(name);
     await blockBlobClient.upload(content, content.byteLength, {
-      metadata: { mtime: new Date(mtime).toISOString() }
+      metadata: { mtime: new Date(mtime).toISOString() },
     });
     return await blockBlobClient.getProperties();
   }

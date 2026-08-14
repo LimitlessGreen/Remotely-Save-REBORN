@@ -1,7 +1,6 @@
-import * as path from "path";
-import type { Vault } from "obsidian";
-
 import emojiRegex from "emoji-regex";
+import type { Vault } from "obsidian";
+import * as path from "path";
 import { base32 } from "rfc4648";
 import XRegExp from "xregexp";
 
@@ -126,7 +125,7 @@ export const getFolderLevels = (x: string, addEndingSlash = false) => {
   }
 
   const y1 = x.split("/");
-  const i = 0;
+  const _i = 0;
   for (let index = 0; index + 1 < y1.length; index++) {
     let k = y1.slice(0, index + 1).join("/");
     if (k === "" || k === "/") {
@@ -162,7 +161,10 @@ export const mkdirpInVault = async (thePath: string, vault: Vault) => {
 export const bufferToArrayBuffer = (
   b: Buffer | Uint8Array<ArrayBuffer> | ArrayBufferView
 ): ArrayBuffer => {
-  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
+  return b.buffer.slice(
+    b.byteOffset,
+    b.byteOffset + b.byteLength
+  ) as ArrayBuffer;
 };
 
 /**
@@ -308,7 +310,7 @@ export const setToString = (a: Set<string>, delimiter = ",") => {
   return [...a].join(delimiter);
 };
 
-export const extractSvgSub = (x: string, subEl = "rect") => {
+export const extractSvgSub = (x: string, _subEl = "rect") => {
   const parser = new window.DOMParser();
   const dom = parser.parseFromString(x, "image/svg+xml");
   const svg = dom.querySelector("svg")!;
@@ -432,7 +434,7 @@ export const unixTimeToStr = (x: number | undefined | null, hasMs = false) => {
  */
 const getCircularReplacer = () => {
   const seen = new WeakSet();
-  return (key: any, value: any) => {
+  return (_key: any, value: any) => {
     if (typeof value === "object" && value !== null) {
       if (seen.has(value)) {
         return;
@@ -631,7 +633,7 @@ export const changeMobileStatusBar = (
   if (op === "enable") {
     const callback = async (
       mutationList: MutationRecord[],
-      observer: MutationObserver
+      _observer: MutationObserver
     ) => {
       for (const mutation of mutationList) {
         // console.debug(mutation);
@@ -670,7 +672,7 @@ export const changeMobileStatusBar = (
       const height = window.getComputedStyle(navBar).getPropertyValue("height");
       statusbar.style.setProperty("display", "flex");
       statusbar.style.setProperty("margin-bottom", height);
-    } catch (e) {
+    } catch (_e) {
       // skip
     }
 

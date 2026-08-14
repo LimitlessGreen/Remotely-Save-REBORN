@@ -1,10 +1,9 @@
-import type { CipherMethodType, Entity } from "../baseTypes";
+import { getEncryptionProvider } from "../../logic/encryption/factory";
+import type { EncryptionProvider } from "../../logic/encryption/interface";
 import * as openssl from "../../logic/encryption/providers/openssl";
 import { isSpecialFolderNameToSkip } from "../../utils/misc";
-
+import type { CipherMethodType, Entity } from "../baseTypes";
 import { FakeFs } from "./fsAll";
-import { type EncryptionProvider } from "../../logic/encryption/interface";
-import { getEncryptionProvider } from "../../logic/encryption/factory";
 
 /**
  * quick guess, no actual decryption here
@@ -158,7 +157,7 @@ export class FakeFsEncrypt extends FakeFs {
           ok: true,
           reason: "password_matched",
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           ok: false,
           reason: "password_or_method_not_matched_or_remote_not_encrypted",
@@ -182,8 +181,10 @@ export class FakeFsEncrypt extends FakeFs {
 
     if (this.isPasswordEmpty()) {
       for (const innerEntity of innerWalkResult) {
-        res.push(copyEntityAndCopyKeyEncSizeEnc(innerEntity));
-        this.cacheMapOrigToEnc[innerEntity.key!] = innerEntity.key!;
+        const entity = copyEntityAndCopyKeyEncSizeEnc(innerEntity);
+        res.push(entity);
+        const key = innerEntity.key ?? innerEntity.keyRaw;
+        this.cacheMapOrigToEnc[key] = key;
       }
       this.hasCacheMap = true;
       return res;
@@ -198,11 +199,11 @@ export class FakeFsEncrypt extends FakeFs {
         res.push({
           key: key,
           keyRaw: innerEntity.keyRaw,
-          keyEnc: innerEntity.key!,
+          keyEnc: innerEntity.key ?? innerEntity.keyRaw,
           mtimeCli: innerEntity.mtimeCli,
           mtimeSvr: innerEntity.mtimeSvr,
           size: size,
-          sizeEnc: innerEntity.size!,
+          sizeEnc: innerEntity.size ?? 0,
           sizeRaw: innerEntity.sizeRaw,
           hash: undefined,
           synthesizedFolder: innerEntity.synthesizedFolder,
@@ -231,11 +232,11 @@ export class FakeFsEncrypt extends FakeFs {
       return {
         key: key,
         keyRaw: innerEntity.keyRaw,
-        keyEnc: innerEntity.key!,
+        keyEnc: innerEntity.key ?? innerEntity.keyRaw,
         mtimeCli: innerEntity.mtimeCli,
         mtimeSvr: innerEntity.mtimeSvr,
         size: undefined,
-        sizeEnc: innerEntity.size!,
+        sizeEnc: innerEntity.size ?? 0,
         sizeRaw: innerEntity.sizeRaw,
         hash: undefined,
         synthesizedFolder: innerEntity.synthesizedFolder,
@@ -280,11 +281,11 @@ export class FakeFsEncrypt extends FakeFs {
       return {
         key: key,
         keyRaw: innerEntity.keyRaw,
-        keyEnc: innerEntity.key!,
+        keyEnc: innerEntity.key ?? innerEntity.keyRaw,
         mtimeCli: innerEntity.mtimeCli,
         mtimeSvr: innerEntity.mtimeSvr,
         size: 0,
-        sizeEnc: innerEntity.size!,
+        sizeEnc: innerEntity.size ?? 0,
         sizeRaw: innerEntity.sizeRaw,
         hash: undefined,
         synthesizedFolder: innerEntity.synthesizedFolder,
@@ -330,11 +331,11 @@ export class FakeFsEncrypt extends FakeFs {
       return {
         key: key,
         keyRaw: innerEntity.keyRaw,
-        keyEnc: innerEntity.key!,
+        keyEnc: innerEntity.key ?? innerEntity.keyRaw,
         mtimeCli: innerEntity.mtimeCli,
         mtimeSvr: innerEntity.mtimeSvr,
         size: undefined,
-        sizeEnc: innerEntity.size!,
+        sizeEnc: innerEntity.size ?? 0,
         sizeRaw: innerEntity.sizeRaw,
         hash: undefined,
         synthesizedFolder: innerEntity.synthesizedFolder,
@@ -398,7 +399,9 @@ export class FakeFsEncrypt extends FakeFs {
 
   async listVersions(key: string): Promise<Entity[]> {
     if (!this.hasCacheMap) {
-      throw new Error("You have to build the cacheMap firstly for listVersions");
+      throw new Error(
+        "You have to build the cacheMap firstly for listVersions"
+      );
     }
     const keyEnc = this.cacheMapOrigToEnc[key];
     if (keyEnc === undefined) {
@@ -409,14 +412,14 @@ export class FakeFsEncrypt extends FakeFs {
     }
     const innerVersions = await this.innerFs.listVersions(keyEnc);
     // Note: We don't decrypt content here, just return metadata
-    return innerVersions.map(v => ({
+    return innerVersions.map((v) => ({
       ...v,
       key,
       keyRaw: keyEnc,
     }));
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     return await this.innerFs.checkConnect(callbackFunc);
   }
 
@@ -515,7 +518,7 @@ export class FakeFsEncrypt extends FakeFs {
     return await this.innerFs.getUserDisplayName();
   }
 
-  async revokeAuth(): Promise<any> {
+  async revokeAuth(): Promise<void> {
     return await this.innerFs.revokeAuth();
   }
 

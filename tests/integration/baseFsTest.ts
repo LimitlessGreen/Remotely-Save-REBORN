@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import type { RawFs } from "../../src/core/fs/rawFsInterface";
 
 export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
-  describe(`Base FS Tests at ${rootPath}`, function() {
+  describe(`Base FS Tests at ${rootPath}`, function () {
     this.timeout(30000); // Set timeout for each platform test suite
     let fs: RawFs;
     const testFile = `${rootPath}/test.txt`;
@@ -15,7 +15,7 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
       // Ensure the test root directory exists
       try {
         await fs.mkdir(rootPath);
-      } catch (e) {
+      } catch (_e) {
         // Ignore error if it already exists
       }
     });
@@ -53,7 +53,7 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
 
     it("should be able to list files (walk)", async () => {
       const entities = await fs.walk(rootPath, false);
-      const keys = entities.map(e => e.keyRaw);
+      const keys = entities.map((e) => e.keyRaw);
 
       const includesPath = (list: string[], p: string) => {
         const p1 = p.endsWith("/") ? p : p + "/";
@@ -62,7 +62,10 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
       };
 
       assert.ok(keys.includes(testFile), `Keys should include ${testFile}`);
-      assert.ok(includesPath(keys, testFolder), `Keys should include ${testFolder} (with or without slash)`);
+      assert.ok(
+        includesPath(keys, testFolder),
+        `Keys should include ${testFolder} (with or without slash)`
+      );
     });
 
     it("should be able to delete a file", async () => {
@@ -70,7 +73,7 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
       try {
         await fs.stat(testFileInSubdir);
         assert.fail("File should have been deleted");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
     });
@@ -80,7 +83,7 @@ export function runBaseFsTests(getFs: () => RawFs, rootPath: string) {
       await fs.rm(testFile);
 
       const entities = await fs.walk(rootPath, false);
-      const keys = entities.map(e => e.keyRaw);
+      const keys = entities.map((e) => e.keyRaw);
       assert.ok(!keys.includes(testFile));
       assert.ok(!keys.includes(testFolder + "/"));
     });

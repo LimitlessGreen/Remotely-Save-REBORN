@@ -1,15 +1,25 @@
-import { Auth, Drive, CryptoProvider, Keys, Password } from '@internxt/sdk';
-import { Network } from '@internxt/sdk/dist/network';
-import { EncryptFilename, DecryptFileName, GenerateFileKey } from '@internxt/inxt-js/build/lib/utils/crypto/crypto';
-import CryptoJS from 'crypto-js';
-import { requestUrl } from 'obsidian';
-import * as crypto from 'crypto';
+import {
+  DecryptFileName,
+  EncryptFilename,
+  GenerateFileKey,
+} from "@internxt/inxt-js/build/lib/utils/crypto/crypto";
+import {
+  Auth,
+  type CryptoProvider,
+  Drive,
+  type Keys,
+  type Password,
+} from "@internxt/sdk";
+import { Network } from "@internxt/sdk/dist/network";
+import * as crypto from "crypto";
+import CryptoJS from "crypto-js";
+import { requestUrl } from "obsidian";
 
 /**
  * Custom Internxt Crypto Provider
  */
 class InternxtCryptoProvider implements CryptoProvider {
-  private readonly PEPPER = '6KYQBP847D4ATSFA';
+  private readonly PEPPER = "6KYQBP847D4ATSFA";
 
   encryptPasswordHash(password: Password, encryptedSalt: string): string {
     try {
@@ -19,15 +29,17 @@ class InternxtCryptoProvider implements CryptoProvider {
       const hash = CryptoJS.PBKDF2(password, rawSalt, {
         keySize: 256 / 32,
         iterations: 10000,
-        hasher: CryptoJS.algo.SHA1
+        hasher: CryptoJS.algo.SHA1,
       }).toString();
 
       const encrypted = CryptoJS.AES.encrypt(hash, this.PEPPER).toString();
-      const hex = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Base64.parse(encrypted));
+      const hex = CryptoJS.enc.Hex.stringify(
+        CryptoJS.enc.Base64.parse(encrypted)
+      );
       return hex;
     } catch (e) {
-      console.error('Encryption failed:', e);
-      return '';
+      console.error("Encryption failed:", e);
+      return "";
     }
   }
 
@@ -38,10 +50,10 @@ class InternxtCryptoProvider implements CryptoProvider {
     return decrypt.toString(CryptoJS.enc.Utf8);
   }
 
-  async generateKeys(password: Password): Promise<Keys> {
+  async generateKeys(_password: Password): Promise<Keys> {
     return {
-      ecc: { publicKey: '', privateKeyEncrypted: '' },
-      kyber: { publicKey: '', privateKeyEncrypted: '' }
+      ecc: { publicKey: "", privateKeyEncrypted: "" },
+      kyber: { publicKey: "", privateKeyEncrypted: "" },
     };
   }
 }
@@ -51,22 +63,39 @@ export class InternxtClient {
   private storage?: Drive.Storage;
   private network?: Network;
   private cryptoProvider: InternxtCryptoProvider;
-  private config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string };
+  private config?: {
+    token: string;
+    mnemonic: string;
+    bridgeUser: string;
+    userId: string;
+    rootFolderUuid: string;
+    bucketId: string;
+  };
   private clientName: string;
   private clientVersion: string;
-  private apiUrl = 'https://gateway.internxt.com/drive';
-  private networkUrl = 'https://gateway.internxt.com/network';
+  private apiUrl = "https://gateway.internxt.com/drive";
+  private networkUrl = "https://gateway.internxt.com/network";
 
   constructor(
-    config?: { token: string; mnemonic: string; bridgeUser: string; userId: string; rootFolderUuid: string; bucketId: string },
-    appDetails: { clientName: string; clientVersion: string } = { clientName: 'remotely-save', clientVersion: '1.0.0' }
+    config?: {
+      token: string;
+      mnemonic: string;
+      bridgeUser: string;
+      userId: string;
+      rootFolderUuid: string;
+      bucketId: string;
+    },
+    appDetails: { clientName: string; clientVersion: string } = {
+      clientName: "remotely-save",
+      clientVersion: "1.0.0",
+    }
   ) {
     this.clientName = appDetails.clientName;
     this.clientVersion = appDetails.clientVersion;
     this.cryptoProvider = new InternxtCryptoProvider();
     const sdkAppDetails = {
       clientName: this.clientName,
-      clientVersion: this.clientVersion
+      clientVersion: this.clientVersion,
     };
 
     this.auth = Auth.client(this.apiUrl, sdkAppDetails);
@@ -78,7 +107,7 @@ export class InternxtClient {
       });
       this.network = Network.client(this.networkUrl, sdkAppDetails, {
         bridgeUser: config.bridgeUser,
-        userId: crypto.createHash('sha256').update(config.userId).digest('hex')
+        userId: crypto.createHash("sha256").update(config.userId).digest("hex"),
       });
     }
   }
@@ -91,24 +120,37 @@ export class InternxtClient {
       } catch (e: any) {
         const status = e.response?.status || e.status;
         const isNetworkErr = !status && e instanceof TypeError;
-        const isRetryable = isNetworkErr || status === 429 || status === 503 || status === 502 || status === 500;
+        const isRetryable =
+          isNetworkErr ||
+          status === 429 ||
+          status === 503 ||
+          status === 502 ||
+          status === 500;
 
         if (!isRetryable || idx === waitSeconds.length - 1) throw e;
 
         const wait = waitSeconds[idx] * 1000 + Math.random() * 1000;
-        console.warn(`Internxt retry ${idx + 1} after ${Math.round(wait)}ms due to status ${status || 'network error'}`);
-        await new Promise(resolve => setTimeout(resolve, wait));
+        console.warn(
+          `Internxt retry ${idx + 1} after ${Math.round(wait)}ms due to status ${status || "network error"}`
+        );
+        await new Promise((resolve) => setTimeout(resolve, wait));
       }
     }
-    throw new Error('Retry failed');
+    throw new Error("Retry failed");
   }
 
-  async login(email: string, password: string): Promise<{ token: string; mnemonic: string; user: any }> {
-    const res = await this.auth.loginWithoutKeys({
-      email: email.toLowerCase(),
-      password,
-      tfaCode: undefined
-    }, this.cryptoProvider);
+  async login(
+    email: string,
+    password: string
+  ): Promise<{ token: string; mnemonic: string; user: any }> {
+    const res = await this.auth.loginWithoutKeys(
+      {
+        email: email.toLowerCase(),
+        password,
+        tfaCode: undefined,
+      },
+      this.cryptoProvider
+    );
 
     const encryptedMnemonic = res.user.mnemonic;
     const decryptedMnemonic = this.decryptMnemonic(encryptedMnemonic, password);
@@ -116,7 +158,7 @@ export class InternxtClient {
     return {
       token: res.newToken,
       mnemonic: decryptedMnemonic,
-      user: res.user
+      user: res.user,
     };
   }
 
@@ -128,35 +170,43 @@ export class InternxtClient {
   }
 
   async getFolderContents(folderUuid: string): Promise<any> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     return this.retryReq(async () => {
-      const [promise] = this.storage!.getFolderContentByUuid({ folderUuid });
+      if (!this.storage) throw new Error("Storage not initialized");
+      const [promise] = this.storage.getFolderContentByUuid({ folderUuid });
       return await promise;
     });
   }
 
   async getFolderMeta(folderUuid: string): Promise<any> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     return this.retryReq(async () => {
-      return await this.storage!.getFolderMeta(folderUuid);
+      return await this.storage?.getFolderMeta(folderUuid);
     });
   }
 
   async createFolder(parentFolderUuid: string, name: string): Promise<any> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     return this.retryReq(async () => {
       try {
-        const encryptedName = await EncryptFilename(this.config!.mnemonic, this.config!.bucketId, name);
-        const [promise] = this.storage!.createFolderByUuid({
+        const encryptedName = await EncryptFilename(
+          this.config?.mnemonic,
+          this.config?.bucketId,
+          name
+        );
+        if (!this.storage) throw new Error("Storage not initialized");
+        const [promise] = this.storage.createFolderByUuid({
           plainName: name,
           name: encryptedName,
-          parentFolderUuid
+          parentFolderUuid,
         } as any);
         return await promise;
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (e.status === 409 || e.status === 422) {
           const contents = await this.getFolderContents(parentFolderUuid);
-          const existing = contents.children?.find((c: any) => (c.plainName || c.name) === name);
+          const existing = contents.children?.find(
+            (c: any) => (c.plainName || c.name) === name
+          );
           if (existing) return existing;
         }
         throw e;
@@ -165,10 +215,10 @@ export class InternxtClient {
   }
 
   async deleteFile(fileUuid: string): Promise<void> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     await this.retryReq(async () => {
       try {
-        await this.storage!.deleteFileByUuid(fileUuid);
+        await this.storage?.deleteFileByUuid(fileUuid);
       } catch (e: any) {
         if (e.status !== 404) throw e;
       }
@@ -176,10 +226,10 @@ export class InternxtClient {
   }
 
   async deleteFolder(folderUuid: string): Promise<void> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     await this.retryReq(async () => {
       try {
-        await this.storage!.deleteFolderByUuid(folderUuid);
+        await this.storage?.deleteFolderByUuid(folderUuid);
       } catch (e: any) {
         if (e.status !== 404) throw e;
       }
@@ -187,18 +237,27 @@ export class InternxtClient {
   }
 
   async getFileMeta(fileUuid: string): Promise<any> {
-    if (!this.storage) throw new Error('Not authenticated');
+    if (!this.storage) throw new Error("Not authenticated");
     return this.retryReq(async () => {
-      const [promise] = this.storage!.getFile(fileUuid);
+      if (!this.storage) throw new Error("Storage not initialized");
+      const [promise] = this.storage.getFile(fileUuid);
       return await promise;
     });
   }
 
-  async uploadFile(parentFolderUuid: string, filename: string, content: Buffer, size: number, mtime?: number, ctime?: number): Promise<any> {
-    if (!this.network || !this.config || !this.storage) throw new Error('Not authenticated');
+  async uploadFile(
+    parentFolderUuid: string,
+    filename: string,
+    content: Buffer,
+    size: number,
+    mtime?: number,
+    ctime?: number
+  ): Promise<any> {
+    if (!this.network || !this.config || !this.storage)
+      throw new Error("Not authenticated");
 
     const bucketId = this.config.bucketId;
-    let networkFileId: string | undefined = undefined;
+    let networkFileId: string | undefined;
     let uploadSize = size;
     let uploadContent = content;
 
@@ -206,7 +265,7 @@ export class InternxtClient {
       // Workaround: Internxt network doesn't support 0-byte files.
       // Use a single space (1 byte) instead.
       uploadSize = 1;
-      uploadContent = Buffer.from(' ');
+      uploadContent = Buffer.from(" ");
     }
 
     // 1. Start upload
@@ -218,12 +277,21 @@ export class InternxtClient {
     const iv = index.slice(0, 16);
     const key = await GenerateFileKey(this.config.mnemonic, bucketId, index);
 
-    const cipher = crypto.createCipheriv('aes-256-ctr', key, iv);
-    const encryptedContent = Buffer.concat([cipher.update(uploadContent), cipher.final()]);
+    const cipher = crypto.createCipheriv("aes-256-ctr", key, iv);
+    const encryptedContent = Buffer.concat([
+      cipher.update(uploadContent),
+      cipher.final(),
+    ]);
 
     // 3. Calculate hash (SHA256 then RIPEMD160)
-    const sha256Hash = crypto.createHash('sha256').update(encryptedContent).digest();
-    const ripemd160Hash = crypto.createHash('ripemd160').update(sha256Hash).digest('hex');
+    const sha256Hash = crypto
+      .createHash("sha256")
+      .update(encryptedContent)
+      .digest();
+    const ripemd160Hash = crypto
+      .createHash("ripemd160")
+      .update(sha256Hash)
+      .digest("hex");
 
     // 4. PUT to network using Obsidian requestUrl
     // Ensure we send a clean ArrayBuffer copy to avoid ERR_INVALID_ARGUMENT
@@ -232,106 +300,138 @@ export class InternxtClient {
     try {
       const putRes = await requestUrl({
         url: url!,
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/octet-stream',
+          "Content-Type": "application/octet-stream",
         },
-        body: body
+        body: body,
       });
       if (putRes.status !== 200 && putRes.status !== 201) {
-        throw new Error(`Internxt network PUT failed with status ${putRes.status}`);
+        throw new Error(
+          `Internxt network PUT failed with status ${putRes.status}`
+        );
       }
     } catch (e: any) {
-      console.error('[INTERNXT] requestUrl PUT failed:', e);
+      console.error("[INTERNXT] requestUrl PUT failed:", e);
       throw e;
     }
 
     // 5. Finish upload
     const finishPayload = {
-      index: index.toString('hex'),
+      index: index.toString("hex"),
       shards: [{ hash: ripemd160Hash, uuid }],
     };
 
     try {
-      const finishRes: any = await this.network.finishUpload(bucketId, finishPayload);
-      networkFileId = typeof finishRes === 'string' ? finishRes : finishRes.id;
+      const finishRes: any = await this.network.finishUpload(
+        bucketId,
+        finishPayload
+      );
+      networkFileId = typeof finishRes === "string" ? finishRes : finishRes.id;
     } catch (e: any) {
       if (e.response?.data) {
-        console.error('[INTERNXT] Finish upload failed:', JSON.stringify(e.response.data));
+        console.error(
+          "[INTERNXT] Finish upload failed:",
+          JSON.stringify(e.response.data)
+        );
       }
       throw e;
     }
 
     // 6. Create Drive entry
-    const dotIdx = filename.lastIndexOf('.');
+    const dotIdx = filename.lastIndexOf(".");
     const nameOnly = dotIdx > 0 ? filename.substring(0, dotIdx) : filename;
-    const extension = dotIdx > 0 ? filename.substring(dotIdx + 1) : '';
+    const extension = dotIdx > 0 ? filename.substring(dotIdx + 1) : "";
 
     // Encrypt the same string as plainName for consistency with official clients
-    const encryptedName = await EncryptFilename(this.config.mnemonic, bucketId, nameOnly);
+    const encryptedName = await EncryptFilename(
+      this.config.mnemonic,
+      bucketId,
+      nameOnly
+    );
 
     const payload = {
       bucket: bucketId,
       fileId: networkFileId,
-      encryptVersion: '03-aes' as any,
+      encryptVersion: "03-aes" as any,
       folderUuid: parentFolderUuid,
       size: uploadSize,
       plainName: nameOnly,
       name: encryptedName,
       type: extension,
       modificationTime: mtime ? new Date(mtime).toISOString() : undefined,
-      creationTime: ctime ? new Date(ctime).toISOString() : undefined
+      creationTime: ctime ? new Date(ctime).toISOString() : undefined,
     };
 
     return this.retryReq(async () => {
-      return await this.storage!.createFileEntryByUuid(payload as any);
+      return await this.storage?.createFileEntryByUuid(payload as any);
     });
   }
 
   async downloadFile(fileUuid: string): Promise<Buffer> {
-    if (!this.network || !this.config || !this.storage) throw new Error('Not authenticated');
+    if (!this.network || !this.config || !this.storage)
+      throw new Error("Not authenticated");
 
     const fileMeta = await this.getFileMeta(fileUuid);
     const bucketId = fileMeta.bucket;
     const fileId = fileMeta.fileId;
 
     // 1. Get download links
-    const downloads: any = await this.network.getDownloadLinks(bucketId, fileId);
+    const downloads: any = await this.network.getDownloadLinks(
+      bucketId,
+      fileId
+    );
     const [{ url, hash: expectedHash }] = downloads.shards;
     const indexHex = downloads.index;
 
     // 2. Download encrypted content using Obsidian requestUrl
     const res = await requestUrl({
       url: url,
-      method: 'GET'
+      method: "GET",
     });
     const encryptedContent = Buffer.from(res.arrayBuffer);
 
     // 3. Verify hash
-    const sha256Hash = crypto.createHash('sha256').update(encryptedContent).digest();
-    const actualHash = crypto.createHash('ripemd160').update(sha256Hash).digest('hex');
+    const sha256Hash = crypto
+      .createHash("sha256")
+      .update(encryptedContent)
+      .digest();
+    const actualHash = crypto
+      .createHash("ripemd160")
+      .update(sha256Hash)
+      .digest("hex");
     if (actualHash !== expectedHash) {
-      throw new Error('Hash mismatch during download');
+      throw new Error("Hash mismatch during download");
     }
 
     // 4. Decrypt file
-    if (!indexHex) throw new Error('No index found for decryption');
-    const index = Buffer.from(indexHex, 'hex');
+    if (!indexHex) throw new Error("No index found for decryption");
+    const index = Buffer.from(indexHex, "hex");
     const iv = index.slice(0, 16);
     const key = await GenerateFileKey(this.config.mnemonic, bucketId, index);
 
-    const decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
-    const decrypted = Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
+    const decipher = crypto.createDecipheriv("aes-256-ctr", key, iv);
+    const decrypted = Buffer.concat([
+      decipher.update(encryptedContent),
+      decipher.final(),
+    ]);
 
     return decrypted;
   }
 
-  async decryptFilename(encryptedName: string, bucketId: string): Promise<string> {
-    if (!this.config) throw new Error('Not authenticated');
+  async decryptFilename(
+    encryptedName: string,
+    bucketId: string
+  ): Promise<string> {
+    if (!this.config) throw new Error("Not authenticated");
     try {
-      const decrypted = await DecryptFileName(this.config.mnemonic, bucketId, encryptedName);
+      const decrypted = await DecryptFileName(
+        this.config.mnemonic,
+        bucketId,
+        encryptedName
+      );
       return decrypted || encryptedName;
-    } catch (e) {
+    } catch (_e) {
       return encryptedName;
     }
   }
