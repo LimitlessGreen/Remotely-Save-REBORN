@@ -53,24 +53,24 @@ const obsidianMock = {
       text: text,
     };
   },
-  platform: {
+  Platform: {
     isAndroidApp: false,
     isIosApp: false,
     isMacOS: false,
     isMobile: false,
     isSafari: false,
   },
-  notice: class Notice {
+  Notice: class Notice {
     constructor(message: string) {
       console.log(`[Obsidian Notice] ${message}`);
     }
   },
-  plugin: class Plugin {},
-  modal: class Modal {
+  Plugin: class Plugin {},
+  Modal: class Modal {
     open() {}
     close() {}
   },
-  setting: class Setting {
+  Setting: class Setting {
     setName(_name: string) {
       return this;
     }
