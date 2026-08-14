@@ -33,3 +33,5 @@ export const isS3Configured = !!(testConfig.s3.endpoint && testConfig.s3.accessK
 export const isDropboxConfigured = !!(testConfig.dropbox.token);
 export const isWebdavConfigured = !!(testConfig.webdav.address);
 export const isInternxtConfigured = !!(testConfig.internxt.token || (testConfig.internxt.email && testConfig.internxt.password));
+
+export const isAnyCloudConfigured = isS3Configured || isDropboxConfigured || isWebdavConfigured || isInternxtConfigured;

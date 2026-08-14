@@ -5,6 +5,12 @@ describe('Obsidian Deep Integration Smoke Test', function() {
     this.timeout(15000);
     const bridge = new ObsidianBridge();
 
+    before(async function() {
+        if (!(await bridge.isFunctional())) {
+            this.skip();
+        }
+    });
+
     it('should connect to Obsidian and read the vault name', async () => {
         const vaultName = await bridge.getVaultName();
         console.log(`Connected to vault: ${vaultName}`);

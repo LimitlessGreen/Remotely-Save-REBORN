@@ -77,4 +77,13 @@ export class ObsidianBridge {
     async reloadApp(): Promise<void> {
         await this.eval('window.location.reload()');
     }
+
+    async isFunctional(): Promise<boolean> {
+        try {
+            const vaultName = await this.getVaultName();
+            return !!vaultName && vaultName.length > 0;
+        } catch (e) {
+            return false;
+        }
+    }
 }

@@ -1,12 +1,20 @@
 import { expect } from 'chai';
 import { ObsidianBridge } from '../obsidian_bridge';
+import { isAnyCloudConfigured } from './config';
 
 describe('Sync Workflow Deep Integration', function() {
     this.timeout(60000);
     const bridge = new ObsidianBridge();
     const TEST_FILE_PATH = 'DeepTestFile.md';
 
-    before(async () => {
+    before(async function() {
+        if (!(await bridge.isFunctional())) {
+            this.skip();
+        }
+        if (!isAnyCloudConfigured) {
+            console.log("Skipping Deep Integration tests: No cloud credentials configured.");
+            this.skip();
+        }
         // Ensure plugin is fresh
         await bridge.reloadPlugin('remotely-save');
     });
