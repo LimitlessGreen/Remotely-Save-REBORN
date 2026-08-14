@@ -1,7 +1,7 @@
 import { Cipher as CipherRCloneCryptPack } from "@fyears/rclone-crypt";
 import { nanoid } from "nanoid";
 
-const ctx: WorkerGlobalScope = self as unknown as WorkerGlobalScope;
+const _ctx: WorkerGlobalScope = self as unknown as WorkerGlobalScope;
 
 const workerNanoID = nanoid();
 const cipher = new CipherRCloneCryptPack("base64");

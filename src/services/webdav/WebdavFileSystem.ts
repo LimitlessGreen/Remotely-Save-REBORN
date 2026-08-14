@@ -66,8 +66,6 @@ import { Base64 } from "js-base64";
 export class RawWebdavFs implements RawFs {
   private client!: WebDAVClient;
   private isNextcloud = false;
-  private supportApachePartial = false;
-  private supportSabrePartial = false;
 
   constructor(
     private config: WebdavConfig,

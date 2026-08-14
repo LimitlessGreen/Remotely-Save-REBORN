@@ -10,7 +10,6 @@ export class VersionHistoryModal extends Modal {
   private readonly file: TFile;
   private versions: Entity[] = [];
   private selectedVersion?: Entity;
-  private localContent = "";
 
   private sidebarEl!: HTMLElement;
   private mainEl!: HTMLElement;

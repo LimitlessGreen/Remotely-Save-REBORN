@@ -217,8 +217,7 @@ class RawBoxFs implements RawFs {
         continue;
       }
       const itemsResult: any = await this.api?.listItems(currId);
-      if (!itemsResult || !itemsResult.entries)
-        throw new Error(`Path not found: ${currPath}`);
+      if (!itemsResult?.entries) throw new Error(`Path not found: ${currPath}`);
       const found = itemsResult.entries.find((i: any) => i.name === part);
       if (!found) throw new Error(`Path not found: ${currPath}`);
       currId = found.id;
