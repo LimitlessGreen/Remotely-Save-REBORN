@@ -8,7 +8,7 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "format": "npx @biomejs/biome check --write .",
     "clean": "npx rimraf main.js",
-    "test": "mocha --import=tsx 'tests/**/*.ts'",
+    "test": "mocha --import=tsx tests/**/*.ts",
     "test:deep": "mocha --import=tsx tests/integration/*.deep.test.ts"
   },
   "browser": {
@@ -54,7 +54,7 @@
     "sinon": "^22.1.0",
     "tslib": "^2.8.1",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.3",
     "webdav-server": "^2.6.3",
     "yargs": "^18.1.0"
   },
