@@ -7,7 +7,7 @@
   "sometext": "Here are some texts.",
   "syncrun_alreadyrunning": "New command {{newTriggerSource}} stops because {{pluginName}} is already running in stage {{syncStatus}}!",
   "syncrun_syncingribbon": "{{pluginName}}: syncing from {{triggerSource}}",
-  "syncrun_step0": "0/8  원격 저장이 드라이 모드에서 실행 중이므로 실제 파일 변경이 일어나지 않습니다..",
+  "syncrun_step0": "0/8 원격 저장이 드라이 모드에서 실행 중이므로 실제 파일 변경이 일어나지 않습니다..",
   "syncrun_step1": "1/8 원격 저장이 준비 중입니다 ({{serviceType}})",
   "syncrun_step2": "2/8 원격 메타 데이터 가져오기 시작 및 비밀번호 확인 중.",
   "syncrun_passworderr": "비밀번호를 확인하는 동안 문제가 발생했습니다..",

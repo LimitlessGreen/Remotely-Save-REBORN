@@ -220,10 +220,10 @@ describe("Advanced Sync: Utilities", () => {
   it("should persist advanced settings correctly", () => {
     const settings: Partial<RemotelySavePluginSettings> = {
       conflictAction: "smart_conflict",
-      serviceType: "googledrive",
+      serviceType: "dropbox",
     };
 
     deepStrictEqual(settings.conflictAction, "smart_conflict");
-    deepStrictEqual(settings.serviceType, "googledrive");
+    deepStrictEqual(settings.serviceType, "dropbox");
   });
 });

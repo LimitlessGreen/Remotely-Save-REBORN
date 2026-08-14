@@ -41,10 +41,8 @@ import {
   DEFAULT_ONEDRIVE_CONFIG,
   DEFAULT_ONEDRIVEFULL_CONFIG,
 } from "./services/onedrive/OneDriveFileSystem";
-import { DEFAULT_GOOGLEDRIVE_CONFIG } from "./services/googledrive/GoogleDriveFileSystem";
 import { DEFAULT_BOX_CONFIG } from "./services/box/BoxFileSystem";
 import { DEFAULT_PCLOUD_CONFIG } from "./services/pcloud/PCloudFileSystem";
-import { DEFAULT_YANDEXDISK_CONFIG } from "./services/yandex/YandexFileSystem";
 import { DEFAULT_KOOFR_CONFIG } from "./services/koofr/KoofrFileSystem";
 import { DEFAULT_AZUREBLOBSTORAGE_CONFIG } from "./services/azure/AzureFileSystem";
 import { DEFAULT_S3_CONFIG } from "./services/s3/S3FileSystem";
@@ -76,10 +74,8 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   onedrive: DEFAULT_ONEDRIVE_CONFIG,
   onedrivefull: DEFAULT_ONEDRIVEFULL_CONFIG,
   webdis: DEFAULT_WEBDIS_CONFIG,
-  googledrive: DEFAULT_GOOGLEDRIVE_CONFIG,
   box: DEFAULT_BOX_CONFIG,
   pcloud: DEFAULT_PCLOUD_CONFIG,
-  yandexdisk: DEFAULT_YANDEXDISK_CONFIG,
   koofr: DEFAULT_KOOFR_CONFIG,
   azureblobstorage: DEFAULT_AZUREBLOBSTORAGE_CONFIG,
   internxt: {
@@ -832,20 +828,12 @@ export default class RemotelySavePlugin extends Plugin {
       }
     }
 
-    if (this.settings.googledrive === undefined) {
-      this.settings.googledrive = DEFAULT_GOOGLEDRIVE_CONFIG;
-    }
-
     if (this.settings.box === undefined) {
       this.settings.box = DEFAULT_BOX_CONFIG;
     }
 
     if (this.settings.pcloud === undefined) {
       this.settings.pcloud = DEFAULT_PCLOUD_CONFIG;
-    }
-
-    if (this.settings.yandexdisk === undefined) {
-      this.settings.yandexdisk = DEFAULT_YANDEXDISK_CONFIG;
     }
 
     if (this.settings.koofr === undefined) {
@@ -937,17 +925,6 @@ export default class RemotelySavePlugin extends Plugin {
       needSave = true;
     }
 
-    let googleDriveExpired = false;
-    if (
-      this.settings.googledrive.refreshToken !== "" &&
-      current >= this.settings!.googledrive!.credentialsShouldBeDeletedAtTimeMs!
-    ) {
-      console.warn(`google drive expired`);
-      googleDriveExpired = true;
-      this.settings.googledrive = structuredClone(DEFAULT_GOOGLEDRIVE_CONFIG);
-      needSave = true;
-    }
-
     let boxExpired = false;
     if (
       this.settings.box.refreshToken !== "" &&
@@ -967,17 +944,6 @@ export default class RemotelySavePlugin extends Plugin {
       console.warn(`pcloud expired`);
       pCloudExpired = true;
       this.settings.pcloud = structuredClone(DEFAULT_PCLOUD_CONFIG);
-      needSave = true;
-    }
-
-    let yandexDiskExpired = false;
-    if (
-      this.settings.yandexdisk.refreshToken !== "" &&
-      current >= this.settings!.yandexdisk!.credentialsShouldBeDeletedAtTimeMs!
-    ) {
-      console.warn(`yandex disk expired`);
-      yandexDiskExpired = true;
-      this.settings.yandexdisk = structuredClone(DEFAULT_YANDEXDISK_CONFIG);
       needSave = true;
     }
 
@@ -1016,12 +982,6 @@ export default class RemotelySavePlugin extends Plugin {
         6000
       );
     }
-    if (googleDriveExpired) {
-      new Notice(
-        `${this.manifest.name}: You haven't manually auth Google Drive for many days, you need to re-auth it again.`,
-        6000
-      );
-    }
     if (boxExpired) {
       new Notice(
         `${this.manifest.name}: You haven't manually auth Box for many days, you need to re-auth it again.`,
@@ -1031,12 +991,6 @@ export default class RemotelySavePlugin extends Plugin {
     if (pCloudExpired) {
       new Notice(
         `${this.manifest.name}: You haven't manually auth pCloud for many days, you need to re-auth it again.`,
-        6000
-      );
-    }
-    if (yandexDiskExpired) {
-      new Notice(
-        `${this.manifest.name}: You haven't manually auth Yandex Disk for many days, you need to re-auth it again.`,
         6000
       );
     }

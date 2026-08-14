@@ -1,10 +1,8 @@
 import { S3Service } from "./s3/S3Service";
 import { AzureService } from "./azure/AzureService";
-import { GoogleDriveService } from "./googledrive/GoogleDriveService";
 import { OneDriveService } from "./onedrive/OneDriveService";
 import { BoxService } from "./box/BoxService";
 import { PCloudService } from "./pcloud/PCloudService";
-import { YandexDiskService } from "./yandex/YandexService";
 import { InternxtService } from "./internxt/InternxtService";
 import { KoofrService } from "./koofr/KoofrService";
 import { DropboxService } from "./dropbox/DropboxService";
@@ -17,11 +15,9 @@ import type { CloudService } from "./serviceInterface";
  * Registry for all cloud storage services.
  */
 export const SERVICES: CloudService[] = [
-  GoogleDriveService,
   OneDriveService,
   BoxService,
   PCloudService,
-  YandexDiskService,
   InternxtService,
   KoofrService,
   S3Service,

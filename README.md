@@ -1,7 +1,5 @@
 # Remotely Save (Community Fork)
 
-English | [中文](./README.zh-cn.md)
-
 **This is a community-maintained fork of the original Remotely Save plugin.** The original project is currently inactive, and this fork aims to continue development and maintenance under a fully open-source model.
 
 [![BuildCI](https://github.com/remotely-save/remotely-save/actions/workflows/auto-build.yml/badge.svg)](https://github.com/remotely-save/remotely-save/actions/workflows/auto-build.yml)

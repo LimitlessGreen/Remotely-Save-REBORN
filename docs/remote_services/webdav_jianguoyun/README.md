@@ -1,7 +1,5 @@
 # JianGuoYun/NutStore
 
-English | [中文](./README.zh-cn.md)
-
 ## Link
 
 <https://www.jianguoyun.com/>

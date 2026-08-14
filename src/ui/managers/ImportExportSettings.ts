@@ -140,16 +140,6 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
         });
       })
       .addButton(async (button) => {
-        button.setButtonText(t("settings_export_googledrive_button"));
-        button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "googledrive"
-          ).open();
-        });
-      })
-      .addButton(async (button) => {
         button.setButtonText(t("settings_export_box_button"));
         button.onClick(async () => {
           new ExportSettingsQrCodeModal(app, plugin, "box").open();
@@ -159,16 +149,6 @@ export class ImportExportSettingsManager extends BaseSettingsManager {
         button.setButtonText(t("settings_export_pcloud_button"));
         button.onClick(async () => {
           new ExportSettingsQrCodeModal(app, plugin, "pcloud").open();
-        });
-      })
-      .addButton(async (button) => {
-        button.setButtonText(t("settings_export_yandexdisk_button"));
-        button.onClick(async () => {
-          new ExportSettingsQrCodeModal(
-            app,
-            plugin,
-            "yandexdisk"
-          ).open();
         });
       })
       .addButton(async (button) => {

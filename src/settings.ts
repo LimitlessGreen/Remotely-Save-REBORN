@@ -157,19 +157,11 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         dropdown.addOption("webdis", t("settings_chooseservice_webdis"));
 
         dropdown.addOption(
-          "googledrive",
-          t("settings_chooseservice_googledrive")
-        );
-        dropdown.addOption(
           "onedrivefull",
           t("settings_chooseservice_onedrivefull")
         );
         dropdown.addOption("box", t("settings_chooseservice_box"));
         dropdown.addOption("pcloud", t("settings_chooseservice_pcloud"));
-        dropdown.addOption(
-          "yandexdisk",
-          t("settings_chooseservice_yandexdisk")
-        );
         dropdown.addOption("koofr", t("settings_chooseservice_koofr"));
         dropdown.addOption(
           "azureblobstorage",

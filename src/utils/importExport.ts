@@ -24,10 +24,8 @@ export const exportQrCodeUri = async (
     delete settings2.onedrivefull;
     delete settings2.webdav;
     delete settings2.webdis;
-    delete settings2.googledrive;
     delete settings2.box;
     delete settings2.pcloud;
-    delete settings2.yandexdisk;
     delete settings2.koofr;
     delete settings2.azureblobstorage;
   } else if (exportFields === "s3") {
@@ -44,14 +42,10 @@ export const exportQrCodeUri = async (
     settings2 = { webdav: structuredClone(settings.webdav) };
   } else if (exportFields === "webdis") {
     settings2 = { webdis: structuredClone(settings.webdis) };
-  } else if (exportFields === "googledrive") {
-    settings2 = { googledrive: structuredClone(settings.googledrive) };
   } else if (exportFields === "box") {
     settings2 = { box: structuredClone(settings.box) };
   } else if (exportFields === "pcloud") {
     settings2 = { pcloud: structuredClone(settings.pcloud) };
-  } else if (exportFields === "yandexdisk") {
-    settings2 = { yandexdisk: structuredClone(settings.yandexdisk) };
   } else if (exportFields === "koofr") {
     settings2 = { koofr: structuredClone(settings.koofr) };
   } else if (exportFields === "azureblobstorage") {

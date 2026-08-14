@@ -1,7 +1,5 @@
 # Tencent Cloud COS
 
-English | [中文](./README.zh-cn.md)
-
 ## Link
 
 - international <https://console.tencentcloud.com/cos>

@@ -1,7 +1,5 @@
 # AList
 
-English | [中文](./README.zh-cn.md)
-
 ## Links
 
 - English official website: <https://alist.nn.ci/> and <https://alist.nn.ci/guide/webdav.html>

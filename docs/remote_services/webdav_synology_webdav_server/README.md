@@ -1,7 +1,5 @@
 # Synology Webdav Server
 
-English | [中文](./README.zh-cn.md)
-
 ## Link
 
 <https://kb.synology.com/en-global/DSM/tutorial/How_to_access_files_on_Synology_NAS_with_WebDAV>

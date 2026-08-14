@@ -12,14 +12,10 @@ declare global {
 
   var DEFAULT_REMOTELYSAVE_WEBSITE: string;
   var DEFAULT_REMOTELYSAVE_CLIENT_ID: string;
-  var DEFAULT_GOOGLEDRIVE_CLIENT_ID: string;
-  var DEFAULT_GOOGLEDRIVE_CLIENT_SECRET: string;
   var DEFAULT_BOX_CLIENT_ID: string;
   var DEFAULT_BOX_CLIENT_SECRET: string;
   var DEFAULT_PCLOUD_CLIENT_ID: string;
   var DEFAULT_PCLOUD_CLIENT_SECRET: string;
-  var DEFAULT_YANDEXDISK_CLIENT_ID: string;
-  var DEFAULT_YANDEXDISK_CLIENT_SECRET: string;
   var DEFAULT_KOOFR_CLIENT_ID: string;
   var DEFAULT_KOOFR_CLIENT_SECRET: string;
 }
@@ -37,10 +33,8 @@ export type SUPPORTED_SERVICES_TYPE =
   | "onedrive"
   | "onedrivefull"
   | "webdis"
-  | "googledrive"
   | "box"
   | "pcloud"
-  | "yandexdisk"
   | "koofr"
   | "azureblobstorage"
   | "internxt"
@@ -133,21 +127,6 @@ export interface WebdisConfig {
   remoteBaseDir?: string;
 }
 
-export interface GoogleDriveConfig {
-  accessToken: string;
-  accessTokenExpiresInMs: number;
-  accessTokenExpiresAtTimeMs: number;
-  refreshToken: string;
-  remoteBaseDir?: string;
-  credentialsShouldBeDeletedAtTimeMs?: number;
-  scope: "https://www.googleapis.com/auth/drive.file";
-  kind: "googledrive";
-}
-
-export const GOOGLEDRIVE_CLIENT_ID = global.DEFAULT_GOOGLEDRIVE_CLIENT_ID;
-export const GOOGLEDRIVE_CLIENT_SECRET =
-  global.DEFAULT_GOOGLEDRIVE_CLIENT_SECRET;
-
 export interface BoxConfig {
   accessToken: string;
   accessTokenExpiresInMs: number;
@@ -173,21 +152,6 @@ export interface PCloudConfig {
 
 export const PCLOUD_CLIENT_ID = global.DEFAULT_PCLOUD_CLIENT_ID;
 export const PCLOUD_CLIENT_SECRET = global.DEFAULT_PCLOUD_CLIENT_SECRET;
-
-export interface YandexDiskConfig {
-  accessToken: string;
-  accessTokenExpiresInMs: number;
-  accessTokenExpiresAtTimeMs: number;
-  refreshToken: string;
-  remoteBaseDir?: string;
-  credentialsShouldBeDeletedAtTimeMs?: number;
-  scope: string;
-  kind: "yandexdisk";
-}
-
-export const YANDEXDISK_CLIENT_ID = global.DEFAULT_YANDEXDISK_CLIENT_ID;
-export const YANDEXDISK_CLIENT_SECRET =
-  global.DEFAULT_YANDEXDISK_CLIENT_SECRET;
 
 export interface KoofrConfig {
   accessToken: string;
@@ -265,10 +229,8 @@ export interface RemotelySavePluginSettings {
   onedrive: OnedriveConfig;
   onedrivefull: OnedriveFullConfig;
   webdis: WebdisConfig;
-  googledrive: GoogleDriveConfig;
   box: BoxConfig;
   pcloud: PCloudConfig;
-  yandexdisk: YandexDiskConfig;
   koofr: KoofrConfig;
   azureblobstorage: AzureBlobStorageConfig;
   internxt: InternxtConfig;
@@ -330,11 +292,9 @@ export const COMMAND_URI = "remotely-save";
 export const COMMAND_CALLBACK = "remotely-save-cb";
 export const COMMAND_CALLBACK_ONEDRIVE = "remotely-save-cb-onedrive";
 export const COMMAND_CALLBACK_DROPBOX = "remotely-save-cb-dropbox";
-export const COMMAND_CALLBACK_GOOGLEDRIVE = "remotely-save-cb-googledrive";
 export const COMMAND_CALLBACK_ONEDRIVEFULL = "remotely-save-cb-onedrivefull";
 export const COMMAND_CALLBACK_BOX = "remotely-save-cb-box";
 export const COMMAND_CALLBACK_PCLOUD = "remotely-save-cb-pcloud";
-export const COMMAND_CALLBACK_YANDEXDISK = "remotely-save-cb-yandexdisk";
 export const COMMAND_CALLBACK_KOOFR = "remotely-save-cb-koofr";
 export const COMMAND_CALLBACK_INTERNXT = "remotely-save-cb-internxt";
 

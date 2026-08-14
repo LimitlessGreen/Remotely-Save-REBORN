@@ -9,10 +9,8 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   onedrive: {} as any,
   onedrivefull: {} as any,
   webdis: {} as any,
-  googledrive: {} as any,
   box: {} as any,
   pcloud: {} as any,
-  yandexdisk: {} as any,
   koofr: {} as any,
   azureblobstorage: {} as any,
   internxt: {
