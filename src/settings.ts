@@ -22,7 +22,6 @@ import { BasicSettingsManager } from "./ui/managers/BasicSettings";
 import { AdvancedSettingsManager } from "./ui/managers/AdvancedSettings";
 import { ImportExportSettingsManager } from "./ui/managers/ImportExportSettings";
 import { DebugSettingsManager } from "./ui/managers/DebugSettings";
-import { AccountSettingsManager } from "./ui/managers/AccountSettings";
 
 export class ChangeRemoteBaseDirModal extends Modal {
   readonly plugin: RemotelySavePlugin;
@@ -191,7 +190,6 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       service.getSettings(this.plugin, this.app, t).render(containerEl);
     }
 
-    new AccountSettingsManager(this.plugin, this.app, t).render(containerEl);
     new BasicSettingsManager(this.plugin, this.app, t).render(containerEl);
     new AdvancedSettingsManager(this.plugin, this.app, t).render(containerEl);
     new ImportExportSettingsManager(this.plugin, this.app, t).render(containerEl);

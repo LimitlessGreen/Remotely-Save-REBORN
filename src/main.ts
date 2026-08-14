@@ -88,7 +88,6 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
     mnemonic: "",
     kind: "internxt",
   },
-  officialAccount: undefined,
   password: "",
   serviceType: "s3",
   currLogLevel: "info",
@@ -285,26 +284,6 @@ export default class RemotelySavePlugin extends Plugin {
     this.syncEvent = new Events();
 
     await this.loadSettings();
-
-    // Migration from "pro" to "officialAccount"
-    if ((this.settings as any).pro !== undefined) {
-      const oldPro = (this.settings as any).pro;
-      this.settings.officialAccount = {
-        email: oldPro.email,
-        refreshToken: oldPro.refreshToken,
-        accessToken: oldPro.accessToken,
-        accessTokenExpiresInMs: oldPro.accessTokenExpiresInMs,
-        accessTokenExpiresAtTimeMs: oldPro.accessTokenExpiresAtTimeMs,
-        enabledFeatures: oldPro.enabledProFeatures?.map((f: any) => ({
-          featureName: f.featureName,
-          enableAtTimeMs: f.enableAtTimeMs,
-          expireAtTimeMs: f.expireAtTimeMs,
-        })) || [],
-        credentialsShouldBeDeletedAtTimeMs: oldPro.credentialsShouldBeDeletedAtTimeMs,
-      };
-      delete (this.settings as any).pro;
-      await this.saveSettings();
-    }
 
     // MUST after loadSettings and before prepareDB
     const profileID: string = this.getCurrProfileID();

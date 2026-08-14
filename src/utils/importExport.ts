@@ -30,7 +30,6 @@ export const exportQrCodeUri = async (
     delete settings2.yandexdisk;
     delete settings2.koofr;
     delete settings2.azureblobstorage;
-    delete settings2.officialAccount;
   } else if (exportFields === "s3") {
     settings2 = { s3: structuredClone(settings.s3) };
   } else if (exportFields === "dropbox") {
