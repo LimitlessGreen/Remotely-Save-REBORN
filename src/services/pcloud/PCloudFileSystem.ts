@@ -96,7 +96,9 @@ class RawPCloudFs implements RawFs {
 
   async readFile(fullPath: string, versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
-    return await this.api?.downloadFile(fullPath, versionId);
+    const data = await this.api?.downloadFile(fullPath, versionId);
+    if (!data) throw new Error(`Could not download ${fullPath}`);
+    return data;
   }
 
   async writeFile(
@@ -223,10 +225,10 @@ export class PCloudFileSystem extends BaseCloudFs {
     );
   }
 
-  async checkConnect(callbackFunc?: any): Promise<boolean> {
+  async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       await (this.rawFs as RawPCloudFs).checkConnect(this.toFullPath(""));
-    } catch (err) {
+    } catch (err: unknown) {
       callbackFunc?.(err);
       return false;
     }

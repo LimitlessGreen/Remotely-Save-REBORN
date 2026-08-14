@@ -189,9 +189,10 @@ export class InternxtClient {
     if (!this.storage) throw new Error("Not authenticated");
     return this.retryReq(async () => {
       try {
+        if (!this.config) throw new Error("Config not initialized");
         const encryptedName = await EncryptFilename(
-          this.config?.mnemonic,
-          this.config?.bucketId,
+          this.config.mnemonic ?? "",
+          this.config.bucketId ?? "",
           name
         );
         if (!this.storage) throw new Error("Storage not initialized");
@@ -202,7 +203,8 @@ export class InternxtClient {
         } as any);
         return await promise;
       } catch (e: unknown) {
-        if (e.status === 409 || e.status === 422) {
+        const err = e as { status?: number };
+        if (err.status === 409 || err.status === 422) {
           const contents = await this.getFolderContents(parentFolderUuid);
           const existing = contents.children?.find(
             (c: any) => (c.plainName || c.name) === name

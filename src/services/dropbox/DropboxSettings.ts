@@ -1,5 +1,6 @@
 import { type App, Modal, Notice, Platform, Setting } from "obsidian";
 import { getClient } from "../../core/fs/fsGetter";
+import type { TFunc, TransItemType } from "../../core/i18n/i18n";
 import type RemotelySavePlugin from "../../main";
 import { ChangeRemoteBaseDirModal } from "../../settings";
 import { BaseSettingsManager } from "../../ui/settingsManager";

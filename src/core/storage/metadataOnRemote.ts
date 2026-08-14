@@ -88,7 +88,7 @@ export const deserializeMetadataOnRemote = (x: string | ArrayBuffer) => {
   try {
     y3 = (
       base64url.parse(reverseString(y2["d"]), {
-        out: (size) => Buffer.allocUnsafe(size),
+        out: Uint8Array,
         loose: true,
       }) as Buffer
     ).toString("utf-8");

@@ -98,6 +98,7 @@ class RawOneDriveFs implements RawFs {
       const items = await this.api?.listChildren(
         `${this.rootDrivePath}${relPath}`
       );
+      if (!items) return;
       for (const item of items) {
         const isDir = !!item.folder;
         const key =
@@ -108,7 +109,9 @@ class RawOneDriveFs implements RawFs {
           key,
           keyRaw: key,
           sizeRaw: item.size || 0,
-          mtimeSvr: Date.parse(item.lastModifiedDateTime).valueOf(),
+          mtimeSvr: item.lastModifiedDateTime
+            ? Date.parse(item.lastModifiedDateTime).valueOf()
+            : Date.now(),
           hash: item.file?.hashes?.sha1Hash,
         });
         if (!partial && isDir) await recurse(`${relPath}/${item.name}`);
@@ -127,12 +130,15 @@ class RawOneDriveFs implements RawFs {
     const item = await this.api?.getItem(
       `${this.rootDrivePath}${fullPath === "/" ? "" : fullPath.replace(/\/$/, "")}`
     );
+    if (!item) throw new Error(`Not found: ${fullPath}`);
     const _isDir = !!item.folder;
     return {
       key: fullPath,
       keyRaw: fullPath,
       sizeRaw: item.size || 0,
-      mtimeSvr: Date.parse(item.lastModifiedDateTime).valueOf(),
+      mtimeSvr: item.lastModifiedDateTime
+        ? Date.parse(item.lastModifiedDateTime).valueOf()
+        : Date.now(),
       hash: item.file?.hashes?.sha1Hash,
       versionId: item.id, // OneDrive has IDs, but for "versioning" we might need something else later
     };
@@ -141,11 +147,14 @@ class RawOneDriveFs implements RawFs {
   async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
     const item = await this.api?.getItem(`${this.rootDrivePath}${fullPath}`);
+    if (!item) throw new Error(`Not found: ${fullPath}`);
     const downloadUrl = item["@microsoft.graph.downloadUrl"];
     if (!downloadUrl) {
       throw new Error(`Download URL missing for ${fullPath}`);
     }
-    return await this.api?.download(downloadUrl);
+    const data = await this.api?.download(downloadUrl);
+    if (!data) throw new Error(`Could not download ${fullPath}`);
+    return data;
   }
 
   async writeFile(fullPath: string, content: ArrayBuffer): Promise<Entity> {
@@ -154,11 +163,14 @@ class RawOneDriveFs implements RawFs {
       `${this.rootDrivePath}${fullPath}`,
       content
     );
+    if (!item) throw new Error(`Could not upload to ${fullPath}`);
     return {
       key: fullPath,
       keyRaw: fullPath,
       sizeRaw: item.size || 0,
-      mtimeSvr: Date.parse(item.lastModifiedDateTime).valueOf(),
+      mtimeSvr: item.lastModifiedDateTime
+        ? Date.parse(item.lastModifiedDateTime).valueOf()
+        : Date.now(),
       hash: item.file?.hashes?.sha1Hash,
       versionId: item.id,
     };
@@ -181,18 +193,22 @@ class RawOneDriveFs implements RawFs {
     const parentDrivePath = `${this.rootDrivePath}${parentPath ? "/" + parentPath : ""}`;
 
     const item = await this.api?.createFolder(parentDrivePath, name);
+    if (!item) throw new Error(`Could not create folder ${fullPath}`);
     return {
       key: fullPath,
       keyRaw: fullPath,
       sizeRaw: 0,
-      mtimeSvr: Date.parse(item.lastModifiedDateTime).valueOf(),
+      mtimeSvr: item.lastModifiedDateTime
+        ? Date.parse(item.lastModifiedDateTime).valueOf()
+        : Date.now(),
     };
   }
 
   async getUserDisplayName(): Promise<string> {
     await this.ensureInited();
     const info = await this.api?.getUserInfo();
-    return info.displayName;
+    if (!info) return "Unknown User";
+    return info.displayName || "Unknown User";
   }
 
   private async ensureInited() {

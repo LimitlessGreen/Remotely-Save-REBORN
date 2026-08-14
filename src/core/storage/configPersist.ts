@@ -28,7 +28,7 @@ export const messyConfigToNormal = (
     const y = JSON.parse(
       (
         base64url.parse(reverseString(x["d"]), {
-          out: (size) => Buffer.allocUnsafe(size),
+          out: Uint8Array,
           loose: true,
         }) as Buffer
       ).toString("utf-8")

@@ -128,7 +128,11 @@ async function retryReq<T>(
     try {
       return await reqFunc();
     } catch (e: unknown) {
-      const err = e as { status: number; error: any; headers: any };
+      const err = e as {
+        status: number;
+        error: { error?: { retry_after?: number } };
+        headers: any;
+      };
       console.error(
         `Dropbox Error: status=${err.status}, body=${JSON.stringify(err.error)}`
       );
@@ -141,7 +145,7 @@ async function retryReq<T>(
 
       const headers = isNetworkErr ? {} : headersToRecord(err.headers);
       const svrSec =
-        e.error?.error?.retry_after ||
+        err.error?.error?.retry_after ||
         Number.parseInt(headers["retry-after"] || "1", 10) ||
         1;
       const secMin = Math.max(svrSec, waitSeconds[idx]);

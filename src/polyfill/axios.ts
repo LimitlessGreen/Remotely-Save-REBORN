@@ -1,4 +1,3 @@
-// @ts-expect-error
 import axios from "../../node_modules/axios/index.js";
 import obsidianAdapter from "./axiosObsidianAdapter";
 

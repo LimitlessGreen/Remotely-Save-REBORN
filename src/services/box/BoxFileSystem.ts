@@ -114,7 +114,9 @@ class RawBoxFs implements RawFs {
   async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
     const id = await this.resolvePathToId(fullPath);
-    return await this.api?.downloadFile(id);
+    const data = await this.api?.downloadFile(id);
+    if (!data) throw new Error(`Could not download ${fullPath}`);
+    return data;
   }
 
   async writeFile(
@@ -184,6 +186,7 @@ class RawBoxFs implements RawFs {
     const parentId = await this.resolvePathToId(parentPath);
 
     const res = await this.api?.createFolder(parentId, name);
+    if (!res) throw new Error(`Could not create folder ${fullPath}`);
     this.cache.set(fullPath, res.id);
     return {
       key: fullPath,
@@ -203,8 +206,8 @@ class RawBoxFs implements RawFs {
     if (cached) return cached;
 
     const parts = normalized.split("/").filter(Boolean);
-    let currId = this.rootId;
-    if (!currId) throw new Error("Root ID not initialized");
+    if (!this.rootId) throw new Error("Root ID not initialized");
+    let currId: string = this.rootId;
     let currPath = "";
     for (const part of parts) {
       currPath += "/" + part;
@@ -213,8 +216,10 @@ class RawBoxFs implements RawFs {
         currId = cachedPart;
         continue;
       }
-      const items = await this.api?.listItems(currId);
-      const found = items?.entries?.find((i) => i.name === part);
+      const itemsResult: any = await this.api?.listItems(currId);
+      if (!itemsResult || !itemsResult.entries)
+        throw new Error(`Path not found: ${currPath}`);
+      const found = itemsResult.entries.find((i: any) => i.name === part);
       if (!found) throw new Error(`Path not found: ${currPath}`);
       currId = found.id;
       this.cache.set(currPath, currId);

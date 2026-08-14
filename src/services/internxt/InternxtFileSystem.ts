@@ -89,7 +89,7 @@ export class RawInternxtFs implements RawFs {
       if (!folder) {
         if (createIfMissing) {
           const res = await this.client.createFolder(currentId, part);
-          folder = res;
+          folder = res as { uuid: string };
 
           // Wait for folder to be recognized by Drive API in parent's children
           for (let i = 0; i < 15; i++) {
@@ -107,6 +107,10 @@ export class RawInternxtFs implements RawFs {
         } else {
           throw new Error(`Folder not found: ${part} in ${currentPath}`);
         }
+      }
+
+      if (!folder) {
+        throw new Error(`Folder creation/resolution failed for ${part}`);
       }
 
       currentId = folder.uuid;
@@ -278,7 +282,7 @@ export class InternxtFileSystem extends BaseCloudFs {
   async checkConnect(callbackFunc?: (err?: unknown) => void): Promise<boolean> {
     try {
       // Basic check: list root
-      await this.walk("/", true);
+      await this.walk();
       return true;
     } catch (err: unknown) {
       callbackFunc?.(err);

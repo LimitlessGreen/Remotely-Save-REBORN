@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import type { RemotelySavePluginSettings } from "../src/core/baseTypes";
 
-// @ts-expect-error
-const _DEFAULT_SETTINGS: RemotelySavePluginSettings = {
+const _DEFAULT_SETTINGS: Partial<RemotelySavePluginSettings> = {
   s3: {} as any,
   webdav: {} as any,
   dropbox: {} as any,

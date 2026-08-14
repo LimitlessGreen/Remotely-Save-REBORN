@@ -103,10 +103,12 @@ class RawKoofrFs implements RawFs {
 
   async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
-    return await this.api?.downloadFile(
+    const data = await this.api?.downloadFile(
       this.config.mountID,
       `/${this.rootPath}${fullPath}`
     );
+    if (!data) throw new Error(`Could not download ${fullPath}`);
+    return data;
   }
 
   async writeFile(
