@@ -11,7 +11,7 @@ export class ObsidianBridge {
         const result = spawnSync(this.obsidianPath, args, {
             encoding: 'utf8',
             timeout: 120000,
-            shell: true
+            shell: false
         });
         return result.stdout || '';
     }
@@ -31,7 +31,7 @@ export class ObsidianBridge {
         // It decodes the hex and evals it.
         const wrapped = `(async()=>{try{const h='${hex}';let s='';for(let i=0;i<h.length;i+=2)s+=String.fromCharCode(parseInt(h.substr(i,2),16));const r=await eval(s);return JSON.stringify({d:r});}catch(e){return JSON.stringify({e:e.message});}})()`;
 
-        const output = this.runCommand(['eval', `code="${wrapped}"`]);
+        const output = this.runCommand(['eval', `code=${wrapped}`]);
         const cleaned = output.trim();
 
         if (cleaned.startsWith('=> ')) {
