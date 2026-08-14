@@ -40,7 +40,7 @@
     "@types/node": "^26.2.0",
     "@types/qrcode": "^1.5.6",
     "@types/sinon": "^22.0.0",
-    "@types/uuid": "^10.0.0",
+    "@types/uuid": "^11.0.0",
     "builtin-modules": "^5.3.0",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
@@ -54,7 +54,7 @@
     "sinon": "^22.1.0",
     "tslib": "^2.8.1",
     "tsx": "^4.23.12",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "webdav-server": "^2.6.3",
     "yargs": "^18.1.0"
   },
