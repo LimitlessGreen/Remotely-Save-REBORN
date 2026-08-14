@@ -37,7 +37,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm test
+      - name: Run library tests
+        run: npm run test:libs
+      - name: Run main tests
+        run: npm test
       - run: npm run build
       - uses: actions/upload-artifact@v7
         with:

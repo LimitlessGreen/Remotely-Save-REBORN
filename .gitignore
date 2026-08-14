@@ -26,6 +26,8 @@ dev-deploy.mjs
 
 # hidden files
 .*
+!.github/
+!.gitignore
 
 # implementation plans
 implementation_plan*
