@@ -1,0 +1,34 @@
+# Dependabot configuration for 2026 Best Practices
+version: 2
+updates:
+  # 1. NPM: Grouped and stable updates for the plugin and workspaces
+  - package-ecosystem: "npm"
+    directories: 
+      - "/"
+      - "/libs/*"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    # Wait 7 days to ensure the community has vetted new versions
+    cooldown:
+      default-days: 7
+    groups:
+      # Bundle all non-major updates to reduce CI noise
+      dependencies-group:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      # Keep major updates separate as they usually need manual review
+      major-updates:
+        patterns: ["*"]
+        update-types: ["major"]
+
+  # 2. GITHUB ACTIONS: Group all updates together weekly
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions-group:
+        patterns: ["*"]
