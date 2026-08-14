@@ -12,7 +12,10 @@ describe('S3 Deep Integration Test', function() {
         return;
     }
 
-    before(async () => {
+    before(async function() {
+        if (!(await bridge.isFunctional())) {
+            this.skip();
+        }
         console.log('Injecting S3 credentials into Obsidian...');
         const res = await bridge.updatePluginSettings('remotely-save', {
             serviceType: 's3',

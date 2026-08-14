@@ -43,7 +43,7 @@ describe("Axios Obsidian Adapter", () => {
         status: 200,
         text: "OK",
         headers: {},
-        json: {},
+        json: null,
         arrayBuffer: new ArrayBuffer(0)
       };
     };

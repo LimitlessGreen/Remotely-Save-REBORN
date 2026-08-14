@@ -12,7 +12,10 @@ describe('Internxt Deep Integration Test', function() {
         return;
     }
 
-    before(async () => {
+    before(async function() {
+        if (!(await bridge.isFunctional())) {
+            this.skip();
+        }
         console.log('Injecting Internxt credentials into Obsidian...');
         await bridge.updatePluginSettings('remotely-save', {
             serviceType: 'internxt',

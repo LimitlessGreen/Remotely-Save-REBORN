@@ -12,7 +12,10 @@ describe('Deep Integration Edge Cases (S3)', function() {
         return;
     }
 
-    before(async () => {
+    before(async function() {
+        if (!(await bridge.isFunctional())) {
+            this.skip();
+        }
         await bridge.updatePluginSettings('remotely-save', {
             serviceType: 's3',
             s3: {

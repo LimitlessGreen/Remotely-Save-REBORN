@@ -968,8 +968,13 @@ describe("Really RClone Files", () => {
     await rejects(async () => await cipher.decryptFileName(`xx${actual}`));
   });
 
-  it("MonaLisaImageContent", async () => {
+  it("MonaLisaImageContent", async function () {
     const testFolder = path.join(__dirname, "static_assets", "mona_lisa");
+    try {
+      await fs.access(testFolder);
+    } catch (e) {
+      this.skip();
+    }
     const testFileName =
       "1374px-Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg";
     const password = "testpassword";
