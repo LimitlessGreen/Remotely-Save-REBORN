@@ -86,11 +86,10 @@ export const deserializeMetadataOnRemote = (x: string | ArrayBuffer) => {
 
   let y3: string;
   try {
-    y3 = (
+    y3 = Buffer.from(
       base64url.parse(reverseString(y2["d"]), {
-        out: Uint8Array,
         loose: true,
-      }) as Buffer
+      })
     ).toString("utf-8");
   } catch (_e) {
     throw new Error('invalid remote meta data file (invalid "d" field)!');

@@ -26,11 +26,10 @@ export const messyConfigToNormal = (
   if ("readme" in x && "d" in x) {
     // we should decode
     const y = JSON.parse(
-      (
+      Buffer.from(
         base64url.parse(reverseString(x["d"]), {
-          out: Uint8Array,
           loose: true,
-        }) as Buffer
+        })
       ).toString("utf-8")
     );
     // console.debug("loading, parsed config is:");

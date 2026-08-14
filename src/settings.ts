@@ -3,7 +3,7 @@ import type {
   SupportedServicesType,
   SupportedServicesTypeWithRemoteBaseDir,
 } from "./core/baseTypes";
-import type { TransItemType } from "./core/i18n/i18n";
+import type { TFunc, TransItemType } from "./core/i18n/i18n";
 import type RemotelySavePlugin from "./main"; // unavoidable
 import { SERVICES } from "./services/serviceRegistry";
 import { AdvancedSettingsManager } from "./ui/managers/AdvancedSettings";
@@ -31,7 +31,7 @@ export class ChangeRemoteBaseDirModal extends Modal {
   onOpen() {
     const { contentEl } = this;
 
-    const t = (x: TransItemType, vars?: any) => {
+    const t: TFunc = (x, vars) => {
       return this.plugin.i18n.t(x, vars);
     };
 
@@ -124,7 +124,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    const t = (x: TransItemType, vars?: any) => {
+    const t: TFunc = (x, vars) => {
       return this.plugin.i18n.t(x, vars);
     };
 
