@@ -26,7 +26,7 @@ const obsidianMock = {
 
     const buffer = await response.arrayBuffer();
     const text = new TextDecoder().decode(buffer);
-    let json = {};
+    let json: any = null;
     try { json = JSON.parse(text); } catch (e) {}
 
     return {
