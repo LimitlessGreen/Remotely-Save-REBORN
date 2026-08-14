@@ -1,4 +1,4 @@
-import { ecb } from '@noble/ciphers/aes';
+import { ecb } from '@noble/ciphers/aes.js';
 
 function multByTwo(output: Uint8Array, input: Uint8Array) {
     if (input.length !== 16) {

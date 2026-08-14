@@ -1,6 +1,5 @@
-import * as chai from "chai";
+import { expect } from "chai";
 import { Queue, Stack } from "../src";
-const expect = chai.expect;
 
 describe("basic Queue tests", () => {
 

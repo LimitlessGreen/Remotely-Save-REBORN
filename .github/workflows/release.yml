@@ -28,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
 
     steps:
       - name: Checkout codes
@@ -54,7 +54,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - name: Create Release And Upload
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.1.0
         with:
           files: |
             main.js

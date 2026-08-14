@@ -1,5 +1,5 @@
 import { deepStrictEqual, throws, rejects } from "assert";
-import { xsalsa20poly1305 } from "@noble/ciphers/salsa";
+import { xsalsa20poly1305 } from "@noble/ciphers/salsa.js";
 import {
   increment,
   add,
