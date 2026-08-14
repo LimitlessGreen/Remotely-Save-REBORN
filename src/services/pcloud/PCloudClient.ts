@@ -24,9 +24,28 @@ export class PCloudApiClient {
     return await this.client.upload(content, parentId, name);
   }
 
-  public async downloadFile(path: string): Promise<ArrayBuffer> {
-    const data = await this.client.downloadfile(0, path);
-    return await new Response(data as any).arrayBuffer();
+  public async downloadFile(path: string, revisionId?: string): Promise<ArrayBuffer> {
+    const options: any = {};
+    if (revisionId) {
+      options.revisionid = revisionId;
+    }
+
+    // pCloud downloadfile returns a link (hosts + path)
+    const res = await this.client.downloadfile(0, path, options);
+    if (res.result !== 0) {
+      throw new Error(`pCloud download error: ${res.error || res.result}`);
+    }
+
+    const downloadUrl = `https://${res.hosts[0]}${res.path}`;
+    const downloadRes = await fetch(downloadUrl);
+    if (!downloadRes.ok) {
+      throw new Error(`Failed to download from pCloud link: ${downloadRes.statusText}`);
+    }
+    return await downloadRes.arrayBuffer();
+  }
+
+  public async listRevisions(path: string) {
+    return await this.client.listrevisions(0, path);
   }
 
   public async deleteFile(path: string) {

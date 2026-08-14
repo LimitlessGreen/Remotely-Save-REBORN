@@ -21,8 +21,9 @@ export const DEFAULT_PCLOUD_CONFIG: PCloudConfig = {
   kind: "pcloud",
 };
 
-export const generateAuthUrl = async () => {
+export const generateAuthUrl = async (locationId: number = 1) => {
   const clientID = PCLOUD_CLIENT_ID ?? "";
+  // pCloud handles regional redirection after login on my.pcloud.com
   const authUrl = `https://my.pcloud.com/oauth2/authorize?client_id=${clientID}&response_type=code`;
   return { authUrl };
 };
@@ -80,9 +81,9 @@ class RawPCloudFs implements RawFs {
     };
   }
 
-  async readFile(fullPath: string, _versionId?: string): Promise<ArrayBuffer> {
+  async readFile(fullPath: string, versionId?: string): Promise<ArrayBuffer> {
     await this.ensureInited();
-    return await this.api!.downloadFile(fullPath);
+    return await this.api!.downloadFile(fullPath, versionId);
   }
 
   async writeFile(fullPath: string, content: ArrayBuffer, _mtime: number, _ctime: number): Promise<Entity> {
@@ -103,6 +104,18 @@ class RawPCloudFs implements RawFs {
   async rm(fullPath: string, _versionId?: string): Promise<void> {
     await this.ensureInited();
     await this.api!.deleteFile(fullPath);
+  }
+
+  async listVersions(fullPath: string): Promise<Entity[]> {
+    await this.ensureInited();
+    const res = await this.api!.listRevisions(fullPath);
+    return (res.revisions || []).map((rev: any) => ({
+      key: fullPath,
+      keyRaw: fullPath,
+      sizeRaw: rev.size || 0,
+      mtimeSvr: Date.parse(rev.created).valueOf(),
+      versionId: String(rev.revisionid),
+    }));
   }
 
   async mkdir(fullPath: string): Promise<Entity> {

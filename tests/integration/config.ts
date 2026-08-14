@@ -26,6 +26,12 @@ export const testConfig = {
     bucketId: process.env.TEST_INTERNXT_BUCKET_ID || "",
     rootFolderUuid: process.env.TEST_INTERNXT_ROOT_FOLDER_UUID || "",
     remoteBaseDir: process.env.TEST_INTERNXT_REMOTE_BASE_DIR || "rs-test",
+  },
+  pcloud: {
+    token: process.env.TEST_PCLOUD_TOKEN || "",
+    hostname: (process.env.TEST_PCLOUD_HOSTNAME as any) || "api.pcloud.com",
+    locationid: parseInt(process.env.TEST_PCLOUD_LOCATION_ID || "1") as 1 | 2,
+    remoteBaseDir: process.env.TEST_PCLOUD_REMOTE_BASE_DIR || "rs-test",
   }
 };
 
@@ -33,5 +39,6 @@ export const isS3Configured = !!(testConfig.s3.endpoint && testConfig.s3.accessK
 export const isDropboxConfigured = !!(testConfig.dropbox.token);
 export const isWebdavConfigured = !!(testConfig.webdav.address);
 export const isInternxtConfigured = !!(testConfig.internxt.token || (testConfig.internxt.email && testConfig.internxt.password));
+export const isPCloudConfigured = !!(testConfig.pcloud.token);
 
-export const isAnyCloudConfigured = isS3Configured || isDropboxConfigured || isWebdavConfigured || isInternxtConfigured;
+export const isAnyCloudConfigured = isS3Configured || isDropboxConfigured || isWebdavConfigured || isInternxtConfigured || isPCloudConfigured;

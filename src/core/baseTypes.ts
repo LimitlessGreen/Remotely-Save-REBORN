@@ -148,6 +148,7 @@ export interface PCloudConfig {
   credentialsShouldBeDeletedAtTimeMs?: number;
   kind: "pcloud";
   emptyFile: "skip" | "error";
+  manualLocationSelection?: boolean;
 }
 
 export const PCLOUD_CLIENT_ID = global.DEFAULT_PCLOUD_CLIENT_ID;

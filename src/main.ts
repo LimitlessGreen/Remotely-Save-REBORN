@@ -1,5 +1,5 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
-import { FileText, RefreshCcw, RotateCcw, createElement } from "lucide";
+import { FileText, RefreshCw, RotateCw, createElement } from "lucide";
 import {
   Events,
   FileSystemAdapter,
@@ -66,6 +66,8 @@ import { changeMobileStatusBar } from "./utils/misc";
 import { DEFAULT_PROFILER_CONFIG, Profiler } from "./utils/profiler";
 import { RemotelySaveSettingTab } from "./settings";
 import { SyncAlgoV3Modal } from "./ui/modals/syncAlgoV3Notice";
+import { VersionHistoryModal } from "./ui/modals/versionHistoryModal";
+import { TFile } from "obsidian";
 
 const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   s3: DEFAULT_S3_CONFIG,
@@ -127,10 +129,10 @@ const iconNameSyncRunning = `remotely-save-sync-running`;
 const iconNameLogs = `remotely-save-logs`;
 
 const getIconSvg = () => {
-  const iconSvgSyncWait = createElement(RotateCcw);
+  const iconSvgSyncWait = createElement(RotateCw);
   iconSvgSyncWait.setAttribute("width", "100");
   iconSvgSyncWait.setAttribute("height", "100");
-  const iconSvgSyncRunning = createElement(RefreshCcw);
+  const iconSvgSyncRunning = createElement(RefreshCw);
   iconSvgSyncRunning.setAttribute("width", "100");
   iconSvgSyncRunning.setAttribute("height", "100");
   const iconSvgLogs = createElement(FileText);
@@ -226,6 +228,11 @@ export default class RemotelySavePlugin extends Plugin {
     this.currSyncMsg = t("syncrun_shortstep1", { serviceType: this.settings.serviceType });
     getNotice(triggerSource, this.currSyncMsg);
 
+    if (this.syncRibbon) {
+      setIcon(this.syncRibbon, iconNameSyncRunning);
+      this.syncRibbon.addClass("remotely-save-is-spinning");
+    }
+
     try {
       await syncer(
         this.app,
@@ -252,6 +259,10 @@ export default class RemotelySavePlugin extends Plugin {
     } finally {
       this.isSyncing = false;
       this.currSyncMsg = "";
+      if (this.syncRibbon) {
+        setIcon(this.syncRibbon, iconNameSyncWait);
+        this.syncRibbon.removeClass("remotely-save-is-spinning");
+      }
       this.syncEvent?.trigger("SYNC_DONE");
     }
   }
@@ -1212,6 +1223,26 @@ export default class RemotelySavePlugin extends Plugin {
                 new Notice(JSON.stringify(s, null, 2), 10000);
               });
           });
+
+          const client = getClient(
+            this.settings,
+            this.app.vault.getName(),
+            () => this.saveSettings(),
+            this.manifest
+          );
+
+          if (client.listVersions) {
+            menu.addItem((item) => {
+              item
+                .setTitle(t("menu_view_version_history"))
+                .setIcon("history")
+                .onClick(async () => {
+                  if (file instanceof TFile) {
+                    new VersionHistoryModal(this.app, this, file).open();
+                  }
+                });
+            });
+          }
         })
       );
     });

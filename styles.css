@@ -246,3 +246,161 @@
 .pro-revoke-auth-button-hide {
   display: none;
 }
+
+/* Remotely Save Version History Browser */
+.remotely-save-version-history-modal {
+  width: 90vw;
+  max-width: 1200px;
+  height: 85vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.remotely-save-version-history-container {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.remotely-save-version-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--background-modifier-border);
+  overflow-y: auto;
+  background-color: var(--background-secondary);
+}
+
+.remotely-save-version-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--background-primary);
+}
+
+.remotely-save-version-day-header {
+  padding: 6px 12px;
+  font-weight: bold;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background-color: var(--background-secondary-alt);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.remotely-save-version-item {
+  padding: 6px 12px 6px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--background-modifier-border-focus);
+  transition: background-color 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.remotely-save-version-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.remotely-save-version-item.is-active {
+  background-color: var(--background-modifier-active-hover);
+  border-left: 3px solid var(--interactive-accent);
+}
+
+.remotely-save-version-item-time {
+  font-weight: 500;
+  font-size: 0.85em;
+}
+
+.remotely-save-version-item-info {
+  font-size: 0.75em;
+  color: var(--text-faint);
+}
+
+.remotely-save-version-header {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.remotely-save-version-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remotely-save-version-header-top div {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.remotely-save-diff-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 12px;
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.remotely-save-diff-line {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 0 4px;
+}
+
+.remotely-save-diff-added {
+  background-color: rgba(0, 255, 0, 0.08);
+  border-left: 3px solid var(--text-success);
+}
+
+.remotely-save-diff-removed {
+  background-color: rgba(255, 0, 0, 0.08);
+  border-left: 3px solid var(--text-error);
+}
+
+.remotely-save-diff-word-added {
+  background-color: rgba(0, 255, 0, 0.2);
+  text-decoration: underline;
+}
+
+.remotely-save-diff-word-removed {
+  background-color: rgba(255, 0, 0, 0.2);
+  text-decoration: line-through;
+}
+
+.remotely-save-diff-unchanged {
+  color: var(--text-muted);
+}
+
+.remotely-save-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--text-muted);
+}
+
+/* Spinning Animation for Ribbon Icon */
+@keyframes remotely-save-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.remotely-save-is-spinning svg {
+  animation: remotely-save-spin 2s linear infinite;
+  transform-origin: center;
+}

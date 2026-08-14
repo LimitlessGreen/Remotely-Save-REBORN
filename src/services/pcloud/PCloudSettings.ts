@@ -11,7 +11,25 @@ export class PCloudSettings extends BaseSettingsManager {
     this.addDescription(root, this.t("settings_pcloud_disclaimer1"));
 
     this.addDirectorySetting(root);
+    this.addRegionSetting(root);
     this.addAuthSection(root);
+  }
+
+  private addRegionSetting(el: HTMLElement) {
+    new Setting(el)
+      .setName(this.t("settings_pcloud_region"))
+      .setDesc(this.t("settings_pcloud_region_desc"))
+      .addDropdown(dropdown => dropdown
+        .addOption("1", "United States (api.pcloud.com)")
+        .addOption("2", "Europe (eapi.pcloud.com)")
+        .setValue(String(this.plugin.settings.pcloud.locationid || "1"))
+        .onChange(async (value) => {
+          const locId = parseInt(value) as 1 | 2;
+          this.plugin.settings.pcloud.locationid = locId;
+          this.plugin.settings.pcloud.hostname = locId === 2 ? "eapi.pcloud.com" : "api.pcloud.com";
+          await this.plugin.saveSettings();
+        })
+      );
   }
 
   private addDirectorySetting(el: HTMLElement) {
@@ -47,7 +65,7 @@ export class PCloudSettings extends BaseSettingsManager {
               await this.plugin.saveSettings();
               refresh();
             } else {
-              const { authUrl } = await generateAuthUrl();
+              const { authUrl } = await generateAuthUrl(this.plugin.settings.pcloud.locationid);
               window.open(authUrl);
             }
           })
