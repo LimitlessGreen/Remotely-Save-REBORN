@@ -51,15 +51,14 @@ describe('Internxt Deep Integration Test', function() {
                 const plugin = app.plugins.getPlugin('remotely-save');
                 try {
                     await plugin.syncRun("manual");
-                    return JSON.stringify({ success: true });
+                    return "success";
                 } catch (e) {
-                    return JSON.stringify({ success: false, error: e.message });
+                    return "error: " + e.message;
                 }
             })()
         `);
 
-        const parsed = typeof syncResult === 'string' ? JSON.parse(syncResult) : syncResult;
-        expect(parsed.success, `Sync failed: ${parsed.error}`).to.be.true;
+        expect(syncResult).to.equal("success");
 
         // 3. Optional: Verify sync status via metadata if available
         const settings = await bridge.getPluginSettings('remotely-save');
