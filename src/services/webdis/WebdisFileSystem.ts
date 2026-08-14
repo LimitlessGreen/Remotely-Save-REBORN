@@ -10,6 +10,8 @@ export const DEFAULT_WEBDIS_CONFIG: WebdisConfig = {
 };
 
 class RawWebdisFs implements RawFs {
+  constructor(_config: WebdisConfig) {}
+
   async walk(_fullPath: string): Promise<Entity[]> {
     throw new Error("Not implemented");
   }
